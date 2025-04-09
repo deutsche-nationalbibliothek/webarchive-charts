@@ -8,6 +8,7 @@ sparqlTitleData: "https://qlever.cs.uni-freiburg.de/api/dnb"
 
 websiteGraphDir: "/data/graph/"
 websiteGraphFile: "/data/graph/websites.ttl"
+
 rawWarcDirectory: "/data/warcs-raw/"
 warcDirectory: "/data/warcs/"
 webarchiveDirectory: "/webarchive/"

@@ -61,7 +61,7 @@ The collection at the DNB requires the recompression step as they are not compre
 https://www.redhat.com/en/blog/9-best-practices-for-deploying-highly-available-applications-to-openshift
 https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 
-## Conceptual Figure of the Environment
+## Conceptual Figure of the Future Setup
 
 ```
 ┌──────────────────┐  ┌──────────────────┐
@@ -87,4 +87,55 @@ https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-read
 ┌────────────────────────────────────────┐─>┌──────────────────┐
 │               Repository               │  │    Validation    │
 └────────────────────────────────────────┘<─└──────────────────┘
+```
+
+## Current Environment
+
+```
+Containers with * are init containers
+(block the init process but are cleaned after they have exited).
+
+                      ┌──────────────────┐
+                      │📦   Playback     │ pywb-app
+                      └──────────────────┘
+                               ∧          
+                               │          
+                      ┌──────────────────┐
+                      │📁Playback Cache  │ .Values.webarchiveDirectory
+                      └──────────────────┘
+                               ∧          
+                               │          
+                      ┌──────────────────┐
+                      │📦    Index*      │ wb-manager-add
+                      └──────────────────┘
+                               ∧          
+                               │          
+                      ┌──────────────────┐
+                      │📁  WARC Cache    │ .Values.warcDirectory
+                      └──────────────────┘
+                               ∧          
+                               │          
+                      ┌──────────────────┐ wacli-recompress-warcs
+                      │📦  Recompress*   │ $ wacli recompress-warcs
+                      └──────────────────┘
+                               ∧          
+                               │          
+                      ┌──────────────────┐
+                      │📁  RAW Cache     │ .Values.rawWarcDirectory
+                      └──────────────────┘
+                               ∧          
+                               │          
+┌──────────────────┐  ┌──────────────────┐ wacli-load-warcs
+│ Repository (aras)│─>│📦    Fetch*      │ $ wacli load-warcs
+└──────────────────┘  └──────────────────┘
+                               ∧          
+                               │          
+                      ┌──────────────────┐
+                      │📄️  Graph Cache   │ .Values.websiteGraphFile
+                      └──────────────────┘
+                               ∧          
+                               │          
+┌──────────────────┐  ┌──────────────────┐ wacli-load-graph
+│  Catalog/SPARQL  │─>│📦    Query*      │ $ wacli load-graph
+└──────────────────┘  └──────────────────┘
 ```

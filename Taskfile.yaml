@@ -1,0 +1,91 @@
+version: "3"
+
+env:
+    ENV: '{{.ENV | default "minikube" }}'
+
+vars:
+  PLAYBACK_NAME: wa-playback
+  PLAYBACK_CHART: ./playback
+  MOCKILS_NAME: wa-mocked-ils
+  MOCKILS_CHART: ./mocked-ils
+
+tasks:
+  default:
+    desc: List the tasks
+    cmds:
+      - task -l
+
+  setup:minikube:
+    desc: Setup the relevant stuff for local minikube setup
+    cmds:
+      - task: install:mock:example-data
+      - minikube addons enable ingress
+
+  install:
+    aliases: [deploy]
+    desc: Install/deploy the webarchive setup
+    deps:
+      - task: install:playback
+      - task: install:mockils
+
+  install:playback:
+    desc: Install/deploy the playback setup
+    cmds:
+      - helm install -f {{.PLAYBACK_CHART}}/values-{{.ENV}}.yaml {{.PLAYBACK_NAME}} {{.PLAYBACK_CHART}}
+
+  install:mockils:
+    desc: Install/deploy the mockils setup
+    cmds:
+      - helm install {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
+
+  upgrade:
+    desc:  Upgrade the deployed webarchive setup
+    deps:
+      - task: upgrade:playback
+      - task: upgrade:mockils
+
+  upgrade:playback:
+    desc: Upgrade the playback setup
+    cmds:
+      - helm upgrade -f {{.PLAYBACK_CHART}}/values-{{.ENV}}.yaml {{.PLAYBACK_NAME}} {{.PLAYBACK_CHART}}
+
+  upgrade:mockils:
+    desc: Upgrade the mockils setup
+    cmds:
+      - helm upgrade {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
+
+  uninstall:
+    desc:  Uninstall the deployed webarchive setup
+    deps:
+      - task: uninstall:playback
+      - task: uninstall:mockils
+
+  uninstall:playback:
+    desc: Uninstall the playback setup
+    cmds:
+      - helm uninstall {{.PLAYBACK_NAME}}
+
+  uninstall:mockils:
+    desc: Uninstall the mockils setup
+    cmds:
+      - helm uninstall {{.MOCKILS_NAME}}
+
+  check:
+    aliases: [lint]
+    desc: Verify the syntax
+    cmds:
+      - helm lint {{.PLAYBACK_CHART}}
+      - helm install --debug --dry-run {{.PLAYBACK_NAME}} {{.PLAYBACK_CHART}}
+
+  debug:
+    desc: Collect some information helpful for debugging
+    summary: |
+      Also check out https://helm.sh/docs/chart_template_guide/debugging/
+    cmds:
+      - helm get manifest {{.PLAYBACK_NAME}}
+
+  install:mock:example-data:
+    desc: Copy the example data to a minikube
+    cmds:
+      - ssh-keygen -R $(minikube ip)
+      - scp -r -i $(minikube ssh-key) examples/hostdata docker@$(minikube ip):/home/docker/

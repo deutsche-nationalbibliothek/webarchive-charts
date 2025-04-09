@@ -1,0 +1,155 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: pywb-app
+  labels:
+    app: pywb
+spec:
+  selector:
+    matchLabels:
+      app: pywb
+  template:
+    metadata:
+      labels:
+        app: pywb
+    spec:
+      initContainers:
+        - name: wacli-load-graph
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          # command: ["python", "-m", "wacli.run"]
+          args: ["load-graph"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+        - name: wacli-list
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["list"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+        - name: wacli-load-warcs
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["load-warcs"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+            - mountPath: {{ .Values.rawWarcDirectory | quote }}
+              name: warcs-raw
+        - name: wacli-recompress-warcs
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["recompress-warcs"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+            - mountPath: {{ .Values.rawWarcDirectory | quote }}
+              name: warcs-raw
+            - mountPath: {{ .Values.warcDirectory | quote }}
+              name: warcs
+        - name: wb-manager-add
+          image: 'ghcr.io/deutsche-nationalbibliothek/pywb:integration-preImage-uwsgiMount-entrypoint'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          command: ["/bin/bash"]
+          args: ["/run.sh"]
+          volumeMounts:
+            - mountPath: {{ .Values.warcDirectory | quote }}
+              name: warcs
+            - mountPath: {{ .Values.webarchiveDirectory | quote }}
+              name: webarchive
+            - mountPath: "/run.sh"
+              name: wb-manager-run-sh
+              subPath: "run.sh"
+              readOnly: true
+      containers:
+        - name: pywb-app
+          # image: 'docker.io/webrecorder/pywb:2.8.3'
+          image: 'ghcr.io/deutsche-nationalbibliothek/pywb:integration-preImage-uwsgiMount-entrypoint'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["uwsgi", "/uwsgi/uwsgi.ini"]
+          env:
+            - name: UWSGI_MOUNT
+              value: /wayback=/pywb/pywb/apps/wayback.py
+          volumeMounts:
+            - mountPath: {{ .Values.webarchiveDirectory | quote }}
+              name: webarchive
+            - mountPath: "/run.sh"
+              name: wb-manager-run-sh
+              subPath: "run.sh"
+              readOnly: true
+        - name: wacli-app
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          command: ["sleep", "infinity"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+            - mountPath: {{ .Values.rawWarcDirectory | quote }}
+              name: warcs-raw
+            - mountPath: {{ .Values.warcDirectory | quote }}
+              name: warcs
+            - mountPath: {{ .Values.webarchiveDirectory | quote }}
+              name: webarchive
+      volumes:
+        - name: webarchive
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: warcs-raw
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: warcs
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: website-graph-dir
+          emptyDir:
+            sizeLimit: 500Mi
+        - name: wb-manager-run-sh
+          configMap:
+            name: pywb-configmap
+            items:
+              - key: "run.sh"
+                path: "run.sh"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: pywb-service
+spec:
+  selector:
+    app: pywb
+  ports:
+    - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pywb-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /wayback
+            pathType: Prefix
+            backend:
+              service:
+                name: pywb-service
+                port:
+                  number: 8080

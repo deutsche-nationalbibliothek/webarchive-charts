@@ -1,0 +1,105 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: mockils-app
+  labels:
+    app: mockils
+spec:
+  selector:
+    matchLabels:
+      app: mockils
+  template:
+    metadata:
+      labels:
+        app: mockils
+    spec:
+      containers:
+        - name: mockils-app
+          image: 'ghcr.io/deutsche-nationalbibliothek/mockils:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["uvicorn", "mockils:app", "--host", "", "--port", "8080", "--root-path", "/mockils"]
+          volumeMounts:
+            - name: repository-warcs
+              mountPath: /data/warcs
+              readOnly: true
+      volumes:
+        - name: repository-warcs
+          hostPath:
+            path: /home/docker/hostdata/warcs
+            type: Directory
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: sparql-app
+  labels:
+    app: sparql
+spec:
+  selector:
+    matchLabels:
+      app: sparql
+  template:
+    metadata:
+      labels:
+        app: sparql
+    spec:
+      containers:
+        - name: sparql-app
+          image: 'ghcr.io/aksw/sparql-file:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          volumeMounts:
+            - name: graph-file
+              mountPath: /data/graph.ttl
+              readOnly: true
+      volumes:
+        - name: graph-file
+          hostPath:
+            path: /home/docker/hostdata/test_websites.ttl
+            type: File
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mockils-service
+spec:
+  selector:
+    app: mockils
+  ports:
+    - port: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: sparql-service
+spec:
+  selector:
+    app: sparql
+  ports:
+    - port: 8080
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: mocked-ils-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /mockils(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: mockils-service
+                port:
+                  number: 8080
+          - path: /sparql(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: sparql-service
+                port:
+                  number: 8080

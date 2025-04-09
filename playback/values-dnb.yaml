@@ -1,0 +1,6 @@
+environment: dnb
+
+imagePullPolicy: Always
+
+arasRestBase: "http://etc.dnb.de/aras/"
+sparqlTitleData: "http://qlever.apps.dnb.de.eval/api"

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pywb-configmap
+data:
+  run.sh: |
+    #!/bin/sh
+    cd {{ .Values.webarchiveDirectory | quote }};
+    wb-manager init {{ .Values.pywbCollection | quote }};
+    for warc_file in "{{ .Values.warcDirectory }}*/*"; do wb-manager add {{ .Values.pywbCollection }} $warc_file; done;

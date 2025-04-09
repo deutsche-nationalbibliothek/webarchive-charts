@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wacli-configmap
+data:
+  SPARQL_TITLE_DATA: {{ .Values.sparqlTitleData | quote }}
+  WEBSITE_GRAPH_FILE: {{ .Values.websiteGraphFile | quote }}
+  ARAS_REST_BASE: {{ .Values.arasRestBase | quote }}
+  ARAS_REPO: {{ .Values.arasRepo | quote }}
+  WARC_DIRECTORY: {{ .Values.rawWarcDirectory | quote }}
+  WARC_DIRECTORY_CLEAN: {{ .Values.warcDirectory | quote }}
+  WEBARCHIVE_DIRECTORY: {{ .Values.webarchiveDirectory | quote }}
+  WEBSITE_GRAPH_LIMIT: {{ .Values.websiteGraphLimit | quote }}
+  PYWB_COLLECTION: {{ .Values.pywbCollection | quote }}

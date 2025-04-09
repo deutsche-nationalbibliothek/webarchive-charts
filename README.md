@@ -61,34 +61,6 @@ The collection at the DNB requires the recompression step as they are not compre
 https://www.redhat.com/en/blog/9-best-practices-for-deploying-highly-available-applications-to-openshift
 https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 
-## Conceptual Figure of the Future Setup
-
-```
-┌──────────────────┐  ┌──────────────────┐
-│     Crawling     │  │     Playback     │
-└──────────────────┘  └──────────────────┘
-         │                     ∧          
-         ∨                     │          
-┌──────────────────┐  ┌──────────────────┐
-│    Validation    │  │      Index       │
-└──────────────────┘  └──────────────────┘
-         │                     ∧          
-         ∨                     │          
-┌──────────────────┐  ┌──────────────────┐
-│      Cache       │─>│      Cache       │
-└──────────────────┘  └──────────────────┘
-         │                     ∧          
-         ∨                     │          
-┌──────────────────┐  ┌──────────────────┐
-│      Ingest      │  │   (Validation)   │
-└──────────────────┘  └──────────────────┘
-         │                     ∧          
-         ∨                     │          
-┌────────────────────────────────────────┐─>┌──────────────────┐
-│               Repository               │  │    Validation    │
-└────────────────────────────────────────┘<─└──────────────────┘
-```
-
 ## Current Environment
 
 ```
@@ -138,4 +110,32 @@ Containers with * are init containers
 ┌──────────────────┐  ┌──────────────────┐ wacli-load-graph
 │  Catalog/SPARQL  │─>│📦    Query*      │ $ wacli load-graph
 └──────────────────┘  └──────────────────┘
+```
+
+## Conceptual Figure of the Data Flow of WARC Files
+
+```
+┌──────────────────┐  ┌──────────────────┐
+│     Crawling     │  │     Playback     │
+└──────────────────┘  └──────────────────┘
+         │                     ∧          
+         ∨                     │          
+┌──────────────────┐  ┌──────────────────┐
+│    Validation    │  │      Index       │
+└──────────────────┘  └──────────────────┘
+         │                     ∧          
+         ∨                     │          
+┌──────────────────┐  ┌──────────────────┐
+│      Cache       │─>│      Cache       │
+└──────────────────┘  └──────────────────┘
+         │                     ∧          
+         ∨                     │          
+┌──────────────────┐  ┌──────────────────┐
+│      Ingest      │  │   (Validation)   │
+└──────────────────┘  └──────────────────┘
+         │                     ∧          
+         ∨                     │          
+┌────────────────────────────────────────┐─>┌──────────────────┐
+│               Repository               │  │    Validation    │
+└────────────────────────────────────────┘<─└──────────────────┘
 ```

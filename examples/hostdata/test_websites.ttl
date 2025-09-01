@@ -1,17 +1,25 @@
+@prefix bibo: <http://purl.org/ontology/bibo/> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
-@prefix ns1: <http://www.w3.org/2007/05/powder-s#> .
-@prefix ns2: <https://d-nb.info/standards/elementset/gnd#> .
+@prefix gndo: <https://d-nb.info/standards/elementset/gnd#> .
+@prefix rdact: <http://rdaregistry.info/termList/RDACarrierType/> .
+@prefix rdau: <http://rdaregistry.info/Elements/u/> .
+@prefix wdrs: <http://www.w3.org/2007/05/powder-s#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 <https://d-nb.info/1234567802> dc:identifier "(DE-101)1234567802"^^xsd:string ;
     dcterms:isPartOf <https://d-nb.info/1234567891> ;
-    ns1:describedby <https://d-nb.info/1234567802/about> ;
-    ns2:gndIdentifier "1234567802" .
+    dcterms:medium rdact:1018 ;
+    bibo:issue "2012-05-18"^^xsd:string ;
+    rdau:P60048 rdact:1018 ;
+    rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
+    rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+    wdrs:describedby <https://d-nb.info/1234567802/about> ;
+    gndo:gndIdentifier "1234567802" .
 
 <https://d-nb.info/1234567891> dc:title "Example"^^xsd:string ;
-    dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-    foaf:isPrimaryTopicOf "https://example.org/"^^xsd:string .
+    dcterms:medium rdact:1018 ;
+    foaf:primaryTopic "https://example.org/"^^xsd:string .
 
-<https://d-nb.info/1234567802/about> dcterms:modified "2019-11-01T12:34:47"^^xsd:dateTime .
+<https://d-nb.info/1234567802/about> dcterms:modified "2012-05-18T12:34:47"^^xsd:dateTime .

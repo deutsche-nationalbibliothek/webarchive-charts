@@ -31,20 +31,20 @@ spec:
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: sparql-app
+  name: mock-sparql-app
   labels:
-    app: sparql
+    app: mock-sparql
 spec:
   selector:
     matchLabels:
-      app: sparql
+      app: mock-sparql
   template:
     metadata:
       labels:
-        app: sparql
+        app: mock-sparql
     spec:
       containers:
-        - name: sparql-app
+        - name: mock-sparql-app
           image: 'ghcr.io/aksw/sparql-file:main'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
           volumeMounts:
@@ -70,10 +70,10 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: sparql-service
+  name: mock-sparql-service
 spec:
   selector:
-    app: sparql
+    app: mock-sparql
   ports:
     - port: 8080
 ---
@@ -96,10 +96,10 @@ spec:
                 name: mockils-service
                 port:
                   number: 8080
-          - path: /sparql(/|$)(.*)
+          - path: /mockils-sparql(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:
-                name: sparql-service
+                name: mock-sparql-service
                 port:
                   number: 8080

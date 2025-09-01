@@ -12,6 +12,8 @@ vars:
   MOCKILS_CHART: ./mocked-ils
   GRAPH_NAME: wa-graph
   GRAPH_CHART: ./graph
+  INGEST_NAME: wa-ingest
+  INGEST_CHART: ./ingest
 
 tasks:
   default:
@@ -33,6 +35,7 @@ tasks:
       - task: install:graph
       - task: install:playback
       - task: install:mockils
+      - task: install:ingest
 
   install:general:
     desc: Install/deploy the  general things
@@ -54,12 +57,24 @@ tasks:
     cmds:
       - helm install {{.GRAPH_NAME}} {{.GRAPH_CHART}}
 
+  install:ingest:
+    desc: Install/deploy the ingest setup
+    cmds:
+      - helm install {{.INGEST_NAME}} {{.INGEST_CHART}}
+
   upgrade:
     desc:  Upgrade the deployed webarchive setup
     deps:
+      - task: upgrade:general
       - task: upgrade:graph
       - task: upgrade:playback
       - task: upgrade:mockils
+      - task: upgrade:ingest
+
+  upgrade:general:
+    desc: Upgrade the general setup
+    cmds:
+      - helm upgrade -f {{.GENERAL_CHART}}/values-{{.ENV}}.yaml {{.GENERAL_NAME}} {{.GENERAL_CHART}}
 
   upgrade:playback:
     desc: Upgrade the playback setup
@@ -76,6 +91,11 @@ tasks:
     cmds:
       - helm upgrade {{.GRAPH_NAME}} {{.GRAPH_CHART}}
 
+  upgrade:ingest:
+    desc: Upgrade the ingest setup
+    cmds:
+      - helm upgrade {{.INGEST_NAME}} {{.INGEST_CHART}}
+
   uninstall:
     desc:  Uninstall the deployed webarchive setup
     deps:
@@ -83,6 +103,7 @@ tasks:
       - task: uninstall:graph
       - task: uninstall:playback
       - task: uninstall:mockils
+      - task: uninstall:ingest
 
   uninstall:general:
     desc: Uninstall the general stuff
@@ -104,6 +125,11 @@ tasks:
     cmds:
       - helm uninstall {{.GRAPH_NAME}}
 
+  uninstall:ingest:
+    desc: Uninstall the ingest setup
+    cmds:
+      - helm uninstall {{.INGEST_NAME}}
+
   check:
     aliases: [lint]
     desc: Verify the syntax
@@ -112,6 +138,7 @@ tasks:
       - task: check:graph
       - task: check:playback
       - task: check:mockils
+      - task: check:ingest
 
   check:general:
     desc: Verify the syntax of general things
@@ -136,6 +163,12 @@ tasks:
     cmds:
       - helm lint {{.MOCKILS_CHART}}
       - helm install --debug --dry-run {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
+
+  check:ingest:
+    desc: Verify the syntax of ingest
+    cmds:
+      - helm lint {{.INGEST_CHART}}
+      - helm install --debug --dry-run {{.INGEST_NAME}} {{.INGEST_CHART}}
 
   debug:
     desc: Collect some information helpful for debugging

@@ -1,0 +1,6 @@
+environment: generic
+imagePullPolicy: IfNotPresent
+
+sparqlEndpoint: "http://graph-service:8080/"
+
+queryDirectory: "/data/queries/"

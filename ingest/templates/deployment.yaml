@@ -1,0 +1,70 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: wapmh-app
+  labels:
+    app: wapmh
+spec:
+  selector:
+    matchLabels:
+      app: wapmh
+  template:
+    metadata:
+      labels:
+        app: wapmh
+    spec:
+      containers:
+        - name: wapmh-app
+          image: 'ghcr.io/deutsche-nationalbibliothek/wapmh:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          envFrom:
+            - configMapRef:
+                name: wapmh-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.queryDirectory | quote }}
+              name: wapmh-queries
+      volumes:
+        - name: wapmh-queries
+          configMap:
+            name: wapmh-query-configmap
+            items:
+              - key: "allHeadersSelect.rq"
+                path: "allHeadersSelect.rq"
+              - key: "dateRangeHeadersSelect.rq"
+                path: "dateRangeHeadersSelect.rq"
+              - key: "identifiedHeaderSelect.rq"
+                path: "identifiedHeaderSelect.rq"
+              - key: "recordConstruct.rq"
+                path: "recordConstruct.rq"
+              - key: "recordOaiDcConstruct.rq"
+                path: "recordOaiDcConstruct.rq"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: wapmh-service
+spec:
+  selector:
+    app: wapmh
+  ports:
+    - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wapmh-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /wapmh(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: wapmh-service
+                port:
+                  number: 8080

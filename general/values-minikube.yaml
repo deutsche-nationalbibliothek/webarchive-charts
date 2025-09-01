@@ -1,0 +1,3 @@
+environment: minikube
+
+sparqlTitleData: "http://mock-sparql-service:8080/"

@@ -4,6 +4,8 @@ env:
     ENV: '{{.ENV | default "minikube" }}'
 
 vars:
+  GENERAL_NAME: wa-general
+  GENERAL_CHART: ./general
   PLAYBACK_NAME: wa-playback
   PLAYBACK_CHART: ./playback
   MOCKILS_NAME: wa-mocked-ils
@@ -25,8 +27,15 @@ tasks:
     aliases: [deploy]
     desc: Install/deploy the webarchive setup
     deps:
+      - task: install:general
+      - task: install:graph
       - task: install:playback
       - task: install:mockils
+
+  install:general:
+    desc: Install/deploy the  general things
+    cmds:
+      - helm install -f {{.GENERAL_CHART}}/values-{{.ENV}}.yaml {{.GENERAL_NAME}} {{.GENERAL_CHART}}
 
   install:playback:
     desc: Install/deploy the playback setup
@@ -59,6 +68,11 @@ tasks:
     deps:
       - task: uninstall:playback
       - task: uninstall:mockils
+
+  uninstall:general:
+    desc: Uninstall the general stuff
+    cmds:
+      - helm uninstall {{.GENERAL_NAME}}
 
   uninstall:playback:
     desc: Uninstall the playback setup

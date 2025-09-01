@@ -1,0 +1,3 @@
+environment: dnb
+
+sparqlTitleData: "https://sparql.dnb.de.test/api/dnbgnd"

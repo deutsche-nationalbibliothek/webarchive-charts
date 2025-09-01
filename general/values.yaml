@@ -1,0 +1,7 @@
+environment: generic
+imagePullPolicy: IfNotPresent
+
+sparqlTitleData: "https://qlever.cs.uni-freiburg.de/api/dnb"
+
+websiteGraphDir: "/data/graph/"
+websiteGraphFile: "/data/graph/websites.ttl"

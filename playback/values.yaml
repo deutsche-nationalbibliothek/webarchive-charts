@@ -4,8 +4,6 @@ imagePullPolicy: IfNotPresent
 arasRestBase: "YOU_NEED_TO_HAVE_ONE_MAYBE_CHOSE_THE_MINIKUBE_SETUP"
 arasRepo: "warc"
 
-sparqlTitleData: "https://qlever.cs.uni-freiburg.de/api/dnb"
-
 websiteGraphDir: "/data/graph/"
 websiteGraphFile: "/data/graph/websites.ttl"
 

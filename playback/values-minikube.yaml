@@ -1,4 +1,3 @@
 environment: minikube
 
 arasRestBase: "http://mockils-service:8080/"
-sparqlTitleData: "http://sparql-service:8080/"

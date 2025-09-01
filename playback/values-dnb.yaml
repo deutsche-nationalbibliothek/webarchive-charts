@@ -3,4 +3,3 @@ environment: dnb
 imagePullPolicy: Always
 
 arasRestBase: "http://etc.dnb.de/aras/"
-sparqlTitleData: "https://sparql.dnb.de.test/api/dnbgnd"

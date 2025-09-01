@@ -1,0 +1,82 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: graph-app
+  labels:
+    app: graph
+spec:
+  selector:
+    matchLabels:
+      app: graph
+  template:
+    metadata:
+      labels:
+        app: graph
+    spec:
+      initContainers:
+        - name: wacli-load-graph
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          # command: ["python", "-m", "wacli.run"]
+          args: ["load-graph"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+        - name: wacli-list
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["list"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+      containers:
+        - name: sparql-app
+          image: 'ghcr.io/aksw/sparql-file:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          envFrom:
+            - configMapRef:
+                name: sparql-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+              readOnly: true
+      volumes:
+        - name: website-graph-dir
+          emptyDir:
+            sizeLimit: 500Mi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: graph-service
+spec:
+  selector:
+    app: graph
+  ports:
+    - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: graph-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /sparql(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: graph-service
+                port:
+                  number: 8080

@@ -10,6 +10,8 @@ vars:
   PLAYBACK_CHART: ./playback
   MOCKILS_NAME: wa-mocked-ils
   MOCKILS_CHART: ./mocked-ils
+  GRAPH_NAME: wa-graph
+  GRAPH_CHART: ./graph
 
 tasks:
   default:
@@ -47,9 +49,15 @@ tasks:
     cmds:
       - helm install {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
 
+  install:graph:
+    desc: Install/deploy the website knowledge graph setup
+    cmds:
+      - helm install {{.GRAPH_NAME}} {{.GRAPH_CHART}}
+
   upgrade:
     desc:  Upgrade the deployed webarchive setup
     deps:
+      - task: upgrade:graph
       - task: upgrade:playback
       - task: upgrade:mockils
 
@@ -63,9 +71,16 @@ tasks:
     cmds:
       - helm upgrade {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
 
+  upgrade:graph:
+    desc: Upgrade the website knowledge graph setup
+    cmds:
+      - helm upgrade {{.GRAPH_NAME}} {{.GRAPH_CHART}}
+
   uninstall:
     desc:  Uninstall the deployed webarchive setup
     deps:
+      - task: uninstall:general
+      - task: uninstall:graph
       - task: uninstall:playback
       - task: uninstall:mockils
 
@@ -84,12 +99,43 @@ tasks:
     cmds:
       - helm uninstall {{.MOCKILS_NAME}}
 
+  uninstall:graph:
+    desc: Uninstall the website knowledge graph setup
+    cmds:
+      - helm uninstall {{.GRAPH_NAME}}
+
   check:
     aliases: [lint]
     desc: Verify the syntax
     cmds:
+      - task: check:general
+      - task: check:graph
+      - task: check:playback
+      - task: check:mockils
+
+  check:general:
+    desc: Verify the syntax of general things
+    cmds:
+      - helm lint {{.GENERAL_CHART}}
+      - helm install --debug --dry-run {{.GENERAL_NAME}} {{.GENERAL_CHART}}
+
+  check:playback:
+    desc: Verify the syntax of playback
+    cmds:
       - helm lint {{.PLAYBACK_CHART}}
       - helm install --debug --dry-run {{.PLAYBACK_NAME}} {{.PLAYBACK_CHART}}
+
+  check:graph:
+    desc: Verify the syntax of graph
+    cmds:
+      - helm lint {{.GRAPH_CHART}}
+      - helm install --debug --dry-run {{.GRAPH_NAME}} {{.GRAPH_CHART}}
+
+  check:mockils:
+    desc: Verify the syntax of mockils
+    cmds:
+      - helm lint {{.MOCKILS_CHART}}
+      - helm install --debug --dry-run {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
 
   debug:
     desc: Collect some information helpful for debugging

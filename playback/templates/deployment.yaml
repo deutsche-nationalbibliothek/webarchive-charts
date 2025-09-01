@@ -14,17 +14,6 @@ spec:
         app: pywb
     spec:
       initContainers:
-        - name: wacli-load-graph
-          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-          # command: ["python", "-m", "wacli.run"]
-          args: ["load-graph"]
-          envFrom:
-            - configMapRef:
-                name: wacli-configmap
-          volumeMounts:
-            - mountPath: {{ .Values.websiteGraphDir | quote }}
-              name: website-graph-dir
         - name: wacli-list
           image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
@@ -117,9 +106,6 @@ spec:
         - name: warcs
           emptyDir:
             sizeLimit: 1Gi
-        - name: website-graph-dir
-          emptyDir:
-            sizeLimit: 500Mi
         - name: wb-manager-run-sh
           configMap:
             name: pywb-configmap

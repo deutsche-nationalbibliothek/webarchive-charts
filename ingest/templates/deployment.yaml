@@ -32,7 +32,7 @@ spec:
                 path: "allHeadersSelect.rq"
               - key: "dateRangeHeadersSelect.rq"
                 path: "dateRangeHeadersSelect.rq"
-              - key: "identifiedHeaderSelect.rq"
+              - key: "allHeadersSelect.rq"
                 path: "identifiedHeaderSelect.rq"
               - key: "recordConstruct.rq"
                 path: "recordConstruct.rq"

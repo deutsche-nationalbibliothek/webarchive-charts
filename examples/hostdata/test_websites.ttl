@@ -20,6 +20,7 @@
 
 <https://d-nb.info/1234567891> dc:title "Example"^^xsd:string ;
     dcterms:medium rdact:1018 ;
+    dc:identifier "(DE-101)1234567891"^^xsd:string ;
     foaf:primaryTopic "https://example.org/"^^xsd:string .
 
 <https://d-nb.info/1234567802/about> dcterms:modified "2012-05-18T12:34:47"^^xsd:dateTime .

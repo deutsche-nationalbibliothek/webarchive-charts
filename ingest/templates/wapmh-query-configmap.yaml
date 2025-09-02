@@ -51,24 +51,8 @@ data:
             )
         )
     }
-  identifiedHeaderSelect.rq: |
-    prefix bibo: <http://purl.org/ontology/bibo/>
-    prefix dc: <http://purl.org/dc/elements/1.1/>
-    prefix rdau: <http://rdaregistry.info/Elements/u/>
-    prefix dcterms: <http://purl.org/dc/terms/>
-    prefix lv:   <http://purl.org/lobid/lv#>
-    prefix bf: <http://id.loc.gov/ontologies/bibframe/>
-    select ?identifier ?datestamp {
-        ?resourceIri
-            dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-            rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
-            dcterms:isPartOf ?work ;
-            bibo:issue ?datestamp ;
-            dc:identifier ?identifier .
-    }
   recordConstruct.rq: |
+    prefix foaf: <http://xmlns.com/foaf/0.1/>
     prefix bibo: <http://purl.org/ontology/bibo/>
     prefix dc: <http://purl.org/dc/elements/1.1/>
     prefix rdau: <http://rdaregistry.info/Elements/u/>
@@ -99,9 +83,10 @@ data:
             dcterms:isPartOf ?work ;
             ?p ?o .
             ?work ?wp ?wo ;
-                foaf:isPrimaryTopicOf ?url .
+                foaf:primaryTopic ?url .
     }
   recordOaiDcConstruct.rq: |
+    prefix foaf: <http://xmlns.com/foaf/0.1/>
     prefix bibo: <http://purl.org/ontology/bibo/>
     prefix dc: <http://purl.org/dc/elements/1.1/>
     prefix rdau: <http://rdaregistry.info/Elements/u/>
@@ -127,6 +112,8 @@ data:
             dc:identifier ?identifier ;
             bibo:issue ?datestamp ;
             dcterms:isPartOf ?work .
-        ?work dc:identifier ?workIdentifier ;
-            foaf:primaryTopic ?url .
+        ?work foaf:primaryTopic ?url .
+        optional {
+            ?work dc:identifier ?workIdentifier
+        }
     }

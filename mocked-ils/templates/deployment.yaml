@@ -19,13 +19,13 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
           args: ["uvicorn", "mockils:app", "--host", "", "--port", "8080", "--root-path", "/mockils"]
           volumeMounts:
-            - name: repository-warcs
-              mountPath: /data/warcs
+            - name: repository-warc
+              mountPath: /data/warc
               readOnly: true
       volumes:
-        - name: repository-warcs
+        - name: repository-warc
           hostPath:
-            path: /home/docker/hostdata/warcs
+            path: /home/docker/hostdata/warc
             type: Directory
 ---
 kind: Deployment

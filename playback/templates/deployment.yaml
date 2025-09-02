@@ -24,6 +24,7 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.websiteGraphDir | quote }}
               name: website-graph-dir
+              readOnly: true
         - name: wacli-load-warcs
           image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
@@ -34,6 +35,7 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.websiteGraphDir | quote }}
               name: website-graph-dir
+              readOnly: true
             - mountPath: {{ .Values.rawWarcDirectory | quote }}
               name: warcs-raw
         - name: wacli-recompress-warcs
@@ -46,6 +48,7 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.websiteGraphDir | quote }}
               name: website-graph-dir
+              readOnly: true
             - mountPath: {{ .Values.rawWarcDirectory | quote }}
               name: warcs-raw
             - mountPath: {{ .Values.warcDirectory | quote }}
@@ -90,6 +93,7 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.websiteGraphDir | quote }}
               name: website-graph-dir
+              readOnly: true
             - mountPath: {{ .Values.rawWarcDirectory | quote }}
               name: warcs-raw
             - mountPath: {{ .Values.warcDirectory | quote }}
@@ -97,6 +101,9 @@ spec:
             - mountPath: {{ .Values.webarchiveDirectory | quote }}
               name: webarchive
       volumes:
+        - name: website-graph-dir
+          persistentVolumeClaim:
+            claimName: website-graph-dir-pvc
         - name: webarchive
           emptyDir:
             sizeLimit: 1Gi

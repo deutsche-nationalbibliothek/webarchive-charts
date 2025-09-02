@@ -25,6 +25,7 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.websiteGraphDir | quote }}
               name: website-graph-dir
+              readOnly: false
         - name: wacli-list
           image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
@@ -35,6 +36,7 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.websiteGraphDir | quote }}
               name: website-graph-dir
+              readOnly: true
       containers:
         - name: sparql-app
           image: 'ghcr.io/aksw/sparql-file:main'
@@ -48,8 +50,8 @@ spec:
               readOnly: true
       volumes:
         - name: website-graph-dir
-          emptyDir:
-            sizeLimit: 500Mi
+          persistentVolumeClaim:
+            claimName: website-graph-dir-pvc
 ---
 kind: Service
 apiVersion: v1

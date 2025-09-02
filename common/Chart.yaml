@@ -1,6 +1,6 @@
 apiVersion: v2
-name: general-chart
-description: The helm chart to deploy the general things.
+name: common-chart
+description: The helm chart to deploy the common things.
 
 # A chart can be either an 'application' or a 'library' chart.
 #

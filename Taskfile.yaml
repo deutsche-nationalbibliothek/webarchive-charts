@@ -4,8 +4,8 @@ env:
     ENV: '{{.ENV | default "minikube" }}'
 
 vars:
-  GENERAL_NAME: wa-general
-  GENERAL_CHART: ./general
+  COMMON_NAME: wa-common
+  COMMON_CHART: ./common
   PLAYBACK_NAME: wa-playback
   PLAYBACK_CHART: ./playback
   MOCKILS_NAME: wa-mocked-ils
@@ -31,16 +31,16 @@ tasks:
     aliases: [deploy]
     desc: Install/deploy the webarchive setup
     deps:
-      - task: install:general
+      - task: install:common
       - task: install:graph
       - task: install:playback
       - task: install:mockils
       - task: install:ingest
 
-  install:general:
-    desc: Install/deploy the  general things
+  install:common:
+    desc: Install/deploy the  common things
     cmds:
-      - helm install -f {{.GENERAL_CHART}}/values-{{.ENV}}.yaml {{.GENERAL_NAME}} {{.GENERAL_CHART}}
+      - helm install -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.COMMON_NAME}} {{.COMMON_CHART}}
 
   install:playback:
     desc: Install/deploy the playback setup
@@ -65,16 +65,16 @@ tasks:
   upgrade:
     desc:  Upgrade the deployed webarchive setup
     deps:
-      - task: upgrade:general
+      - task: upgrade:common
       - task: upgrade:graph
       - task: upgrade:playback
       - task: upgrade:mockils
       - task: upgrade:ingest
 
-  upgrade:general:
-    desc: Upgrade the general setup
+  upgrade:common:
+    desc: Upgrade the common setup
     cmds:
-      - helm upgrade -f {{.GENERAL_CHART}}/values-{{.ENV}}.yaml {{.GENERAL_NAME}} {{.GENERAL_CHART}}
+      - helm upgrade -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.COMMON_NAME}} {{.COMMON_CHART}}
 
   upgrade:playback:
     desc: Upgrade the playback setup
@@ -99,16 +99,16 @@ tasks:
   uninstall:
     desc:  Uninstall the deployed webarchive setup
     deps:
-      - task: uninstall:general
+      - task: uninstall:common
       - task: uninstall:graph
       - task: uninstall:playback
       - task: uninstall:mockils
       - task: uninstall:ingest
 
-  uninstall:general:
-    desc: Uninstall the general stuff
+  uninstall:common:
+    desc: Uninstall the common stuff
     cmds:
-      - helm uninstall {{.GENERAL_NAME}}
+      - helm uninstall {{.COMMON_NAME}}
 
   uninstall:playback:
     desc: Uninstall the playback setup
@@ -134,17 +134,17 @@ tasks:
     aliases: [lint]
     desc: Verify the syntax
     cmds:
-      - task: check:general
+      - task: check:common
       - task: check:graph
       - task: check:playback
       - task: check:mockils
       - task: check:ingest
 
-  check:general:
-    desc: Verify the syntax of general things
+  check:common:
+    desc: Verify the syntax of common things
     cmds:
-      - helm lint {{.GENERAL_CHART}}
-      - helm install --debug --dry-run {{.GENERAL_NAME}} {{.GENERAL_CHART}}
+      - helm lint {{.COMMON_CHART}}
+      - helm install --debug --dry-run {{.COMMON_NAME}} {{.COMMON_CHART}}
 
   check:playback:
     desc: Verify the syntax of playback

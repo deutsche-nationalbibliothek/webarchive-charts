@@ -6,6 +6,8 @@ env:
 vars:
   COMMON_NAME: wa-common
   COMMON_CHART: ./common
+  DASHBOARD_NAME: wa-dashboard
+  DASHBOARD_CHART: ./dashboard
   PLAYBACK_NAME: wa-playback
   PLAYBACK_CHART: ./playback
   MOCKILS_NAME: wa-mocked-ils
@@ -21,154 +23,213 @@ tasks:
     cmds:
       - task -l
 
+
   setup:minikube:
     desc: Setup the relevant stuff for local minikube setup
     cmds:
       - task: install:mock:example-data
       - minikube addons enable ingress
 
+  install:mock:example-data:
+    desc: Copy the example data to a minikube
+    cmds:
+      - ssh-keygen -R $(minikube ip)
+      - scp -r -i $(minikube ssh-key) examples/hostdata docker@$(minikube ip):/home/docker/
+
+
   install:
     aliases: [deploy]
     desc: Install/deploy the webarchive setup
     deps:
       - task: install:common
+      - task: install:dashboard
       - task: install:graph
       - task: install:playback
-      - task: install:mockils
+      - task: install:mocked-ils
       - task: install:ingest
-
-  install:common:
-    desc: Install/deploy the  common things
-    cmds:
-      - helm install -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.COMMON_NAME}} {{.COMMON_CHART}}
-
-  install:playback:
-    desc: Install/deploy the playback setup
-    cmds:
-      - helm install -f {{.PLAYBACK_CHART}}/values-{{.ENV}}.yaml {{.PLAYBACK_NAME}} {{.PLAYBACK_CHART}}
-
-  install:mockils:
-    desc: Install/deploy the mockils setup
-    cmds:
-      - helm install {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
-
-  install:graph:
-    desc: Install/deploy the website knowledge graph setup
-    cmds:
-      - helm install {{.GRAPH_NAME}} {{.GRAPH_CHART}}
-
-  install:ingest:
-    desc: Install/deploy the ingest setup
-    cmds:
-      - helm install {{.INGEST_NAME}} {{.INGEST_CHART}}
 
   upgrade:
     desc:  Upgrade the deployed webarchive setup
     deps:
       - task: upgrade:common
+      - task: upgrade:dashboard
       - task: upgrade:graph
       - task: upgrade:playback
-      - task: upgrade:mockils
+      - task: upgrade:mocked-ils
       - task: upgrade:ingest
-
-  upgrade:common:
-    desc: Upgrade the common setup
-    cmds:
-      - helm upgrade -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.COMMON_NAME}} {{.COMMON_CHART}}
-
-  upgrade:playback:
-    desc: Upgrade the playback setup
-    cmds:
-      - helm upgrade -f {{.PLAYBACK_CHART}}/values-{{.ENV}}.yaml {{.PLAYBACK_NAME}} {{.PLAYBACK_CHART}}
-
-  upgrade:mockils:
-    desc: Upgrade the mockils setup
-    cmds:
-      - helm upgrade {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
-
-  upgrade:graph:
-    desc: Upgrade the website knowledge graph setup
-    cmds:
-      - helm upgrade {{.GRAPH_NAME}} {{.GRAPH_CHART}}
-
-  upgrade:ingest:
-    desc: Upgrade the ingest setup
-    cmds:
-      - helm upgrade {{.INGEST_NAME}} {{.INGEST_CHART}}
 
   uninstall:
     desc:  Uninstall the deployed webarchive setup
     deps:
       - task: uninstall:common
+      - task: uninstall:dashboard
       - task: uninstall:graph
       - task: uninstall:playback
-      - task: uninstall:mockils
+      - task: uninstall:mocked-ils
       - task: uninstall:ingest
-
-  uninstall:common:
-    desc: Uninstall the common stuff
-    cmds:
-      - helm uninstall {{.COMMON_NAME}}
-
-  uninstall:playback:
-    desc: Uninstall the playback setup
-    cmds:
-      - helm uninstall {{.PLAYBACK_NAME}}
-
-  uninstall:mockils:
-    desc: Uninstall the mockils setup
-    cmds:
-      - helm uninstall {{.MOCKILS_NAME}}
-
-  uninstall:graph:
-    desc: Uninstall the website knowledge graph setup
-    cmds:
-      - helm uninstall {{.GRAPH_NAME}}
-
-  uninstall:ingest:
-    desc: Uninstall the ingest setup
-    cmds:
-      - helm uninstall {{.INGEST_NAME}}
 
   check:
     aliases: [lint]
     desc: Verify the syntax
     cmds:
       - task: check:common
+      - task: check:dashboard
       - task: check:graph
       - task: check:playback
-      - task: check:mockils
+      - task: check:mocked-ils
       - task: check:ingest
 
+
+  install:common:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: wa-common
+        CHART: ./common
+
+  upgrade:common:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: wa-common
+        CHART: ./common
+
   check:common:
-    desc: Verify the syntax of common things
-    cmds:
-      - helm lint {{.COMMON_CHART}}
-      - helm install --debug --dry-run {{.COMMON_NAME}} {{.COMMON_CHART}}
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: wa-common
+        CHART: ./common
+
+  uninstall:common:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: wa-common
+        CHART: ./common
+
+
+  install:dashboard:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: wa-dashboard
+        CHART: ./dashboard
+
+  upgrade:dashboard:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: wa-dashboard
+        CHART: ./dashboard
+
+  check:dashboard:
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: wa-dashboard
+        CHART: ./dashboard
+
+  uninstall:dashboard:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: wa-dashboard
+        CHART: ./dashboard
+
+
+  install:playback:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: wa-playback
+        CHART: ./playback
+
+  upgrade:playback:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: wa-playback
+        CHART: ./playback
 
   check:playback:
-    desc: Verify the syntax of playback
-    cmds:
-      - helm lint {{.PLAYBACK_CHART}}
-      - helm install --debug --dry-run {{.PLAYBACK_NAME}} {{.PLAYBACK_CHART}}
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: wa-playback
+        CHART: ./playback
+
+  uninstall:playback:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: wa-playback
+        CHART: ./playback
+
+
+  install:mocked-ils:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: wa-mocked-ils
+        CHART: ./mocked-ils
+
+  upgrade:mocked-ils:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: wa-mocked-ils
+        CHART: ./mocked-ils
+
+  check:mocked-ils:
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: wa-mocked-ils
+        CHART: ./mocked-ils
+
+  uninstall:mocked-ils:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: wa-mocked-ils
+        CHART: ./mocked-ils
+
+
+
+  install:graph:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: wa-graph
+        CHART: ./graph
+
+  upgrade:graph:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: wa-graph
+        CHART: ./graph
 
   check:graph:
-    desc: Verify the syntax of graph
-    cmds:
-      - helm lint {{.GRAPH_CHART}}
-      - helm install --debug --dry-run {{.GRAPH_NAME}} {{.GRAPH_CHART}}
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: wa-graph
+        CHART: ./graph
 
-  check:mockils:
-    desc: Verify the syntax of mockils
-    cmds:
-      - helm lint {{.MOCKILS_CHART}}
-      - helm install --debug --dry-run {{.MOCKILS_NAME}} {{.MOCKILS_CHART}}
+  uninstall:graph:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: wa-graph
+        CHART: ./graph
+
+
+  install:ingest:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: wa-ingest
+        CHART: ./ingest
+
+  upgrade:ingest:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: wa-ingest
+        CHART: ./ingest
 
   check:ingest:
-    desc: Verify the syntax of ingest
-    cmds:
-      - helm lint {{.INGEST_CHART}}
-      - helm install --debug --dry-run {{.INGEST_NAME}} {{.INGEST_CHART}}
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: wa-ingest
+        CHART: ./ingest
+
+  uninstall:ingest:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: wa-ingest
+        CHART: ./ingest
+
 
   debug:
     desc: Collect some information helpful for debugging
@@ -177,8 +238,27 @@ tasks:
     cmds:
       - helm get manifest {{.PLAYBACK_NAME}}
 
-  install:mock:example-data:
-    desc: Copy the example data to a minikube
+  install:any:
+    desc: Install command
+    internal: true
     cmds:
-      - ssh-keygen -R $(minikube ip)
-      - scp -r -i $(minikube ssh-key) examples/hostdata docker@$(minikube ip):/home/docker/
+      - helm install -f {{.COMMON_CHART}}/values.yaml -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.DEPLOYMENT_NAME}} {{.CHART}}
+
+  upgrade:any:
+    desc: Upgrade command
+    internal: true
+    cmds:
+      - helm upgrade -f {{.COMMON_CHART}}/values.yaml -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.DEPLOYMENT_NAME}} {{.CHART}}
+
+  check:any:
+    desc: Check command
+    internal: true
+    cmds:
+      - helm lint {{.CHART}}
+      - helm install --debug --dry-run -f {{.COMMON_CHART}}/values.yaml -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.DEPLOYMENT_NAME}} {{.CHART}}
+
+  uninstall:any:
+    desc: Uninstall command
+    internal: true
+    cmds:
+      - helm uninstall {{.DEPLOYMENT_NAME}}

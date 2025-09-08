@@ -22,11 +22,11 @@ spec:
                 name: wapmh-configmap
           volumeMounts:
             - mountPath: {{ .Values.queryDirectory | quote }}
-              name: wapmh-queries
+              name: wapmh-query-collection
       volumes:
-        - name: wapmh-queries
+        - name: wapmh-query-collection
           configMap:
-            name: wapmh-query-configmap
+            name: wapmh-query-collection-configmap
             items:
               - key: "allHeadersSelect.rq"
                 path: "allHeadersSelect.rq"

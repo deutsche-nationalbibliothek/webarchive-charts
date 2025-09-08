@@ -3,5 +3,14 @@ imagePullPolicy: IfNotPresent
 
 sparqlTitleData: "https://qlever.cs.uni-freiburg.de/api/dnb"
 
+arasRestBase: "YOU_NEED_TO_HAVE_ONE_MAYBE_CHOSE_THE_MINIKUBE_SETUP"
+arasRepo: "warc"
+
 websiteGraphDir: "/data/graph/"
 websiteGraphFile: "/data/graph/websites.ttl"
+rawWarcDirectory: "/data/warcs-raw/"
+warcDirectory: "/data/warcs/"
+webarchiveDirectory: "/webarchive/"
+pywbCollection: "warcs"
+websiteGraphLimit: "5"
+queryDirectory: "/data/queries/"

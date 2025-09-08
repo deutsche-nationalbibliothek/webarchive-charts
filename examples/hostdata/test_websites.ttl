@@ -15,8 +15,7 @@
     rdau:P60048 rdact:1018 ;
     rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
     rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
-    wdrs:describedby <https://d-nb.info/1234567802/about> ;
-    gndo:gndIdentifier "1234567802" .
+    wdrs:describedby <https://d-nb.info/1234567802/about> .
 
 <https://d-nb.info/1234567891> dc:title "Example"^^xsd:string ;
     dcterms:medium rdact:1018 ;

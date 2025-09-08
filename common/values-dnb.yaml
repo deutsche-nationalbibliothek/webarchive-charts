@@ -1,3 +1,6 @@
 environment: dnb
 
+imagePullPolicy: Always
+
 sparqlTitleData: "https://sparql.dnb.de.test/api/dnbgnd"
+arasRestBase: "http://etc.dnb.de/aras/"

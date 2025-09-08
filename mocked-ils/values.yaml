@@ -1,1 +1,1 @@
-arasRepo: "http://etc.dnb.de/aras/"
+imagePullPolicy: Always

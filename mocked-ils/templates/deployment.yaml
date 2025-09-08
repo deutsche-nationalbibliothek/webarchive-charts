@@ -18,6 +18,9 @@ spec:
           image: 'ghcr.io/deutsche-nationalbibliothek/mockils:main'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
           args: ["uvicorn", "mockils:app", "--host", "", "--port", "8080", "--root-path", "/mockils"]
+          env:
+            - name: MOCKILS_DATA_PATH
+              value: /data
           volumeMounts:
             - name: repository-warc
               mountPath: /data/warc

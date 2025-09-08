@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wacli-query-collection-configmap
+data:
+  remote_query.rq: |
+    CONSTRUCT {
+      ?page foaf:primaryTopic ?topic;
+          dc:title ?title;
+          dc:identifier ?pageIdentifier ;
+          dcterms:medium rdact:1018 .
+      ?snapshot dcterms:isPartOf ?page ;
+          dcterms:medium rdact:1018 ;
+          rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+          rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
+          rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+          dc:identifier ?identifier ;
+          bibo:issue ?datestamp ;
+          wdrs:describedby ?description .
+      ?description dcterms:modified ?modification .
+    } WHERE {
+      ?page foaf:primaryTopic ?topic;
+          dc:title ?title;
+          dc:identifier ?pageIdentifier ;
+          dcterms:medium rdact:1018 .
+      ?snapshot dcterms:isPartOf ?page ;
+          dcterms:medium rdact:1018 ;
+          rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+          rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
+          rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+          dc:identifier ?identifier ;
+          bibo:issue ?datestamp ;
+          wdrs:describedby ?description .
+      ?description dcterms:modified ?modification .
+      filter(?modification < "2020-01-01T00:00:00.000"^^xsd:dateTime)
+      optional {
+      ?snapshot a ?snapshot_type
+      }
+      filter (!bound(?snapshot_type))
+    }
+  local_query.rq: |
+    CONSTRUCT {
+      ?page foaf:primaryTopic ?topic;
+          dc:title ?title;
+          dcterms:medium rdact:1018 ;
+          ?pp ?po .
+      ?snapshot dcterms:isPartOf ?page ;
+              dc:identifier ?identifier, ?idn ;
+              gndo:gndIdentifier ?idn ;
+              wdrs:describedby ?description ;
+              ?sp ?so .
+      ?description dcterms:modified ?modification .
+    } WHERE {
+      ?page foaf:primaryTopic ?topic;
+          dc:title ?title;
+          dcterms:medium rdact:1018 ;
+          ?pp ?po .
+      ?snapshot dcterms:isPartOf ?page ;
+          dc:identifier ?identifier ;
+          wdrs:describedby ?description ;
+          ?sp ?so .
+      ?description dcterms:modified ?modification .
+      bind(SUBSTR(str(?identifier), 9) as ?idn)
+    }
+  list_query.rq: |
+    prefix dcterms: <http://purl.org/dc/terms/>
+    prefix gndo: <https://d-nb.info/standards/elementset/gnd#>
+
+    select distinct ?idn {
+        ?snapshot dcterms:isPartOf ?page .
+        ?snapshot gndo:gndIdentifier ?idn .
+    }

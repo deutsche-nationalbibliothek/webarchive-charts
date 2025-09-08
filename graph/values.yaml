@@ -1,5 +1,0 @@
-environment: generic
-imagePullPolicy: IfNotPresent
-
-websiteGraphDir: "/data/graph/"
-websiteGraphFile: "/data/graph/websites.ttl"

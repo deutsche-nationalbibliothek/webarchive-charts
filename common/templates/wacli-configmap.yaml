@@ -12,3 +12,4 @@ data:
   WEBARCHIVE_DIRECTORY: {{ .Values.webarchiveDirectory | quote }}
   WEBSITE_GRAPH_LIMIT: {{ .Values.websiteGraphLimit | quote }}
   PYWB_COLLECTION: {{ .Values.pywbCollection | quote }}
+  QUERY_COLLECTION_DIR: {{ .Values.queryDirectory | quote }}

@@ -1,5 +1,0 @@
-environment: dnb
-
-imagePullPolicy: Always
-
-arasRestBase: "http://etc.dnb.de/aras/"

@@ -25,6 +25,8 @@ spec:
             - mountPath: {{ .Values.websiteGraphDir | quote }}
               name: website-graph-dir
               readOnly: true
+            - mountPath: {{ .Values.queryDirectory | quote }}
+              name: wacli-query-collection
         - name: wacli-load-warcs
           image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
@@ -38,6 +40,8 @@ spec:
               readOnly: true
             - mountPath: {{ .Values.rawWarcDirectory | quote }}
               name: warcs-raw
+            - mountPath: {{ .Values.queryDirectory | quote }}
+              name: wacli-query-collection
         - name: wacli-recompress-warcs
           image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
@@ -53,6 +57,8 @@ spec:
               name: warcs-raw
             - mountPath: {{ .Values.warcDirectory | quote }}
               name: warcs
+            - mountPath: {{ .Values.queryDirectory | quote }}
+              name: wacli-query-collection
         - name: wb-manager-add
           image: 'ghcr.io/deutsche-nationalbibliothek/pywb:integration-preImage-uwsgiMount-entrypoint'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
@@ -100,6 +106,8 @@ spec:
               name: warcs
             - mountPath: {{ .Values.webarchiveDirectory | quote }}
               name: webarchive
+            - mountPath: {{ .Values.queryDirectory | quote }}
+              name: wacli-query-collection
       volumes:
         - name: website-graph-dir
           persistentVolumeClaim:
@@ -119,6 +127,16 @@ spec:
             items:
               - key: "run.sh"
                 path: "run.sh"
+        - name: wacli-query-collection
+          configMap:
+            name: wacli-query-collection-configmap
+            items:
+              - key: "remote_query.rq"
+                path: "remote_query.rq"
+              - key: "local_query.rq"
+                path: "local_query.rq"
+              - key: "list_query.rq"
+                path: "list_query.rq"
 ---
 kind: Service
 apiVersion: v1

@@ -1,3 +1,0 @@
-environment: minikube
-
-arasRestBase: "http://mockils-service:8080/"

@@ -63,6 +63,15 @@ data:
                 url: "https://pywb.readthedocs.io/en/latest/"
                 icon: "fa-solid fa-book"
                 target: "_blank"
+          - name: "PWID Resolver"
+            icon: "fa-solid fa-fingerprint"
+            tag: "playback"
+            url: {{ .Values.pwidResolverUrl | quote }}
+            quick:
+              - name: "code"
+                url: "https://github.com/deutsche-nationalbibliothek/pwidresolver"
+                icon: "fa-solid fa-arrow-up-right-from-square"
+                target: "_blank"
           - name: "Ingest"
             icon: "fa-solid fa-download"
             subtitle: "OAI-PMH"

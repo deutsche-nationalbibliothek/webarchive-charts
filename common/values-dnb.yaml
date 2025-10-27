@@ -4,3 +4,4 @@ imagePullPolicy: Always
 
 sparqlTitleData: "https://sparql.dnb.de.test/api/dnbgnd"
 arasRestBase: "http://etc.dnb.de/aras/"
+pwidResolverUrl: "https://pwidresolver-dnbe-aen-arndtn.apps.prod.jason.dnb.de/"

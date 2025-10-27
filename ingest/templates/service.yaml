@@ -1,0 +1,45 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: wapmh-service
+spec:
+  selector:
+    app: wapmh
+  ports:
+    - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wapmh-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /wapmh(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: wapmh-service
+                port:
+                  number: 8080
+---
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: wapmh
+spec:
+  to:
+    kind: Service
+    name: wapmh-service
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}

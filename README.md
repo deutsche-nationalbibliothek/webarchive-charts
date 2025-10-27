@@ -56,7 +56,7 @@ The collection at the DNB requires the recompression step as they are not compre
   - Validation
 - Best Practices:
   - liveness check
-  - readyness check
+  - readiness check
 
 https://www.redhat.com/en/blog/9-best-practices-for-deploying-highly-available-applications-to-openshift
 https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/

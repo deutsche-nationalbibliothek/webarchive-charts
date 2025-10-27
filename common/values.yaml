@@ -14,5 +14,14 @@ webarchiveDirectory: "/webarchive/"
 pywbCollection: "warcs"
 websiteGraphLimit: "5"
 queryDirectory: "/data/queries/"
+
+graphHost: "localhost"
 pwidResolverBasePath: "/"
+
+waybackUrl: "/wayback"
 pwidResolverUrl: "/pwidresolver"
+wapmhUrl: "/wapmh"
+graphUrl: "/sparql"
+mockils: true
+mockilsGraphUrl: "/mockils-sparql"
+mockilsArasUrl: "/mockils"

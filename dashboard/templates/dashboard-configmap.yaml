@@ -49,7 +49,7 @@ data:
             icon: "fa-solid fa-icons"
             subtitle: "PyWB"
             tag: "playback"
-            url: "/wayback"
+            url: {{ .Values.waybackUrl | quote }}
             quick:
               - name: "code"
                 url: "https://github.com/deutsche-nationalbibliothek/pywb"
@@ -76,34 +76,35 @@ data:
             icon: "fa-solid fa-download"
             subtitle: "OAI-PMH"
             tag: "ingest"
-            url: "/wapmh"
+            url: {{ .Values.wapmhUrl | quote }}
             quick:
               - name: "code"
                 url: "https://github.com/deutsche-nationalbibliothek/wapmh"
                 icon: "fa-solid fa-arrow-up-right-from-square"
                 target: "_blank"
               - name: "identify"
-                url: "/wapmh?verb=Identify"
+                url: "{{ .Values.wapmhUrl }}?verb=Identify"
                 icon: "fa-solid fa-arrow-up-right-from-square"
                 target: "_blank"
               - name: "ids"
-                url: "/wapmh?verb=ListIdentifiers"
+                url: "{{ .Values.wapmhUrl }}?verb=ListIdentifiers"
                 icon: "fa-solid fa-arrow-up-right-from-square"
                 target: "_blank"
               - name: "records"
-                url: "/wapmh?verb=ListRecords"
+                url: "{{ .Values.wapmhUrl }}?verb=ListRecords"
                 icon: "fa-solid fa-arrow-up-right-from-square"
                 target: "_blank"
           - name: "Graph"
             icon: "fa-solid fa-circle-nodes"
             subtitle: "SPARQL"
             tag: "graph"
-            url: "/sparql"
+            url: {{ .Values.graphUrl | quote }}
             quick:
               - name: "upstream"
                 url: "https://github.com/AKSW/sparql-file"
                 icon: "fa-solid fa-arrow-up-right-from-square"
                 target: "_blank"
+      {{- if .Values.mockils }}
       - name: "Mocked Library System"
         icon: "fa-solid fa-ghost"
         class: "highlight-blue"
@@ -112,7 +113,7 @@ data:
             icon: "fa-solid fa-circle-nodes"
             subtitle: "SPARQL"
             tag: "mockils"
-            url: "/mockils-sparql"
+            url: {{ .Values.mockilsGraphUrl | quote }}
             quick:
               - name: "upstream"
                 url: "https://github.com/AKSW/sparql-file"
@@ -122,12 +123,13 @@ data:
             icon: "fa-solid fa-folder-tree"
             subtitle: "Aras"
             tag: "mockils"
-            url: "/mockils"
+            url: {{ .Values.mockilsArasUrl | quote }}
             quick:
               - name: "code"
                 url: "https://github.com/deutsche-nationalbibliothek/mockils"
                 icon: "fa-solid fa-arrow-up-right-from-square"
                 target: "_blank"
+      {{- end }}
       - name: "Ressources"
         icon: "fa-regular fa-bookmark"
         class: highlight-inverted

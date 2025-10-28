@@ -49,7 +49,7 @@ tasks:
       - task: install:playback
       - task: install:mocked-ils
       - task: install:ingest
-      - task: install:piwidresolver
+      - task: install:pwidresolver
 
   upgrade:
     desc:  Upgrade the deployed webarchive setup
@@ -60,7 +60,7 @@ tasks:
       - task: upgrade:playback
       - task: upgrade:mocked-ils
       - task: upgrade:ingest
-      - task: upgrade:piwidresolver
+      - task: upgrade:pwidresolver
 
   uninstall:
     desc:  Uninstall the deployed webarchive setup
@@ -71,7 +71,7 @@ tasks:
       - task: uninstall:playback
       - task: uninstall:mocked-ils
       - task: uninstall:ingest
-      - task: uninstall:piwidresolver
+      - task: uninstall:pwidresolver
 
   check:
     aliases: [lint]
@@ -83,7 +83,7 @@ tasks:
       - task: check:playback
       - task: check:mocked-ils
       - task: check:ingest
-      - task: check:piwidresolver
+      - task: check:pwidresolver
 
 
   install:common:

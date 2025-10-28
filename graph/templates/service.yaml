@@ -32,7 +32,7 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: graph-default-route
+  name: graph
 spec:
   to:
     kind: Service

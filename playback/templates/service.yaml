@@ -29,7 +29,7 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: wayback-default-route
+  name: wayback
 spec:
   to:
     kind: Service

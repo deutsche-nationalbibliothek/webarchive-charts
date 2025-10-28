@@ -29,7 +29,7 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: wayback
+  name: wayback-default-route
 spec:
   to:
     kind: Service
@@ -39,4 +39,17 @@ spec:
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: wayback-apps-route
+spec:
+  host: {{ .Values.routerHost | quote }}
+  path: /wayback
+  to:
+    kind: Service
+    name: pywb-service
+  port:
+    targetPort: 8080
 {{- end }}

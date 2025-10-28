@@ -29,7 +29,7 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: dashboard
+  name: dashboard-default-route
 spec:
   to:
     kind: Service
@@ -39,4 +39,17 @@ spec:
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: dashboard-apps-route
+spec:
+  host: {{ .Values.routerHost | quote }}
+  path: /pwidresolver
+  to:
+    kind: Service
+    name: dashboard-service
+  port:
+    targetPort: 8080
 {{- end }}

@@ -32,7 +32,7 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: graph
+  name: graph-default-route
 spec:
   to:
     kind: Service
@@ -42,4 +42,17 @@ spec:
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: graph-apps-route
+spec:
+  host: {{ .Values.routerHost | quote }}
+  path: /sparql
+  to:
+    kind: Service
+    name: graph-service
+  port:
+    targetPort: 8080
 {{- end }}

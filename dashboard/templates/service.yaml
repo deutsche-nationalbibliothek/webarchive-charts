@@ -46,7 +46,7 @@ metadata:
   name: dashboard-apps-route
 spec:
   host: {{ .Values.routerHost | quote }}
-  path: /pwidresolver
+  path: /dashboard
   to:
     kind: Service
     name: dashboard-service

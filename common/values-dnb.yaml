@@ -9,7 +9,7 @@ arasRestBase: "http://etc.dnb.de/aras/"
 dashboardBasePath: "/dashboard"
 
 waybackUrl: "https://wayback-dnbe-aen-arndtn.apps.prod.jason.dnb.de/"
-pwidResolverUrl: "https://pwidresolver-dnbe-aen-arndtn.apps.prod.jason.dnb.de/"
+pwidResolverUrl: "https://pwidresolver-dnbe-aen-arndtn.apps.prod.jason.dnb.de/pwidresolver"
 wapmhUrl: "https://wapmh-dnbe-aen-arndtn.apps.prod.jason.dnb.de/"
 graphUrl: "https://graph-dnbe-aen-arndtn.apps.prod.jason.dnb.de/"
 mockils: false

@@ -39,12 +39,16 @@ data:
       filter (!bound(?snapshot_type))
     }
   local_query.rq: |
+    prefix lv: <http://purl.org/lobid/lv#>
+    prefix schema: <https://schema.org/>
     CONSTRUCT {
-      ?page foaf:primaryTopic ?topic;
+      ?page a schema:WebPage ;
+          foaf:primaryTopic ?topic;
           dc:title ?title;
           dcterms:medium rdact:1018 ;
           ?pp ?po .
-      ?snapshot dcterms:isPartOf ?page ;
+      ?snapshot a lv:ArchivedWebPage ;
+              dcterms:isPartOf ?page ;
               dc:identifier ?identifier, ?idn ;
               gndo:gndIdentifier ?idn ;
               wdrs:describedby ?description ;

@@ -20,4 +20,6 @@ spec:
           env:
             - name: SERVER_SERVLET_CONTEXT_PATH
               value: {{ .Values.pwidResolverBasePath | quote }}
+            - name: LOGGING_LEVEL_ROOT
+              value: {{ .Values.pwidResolverLoglevel | quote }}
 

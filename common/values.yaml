@@ -18,6 +18,7 @@ queryDirectory: "/data/queries/"
 graphHost: "localhost"
 dashboardBasePath: "/"
 pwidResolverBasePath: "/pwidresolver"
+pwidResolverLoglevel: "ERROR"
 playbackBasePath: "/wayback"
 
 waybackUrl: "/wayback"

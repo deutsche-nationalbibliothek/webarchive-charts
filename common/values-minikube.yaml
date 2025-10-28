@@ -3,3 +3,4 @@ environment: minikube
 sparqlTitleData: "http://mock-sparql-service:8080/"
 arasRestBase: "http://mockils-service:8080/"
 pwidResolverBasePath: "/pwidresolver"
+pwidResolverLoglevel: "DEBUG"

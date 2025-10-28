@@ -81,7 +81,7 @@ spec:
           args: ["uwsgi", "/uwsgi/uwsgi.ini"]
           env:
             - name: UWSGI_MOUNT
-              value: /wayback=/pywb/pywb/apps/wayback.py
+              value: "{{ .Values.playbackBasePath }}=/pywb/pywb/apps/wayback.py"
           volumeMounts:
             - mountPath: {{ .Values.webarchiveDirectory | quote }}
               name: webarchive

@@ -17,6 +17,9 @@ spec:
         - name: dashboard-app
           image: 'docker.io/b4bz/homer:latest'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          env:
+            - name: SUBFOLDER
+              value: {{ .Values.dashboardBasePath | quote }}
           volumeMounts:
             - mountPath: "/www/assets"
               name: dashboard-config

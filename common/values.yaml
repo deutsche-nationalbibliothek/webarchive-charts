@@ -16,7 +16,9 @@ websiteGraphLimit: "5"
 queryDirectory: "/data/queries/"
 
 graphHost: "localhost"
-pwidResolverBasePath: "/"
+dashboardBasePath: "/"
+pwidResolverBasePath: "/pwidresolver"
+playbackBasePath: "/wayback"
 
 waybackUrl: "/wayback"
 pwidResolverUrl: "/pwidresolver"

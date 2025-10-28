@@ -1,9 +1,12 @@
 environment: dnb
 
+routerHost: webarchiv.apps.dnb.de
+
 imagePullPolicy: Always
 
 sparqlTitleData: "https://sparql.dnb.de/api/dnbgnd"
 arasRestBase: "http://etc.dnb.de/aras/"
+dashboardBasePath: "/dashboard"
 
 waybackUrl: "https://wayback-dnbe-aen-arndtn.apps.prod.jason.dnb.de/"
 pwidResolverUrl: "https://pwidresolver-dnbe-aen-arndtn.apps.prod.jason.dnb.de/"

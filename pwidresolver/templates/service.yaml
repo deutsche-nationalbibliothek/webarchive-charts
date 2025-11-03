@@ -44,6 +44,8 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: pwidresolver-apps-route
+  annotations:
+    haproxy.router.openshift.io/set-forwarded-headers: never
 spec:
   host: {{ .Values.routerHost | quote }}
   path: /pwidresolver

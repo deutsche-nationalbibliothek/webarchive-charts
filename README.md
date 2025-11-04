@@ -1,6 +1,6 @@
 # The Deployment of the Webarchive
 
-> The setup is created for the DNB, so it will likely not run in your environment but maybe you can reuse parts of it and you may be able to play with it in a minikube.
+> The setup is created for the DNB, so it will likely not run in your environment, but maybe you can reuse parts of it, and you may be able to play with it in a minikube.
 
 These are Helm charts.
 
@@ -12,8 +12,8 @@ Requirements:
 
 ## Structure
 
-The structure of the repository should in some way represent the structure of the setup.
-For now it would start as a mono repository with the overall setup with services and might be split up in smaller repositories resp. charts using [chart dependencies](https://helm.sh/docs/topics/charts/#chart-dependencies).
+The structure of the repository should in a way represent the structure of the setup.
+For now, it would start as a mono repository with the overall setup with services and might be split up in smaller repositories resp. charts using [chart dependencies](https://helm.sh/docs/topics/charts/#chart-dependencies).
 
 ## Start with Minikube
 
@@ -29,7 +29,7 @@ Note: If you need to interoperate with the docker-host inside the minikube, run 
 
 ## Start with Open Shift
 
-This assumes you have an aras interface (which exists probably only a the DNB).
+This assumes you have an aras interface (which exists probably only at the DNB).
 
 ```
 $ ENV=dnb task install:playback

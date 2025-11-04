@@ -4,117 +4,74 @@ metadata:
   name: wapmh-query-collection-configmap
 data:
   allHeadersSelect.rq: |
-    prefix bibo: <http://purl.org/ontology/bibo/>
     prefix dc: <http://purl.org/dc/elements/1.1/>
-    prefix rdau: <http://rdaregistry.info/Elements/u/>
-    prefix dcterms: <http://purl.org/dc/terms/>
-    prefix lv:   <http://purl.org/lobid/lv#>
-    prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+    prefix lv: <http://purl.org/lobid/lv#>
+
     select ?identifier ?datestamp {
-        ?resourceIri
-            dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-            rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
-            dcterms:isPartOf ?work ;
-            bibo:issue ?datestamp ;
+        ?resourceIri a lv:ArchivedWebPage ;
             dc:identifier ?identifier .
         filter(substr(?identifier, 1, 1) != "(")
     }
   dateRangeHeadersSelect.rq: |
-    prefix bibo: <http://purl.org/ontology/bibo/>
+    prefix xsd: <http://www.w3.org/2001/XMLSchema#>
     prefix dc: <http://purl.org/dc/elements/1.1/>
-    prefix rdau: <http://rdaregistry.info/Elements/u/>
-    prefix dcterms: <http://purl.org/dc/terms/>
-    prefix lv:   <http://purl.org/lobid/lv#>
-    prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+    prefix lv: <http://purl.org/lobid/lv#>
+
     select ?identifier ?datestamp {
-        ?resourceIri
-            dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-            rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
-            dcterms:isPartOf ?work ;
-            bibo:issue ?datestamp ;
+        ?resourceIri a lv:ArchivedWebPage ;
+            dc:date ?datestamp ;
             dc:identifier ?identifier .
-        filter(
-            !bound(?from) || xsd:dateTime(
-                concat(?datestamp, "T00:00:00Z")
-            ) >= xsd:dateTime(
-                concat(?from, "T00:00:00Z")
-            )
-        )
-        filter(
-            !bound(?until) || xsd:dateTime(
-                concat(?datestamp, "T00:00:00Z")
-            ) <= xsd:dateTime(
-                concat(?until, "T00:00:00Z")
-            )
-        )
+        filter(!bound(?from) || ?datestamp >= xsd:dateTime(concat(?from, "T00:00:00Z")))
+        filter(!bound(?until) || ?datestamp <= xsd:dateTime(concat(?until, "T00:00:00Z")))
         filter(substr(?identifier, 1, 1) != "(")
     }
   recordConstruct.rq: |
     prefix foaf: <http://xmlns.com/foaf/0.1/>
     prefix bibo: <http://purl.org/ontology/bibo/>
     prefix dc: <http://purl.org/dc/elements/1.1/>
-    prefix rdau: <http://rdaregistry.info/Elements/u/>
     prefix dcterms: <http://purl.org/dc/terms/>
-    prefix lv:   <http://purl.org/lobid/lv#>
-    prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+    prefix lv: <http://purl.org/lobid/lv#>
 
     construct {
         ?resourceIri a lv:ArchivedWebPage ;
             dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-            rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
             dc:identifier ?identifier ;
             bibo:issue ?datestamp ;
             dcterms:isPartOf ?work ;
             ?p ?o .
-            ?work ?wp ?wo ;
-                foaf:primaryTopic ?url .
+        ?work ?wp ?wo ;
+            foaf:primaryTopic ?url .
     } where {
-        ?resourceIri
+        ?resourceIri a lv:ArchivedWebPage ;
             dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-            rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
             dc:identifier ?identifier ;
             bibo:issue ?datestamp ;
             dcterms:isPartOf ?work ;
             ?p ?o .
-            ?work ?wp ?wo ;
-                foaf:primaryTopic ?url .
+        ?work ?wp ?wo ;
+            foaf:primaryTopic ?url .
     }
   recordOaiDcConstruct.rq: |
     prefix foaf: <http://xmlns.com/foaf/0.1/>
-    prefix bibo: <http://purl.org/ontology/bibo/>
     prefix dc: <http://purl.org/dc/elements/1.1/>
-    prefix rdau: <http://rdaregistry.info/Elements/u/>
     prefix dcterms: <http://purl.org/dc/terms/>
-    prefix lv:   <http://purl.org/lobid/lv#>
-    prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+    prefix lv: <http://purl.org/lobid/lv#>
 
     construct {
         ?resourceIri
-            dc:type <http://rdaregistry.info/termList/RDACarrierType/1018>, <http://rdaregistry.info/termList/RDAContentType/1020>, <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+            dc:type lv:ArchivedWebPage ;
             dc:identifier ?resourceIri, ?identifier ;
             dc:date ?datestamp ;
             dc:relation ?work, ?workIdentifier ;
-            dc:subject ?url ; # could also be the link to the WARC file
-            # dc:format "application/warc" ;
+            dc:format <https://d-nb.info/gnd/4596172-4> , ?medium ;
             dc:source ?url .
     } where {
-        ?resourceIri
-            dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-            rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-            rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+        ?resourceIri a lv:ArchivedWebPage ;
+            dcterms:medium ?medium ;
             dc:identifier ?identifier ;
-            bibo:issue ?datestamp ;
+            dc:date ?datestamp ;
+            foaf:primaryTopic ?url ;
             dcterms:isPartOf ?work .
-        ?work foaf:primaryTopic ?url .
         optional {
             ?work dc:identifier ?workIdentifier
         }

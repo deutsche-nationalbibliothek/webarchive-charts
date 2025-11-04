@@ -1,3 +1,4 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix bibo: <http://purl.org/ontology/bibo/> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -7,19 +8,35 @@
 @prefix rdau: <http://rdaregistry.info/Elements/u/> .
 @prefix wdrs: <http://www.w3.org/2007/05/powder-s#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix lv: <http://purl.org/lobid/lv#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdact: <http://rdaregistry.info/termList/RDACarrierType/> .
 
-<https://d-nb.info/1234567802> dc:identifier "(DE-101)1234567802"^^xsd:string ;
-    dcterms:isPartOf <https://d-nb.info/1234567891> ;
-    dcterms:medium rdact:1018 ;
-    bibo:issue "2012-05-18"^^xsd:string ;
-    rdau:P60048 rdact:1018 ;
+<https://d-nb.info/1234567801>
+    dc:identifier "(DE-101)1234567801" ;
+    dc:title "Example" ;
+    dcterms:issued "2012-" ;
+    dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+    rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+    rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020>, <https://d-nb.info/gnd/4067488-5>, <https://d-nb.info/gnd/4596172-4> ;
+    rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+    a lv:ArchivedWebPage, bibo:Periodical ;
+    owl:sameAs <http://hub.culturegraph.org/resource/DNB-1234567801> ;
+    wdrs:describedby <https://d-nb.info/1234567801/about> ;
+    foaf:primaryTopic <https://example.org/> .
+
+<https://d-nb.info/1234567802>
+    dc:identifier "(DE-101)1234567802" ;
+    dcterms:isPartOf <https://d-nb.info/1234567801> ;
+    dcterms:issued "2012" ;
+    dcterms:medium <http://rdaregistry.info/termList/RDACarrierType/1018> ;
+    bibo:issue "2012-05-18" ;
+    rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
     rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
     rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
+    owl:sameAs <http://hub.culturegraph.org/resource/DNB-1234567802> ;
     wdrs:describedby <https://d-nb.info/1234567802/about> .
 
-<https://d-nb.info/1234567891> dc:title "Example"^^xsd:string ;
-    dcterms:medium rdact:1018 ;
-    dc:identifier "(DE-101)1234567891"^^xsd:string ;
-    foaf:primaryTopic "https://example.org/"^^xsd:string .
-
-<https://d-nb.info/1234567802/about> dcterms:modified "2012-05-18T12:34:47"^^xsd:dateTime .
+<https://d-nb.info/1234567802/about>
+    dcterms:license <http://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:modified "2017-12-03T16:44:37"^^xsd:dateTime .

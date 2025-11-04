@@ -4,73 +4,77 @@ metadata:
   name: wacli-query-collection-configmap
 data:
   remote_query.rq: |
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    PREFIX bibo: <http://purl.org/ontology/bibo/>
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX dcterms: <http://purl.org/dc/terms/>
+    PREFIX rdact: <http://rdaregistry.info/termList/RDACarrierType/>
+    PREFIX lv:   <http://purl.org/lobid/lv#>
+    PREFIX wdrs: <http://www.w3.org/2007/05/powder-s#>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
     CONSTRUCT {
-      ?page foaf:primaryTopic ?topic;
-          dc:title ?title;
-          dc:identifier ?pageIdentifier ;
-          dcterms:medium rdact:1018 .
-      ?snapshot dcterms:isPartOf ?page ;
-          dcterms:medium rdact:1018 ;
-          rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-          rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-          rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
-          dc:identifier ?identifier ;
-          bibo:issue ?datestamp ;
-          wdrs:describedby ?description .
-      ?description dcterms:modified ?modification .
+        ?page a bibo:Website ;
+            dc:identifier ?pageIdentifier ;
+            dc:title ?title ;
+            foaf:primaryTopic ?topic ;
+            dcterms:medium rdact:1018 .
+        ?snapshot a lv:ArchivedWebPage ;
+            dcterms:isPartOf ?page ;
+            dc:identifier ?identifier ;
+            bibo:issue ?issueDate ;
+            dcterms:medium rdact:1018 .
     } WHERE {
-      ?page foaf:primaryTopic ?topic;
-          dc:title ?title;
-          dc:identifier ?pageIdentifier ;
-          dcterms:medium rdact:1018 .
-      ?snapshot dcterms:isPartOf ?page ;
-          dcterms:medium rdact:1018 ;
-          rdau:P60048 <http://rdaregistry.info/termList/RDACarrierType/1018> ;
-          rdau:P60049 <http://rdaregistry.info/termList/RDAContentType/1020> ;
-          rdau:P60050 <http://rdaregistry.info/termList/RDAMediaType/1003> ;
-          dc:identifier ?identifier ;
-          bibo:issue ?datestamp ;
-          wdrs:describedby ?description .
-      ?description dcterms:modified ?modification .
-      filter(?modification < "2020-01-01T00:00:00.000"^^xsd:dateTime)
-      optional {
-      ?snapshot a ?snapshot_type
-      }
-      filter (!bound(?snapshot_type))
+        ?page a lv:ArchivedWebPage ; # Website; wrong type
+            dc:identifier ?pageIdentifier ;
+            dc:title ?title;
+            foaf:primaryTopic ?topic;
+            dcterms:medium rdact:1018 .
+        ?snapshot dcterms:isPartOf ?page ;
+            dc:identifier ?identifier ;
+            bibo:issue ?issueDate ;
+            dcterms:medium rdact:1018 ;
+            wdrs:describedby ?description .
+        ?description dcterms:modified ?modification .
+        filter(?modification < "2020-01-01T00:00:00.000"^^xsd:dateTime)
     }
   local_query.rq: |
-    prefix lv: <http://purl.org/lobid/lv#>
-    prefix schema: <https://schema.org/>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    PREFIX dcterms: <http://purl.org/dc/terms/>
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX lv: <http://purl.org/lobid/lv#>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    PREFIX bibo: <http://purl.org/ontology/bibo/>
+
     CONSTRUCT {
-      ?page a schema:WebPage ;
-          foaf:primaryTopic ?topic;
-          dc:title ?title;
-          dcterms:medium rdact:1018 ;
-          ?pp ?po .
-      ?snapshot a lv:ArchivedWebPage ;
-              dcterms:isPartOf ?page ;
-              dc:identifier ?identifier, ?idn ;
-              gndo:gndIdentifier ?idn ;
-              wdrs:describedby ?description ;
-              ?sp ?so .
-      ?description dcterms:modified ?modification .
+        ?page a bibo:Website ;
+            foaf:primaryTopic ?topic ;
+            ?pp ?po .
+        ?snapshot a lv:ArchivedWebPage ;
+            dc:identifier ?identifier, ?idn ;
+            dc:date ?datestamp ;
+            dcterms:isPartOf ?page ;
+            foaf:primaryTopic ?topic ;
+            lv:webPageArchived ?topic ;
+            ?sp ?so .
     } WHERE {
-      ?page foaf:primaryTopic ?topic;
-          dc:title ?title;
-          dcterms:medium rdact:1018 ;
-          ?pp ?po .
-      ?snapshot dcterms:isPartOf ?page ;
-          dc:identifier ?identifier ;
-          wdrs:describedby ?description ;
-          ?sp ?so .
-      ?description dcterms:modified ?modification .
-      bind(SUBSTR(str(?identifier), 9) as ?idn)
+        ?page a bibo:Website ;
+            foaf:primaryTopic ?topic ;
+            ?pp ?po .
+        ?snapshot a lv:ArchivedWebPage ;
+            dcterms:isPartOf ?page ;
+            dc:identifier ?identifier ;
+            bibo:issue ?issueDate ;
+            ?sp ?so .
+        bind(SUBSTR(STR(?identifier), 9) as ?idn)
+        bind(STRDT(CONCAT(STR(?issueDate), "T02:00:00+01:00"), xsd:dateTime) as ?datestamp)
     }
   list_query.rq: |
-    prefix dcterms: <http://purl.org/dc/terms/>
-    prefix gndo: <https://d-nb.info/standards/elementset/gnd#>
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX lv: <http://purl.org/lobid/lv#>
 
-    select distinct ?idn {
-        ?snapshot dcterms:isPartOf ?page .
-        ?snapshot gndo:gndIdentifier ?idn .
+    select ?idn {
+        ?resourceIri a lv:ArchivedWebPage ;
+            dc:identifier ?idn .
+            filter(SUBSTR(?idn, 1, 1) != "(")
     }

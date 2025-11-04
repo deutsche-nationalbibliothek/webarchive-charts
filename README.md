@@ -25,6 +25,8 @@ $ task install
 # Install the mocked ils and the playback to the minikube
 ```
 
+Note: If you need to interoperate with the docker-host inside the minikube, run `eval $(minikube docker-env)`.
+
 ## Start with Open Shift
 
 This assumes you have an aras interface (which exists probably only a the DNB).

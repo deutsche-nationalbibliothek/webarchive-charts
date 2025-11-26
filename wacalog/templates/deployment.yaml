@@ -1,0 +1,65 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: wacalog-app
+  labels:
+    app: wacalog
+spec:
+  selector:
+    matchLabels:
+      app: wacalog
+  template:
+    metadata:
+      labels:
+        app: wacalog
+    spec:
+      initContainers:
+        - name: wacalog-template-clone
+          image: 'registry.k8s.io/git-sync/git-sync:v4.5.0'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args:
+            - "--repo=https://github.com/deutsche-nationalbibliothek/wacalog"
+            - "--root=/data"
+            - "--link=latest"
+            - "--depth=1"
+            - "--one-time"
+          volumeMounts:
+            - mountPath: "/data"
+              name: wacalog-templates
+        - name: wacalog-build
+          image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          workingDir: /data/latest
+          # command: ["sleep", "1000"]
+          command: ["mkdocs", "build"]
+          args: ["-d", "/build"]
+          volumeMounts:
+            - mountPath: "/data"
+              name: wacalog-templates
+            - mountPath: "/data/mkdocs.yml"
+              name: wacalog-config
+              subPath: "mkdocs.yml"
+            - mountPath: "/build"
+              name: wacalog-build
+      containers:
+        - name: wacalog-serve
+          image: 'docker.io/lipanski/docker-static-website:latest'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          command: ["/busybox-httpd"]
+          args: ["-f", "-p", "8080", "-h", "/data"]
+          volumeMounts:
+            - mountPath: "/data/wacalog"
+              name: wacalog-build
+      volumes:
+        - name: wacalog-templates
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: wacalog-build
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: wacalog-config
+          configMap:
+            name: wacalog-configmap
+            items:
+              - key: "mkdocs.yml"
+                path: "mkdocs.yml"

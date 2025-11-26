@@ -21,6 +21,7 @@ pwidResolverBasePath: "/pwidresolver"
 pwidResolverLoglevel: "ERROR"
 playbackBasePath: "/wayback"
 
+wacalogUrl: "/wacalog"
 waybackUrl: "/wayback"
 pwidResolverUrl: "/pwidresolver"
 wapmhUrl: "/wapmh"

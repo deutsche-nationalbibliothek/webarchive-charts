@@ -18,6 +18,8 @@ vars:
   INGEST_CHART: ./ingest
   PWIDRESOLVER_NAME: wa-pwidresolver
   PWIDRESOLVER_CHART: ./pwidresolver
+  WACALOG_NAME: wa-wacalog
+  WACALOG_CHART: ./wacalog
 
 tasks:
   default:
@@ -50,6 +52,7 @@ tasks:
       - task: install:mocked-ils
       - task: install:ingest
       - task: install:pwidresolver
+      - task: install:wacalog
 
   upgrade:
     desc:  Upgrade the deployed webarchive setup
@@ -61,6 +64,7 @@ tasks:
       - task: upgrade:mocked-ils
       - task: upgrade:ingest
       - task: upgrade:pwidresolver
+      - task: upgrade:wacalog
 
   uninstall:
     desc:  Uninstall the deployed webarchive setup
@@ -72,6 +76,7 @@ tasks:
       - task: uninstall:mocked-ils
       - task: uninstall:ingest
       - task: uninstall:pwidresolver
+      - task: uninstall:wacalog
 
   check:
     aliases: [lint]
@@ -84,6 +89,7 @@ tasks:
       - task: check:mocked-ils
       - task: check:ingest
       - task: check:pwidresolver
+      - task: check:wacalog
 
 
   install:common:
@@ -260,6 +266,31 @@ tasks:
       vars:
         DEPLOYMENT_NAME: wa-pwidresolver
         CHART: "{{.PWIDRESOLVER_CHART}}"
+
+
+  install:wacalog:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
+        CHART: "{{.WACALOG_CHART}}"
+
+  upgrade:wacalog:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
+        CHART: "{{.WACALOG_CHART}}"
+
+  check:wacalog:
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
+        CHART: "{{.WACALOG_CHART}}"
+
+  uninstall:wacalog:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
+        CHART: "{{.WACALOG_CHART}}"
 
 
   debug:

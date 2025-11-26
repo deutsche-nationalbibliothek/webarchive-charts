@@ -45,6 +45,14 @@ data:
       - name: "Webarchive"
         icon: "fa-solid fa-arrow-right"
         items:
+          - name: "Wacalog"
+            icon: "fa-solid fa-book"
+            url: {{ .Values.wacalogUrl | quote }}
+            quick:
+              - name: "code"
+                url: "https://github.com/deutsche-nationalbibliothek/wacalog"
+                icon: "fa-solid fa-arrow-up-right-from-square"
+                target: "_blank"
           - name: "Bereitstellung"
             icon: "fa-solid fa-icons"
             subtitle: "PyWB"

@@ -2,6 +2,7 @@ environment: generic
 imagePullPolicy: IfNotPresent
 
 sparqlTitleData: "https://qlever.cs.uni-freiburg.de/api/dnb"
+sparqlEndpoint: "http://graph-service:8080/"
 
 arasRestBase: "YOU_NEED_TO_HAVE_ONE_MAYBE_CHOSE_THE_MINIKUBE_SETUP"
 arasRepo: "warc"

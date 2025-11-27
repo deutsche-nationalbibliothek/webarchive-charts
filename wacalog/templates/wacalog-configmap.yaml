@@ -17,7 +17,7 @@ data:
     plugins:
       - mkrdf:
           # graph_file: data/websites.ttl
-          sparql_endpoint: http://graph-service:8080/
+          sparql_endpoint: {{ .Values.sparqlEndpoint | quote }}
           base_iri: https://d-nb.info/
           class_template_map:
               http://purl.org/lobid/lv#ArchivedWebPage: archivedwebpage.html

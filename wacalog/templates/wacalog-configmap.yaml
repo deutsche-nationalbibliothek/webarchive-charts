@@ -8,27 +8,27 @@ data:
     playback_base: http://webarchiv.apps.dnb.de/wayback/warcs/
     logo_path: resources/images/logo.png
     theme:
-    name: null
-    custom_dir: templates
+      name: null
+      custom_dir: templates
     extra_css:
-    - resources/css/bootstrap.min.css
+      - resources/css/bootstrap.min.css
     extra_javascript:
-    - resources/js/bootstrap.min.js
+      - resources/js/bootstrap.min.js
     plugins:
-    - mkrdf:
-        # graph_file: data/websites.ttl
-        sparql_endpoint: http://graph-service:8080/"
-        base_iri: https://d-nb.info/
-        class_template_map:
-            http://purl.org/lobid/lv#ArchivedWebPage: archivedwebpage.html
-            http://purl.org/ontology/bibo/Website: website.html
-            http://purl.org/ontology/bibo/Series: collection.html
-            https://github.com/DOWARC/dowarc#WARCfile: warcfile.html
-            https://github.com/DOWARC/dowarc#WARCrecord: warcrecord.html
-        instance_template_map:
-            https://webarchiv.apps.dnb.de/wacalog/: home.html
+      - mkrdf:
+          # graph_file: data/websites.ttl
+          sparql_endpoint: http://graph-service:8080/
+          base_iri: https://d-nb.info/
+          class_template_map:
+              http://purl.org/lobid/lv#ArchivedWebPage: archivedwebpage.html
+              http://purl.org/ontology/bibo/Website: website.html
+              http://purl.org/ontology/bibo/Series: collection.html
+              https://github.com/DOWARC/dowarc#WARCfile: warcfile.html
+              https://github.com/DOWARC/dowarc#WARCrecord: warcrecord.html
+          instance_template_map:
+              https://webarchiv.apps.dnb.de/wacalog/: home.html
     hooks:
-    - plugins/datetime_format.py
+      - plugins/datetime_format.py
   index.md: |
     resource_iri: https://webarchiv.dnb.de/
     template: home.html

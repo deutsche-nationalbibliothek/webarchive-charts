@@ -36,7 +36,7 @@ spec:
           volumeMounts:
             - mountPath: "/data"
               name: wacalog-templates
-            - mountPath: "/data/mkdocs.yml"
+            - mountPath: "/data/latest/mkdocs.yml"
               name: wacalog-config
               subPath: "mkdocs.yml"
             - mountPath: "/build"

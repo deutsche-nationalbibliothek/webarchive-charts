@@ -128,13 +128,13 @@ spec:
             claimName: website-graph-dir-pvc
         - name: webarchive
           emptyDir:
-            sizeLimit: 1Gi
+            sizeLimit: 2Gi
         - name: warcs-raw
           emptyDir:
-            sizeLimit: 1Gi
+            sizeLimit: 2Gi
         - name: warcs
           emptyDir:
-            sizeLimit: 1Gi
+            sizeLimit: 2Gi
         - name: wb-manager-run-sh
           configMap:
             name: pywb-configmap

@@ -1,0 +1,57 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: outbackcdx-service
+spec:
+  selector:
+    app: outbackcdx
+  ports:
+    - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: outbackcdx-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /outbackcdx
+            pathType: Prefix
+            backend:
+              service:
+                name: outbackcdx-service
+                port:
+                  number: 8080
+---
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: outbackcdx-route
+spec:
+  to:
+    kind: Service
+    name: outbackcdx-service
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: outbackcdx-apps-route
+  annotations:
+    haproxy.router.openshift.io/set-forwarded-headers: never
+spec:
+  host: {{ .Values.routerHost | quote }}
+  path: /outbackcdx
+  to:
+    kind: Service
+    name: outbackcdx-service
+  port:
+    targetPort: 8080
+{{- end }}

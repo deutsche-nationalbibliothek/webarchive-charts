@@ -1,0 +1,19 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: outbackcdx-app
+  labels:
+    app: outbackcdx
+spec:
+  selector:
+    matchLabels:
+      app: outbackcdx
+  template:
+    metadata:
+      labels:
+        app: outbackcdx
+    spec:
+      containers:
+        - name: outbackcdx-app
+          image: 'docker.io/nlagovau/outbackcdx:1.1.0'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}

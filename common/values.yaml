@@ -27,6 +27,7 @@ waybackUrl: "/wayback"
 pwidResolverUrl: "/pwidresolver"
 wapmhUrl: "/wapmh"
 graphUrl: "/sparql"
+cdxUrl: "/outbackcdx"
 mockils: true
 mockilsGraphUrl: "/mockils-sparql"
 mockilsArasUrl: "/mockils"

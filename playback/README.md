@@ -4,4 +4,4 @@ The Playback part of the webarchive infrastructure is responsible for providing 
 
 In principle the playback part consists of an *Index* and *Playback Engine*.
 
-Currently, *PyWB* with an *OutbackCDX* index as well as *SolrWayback* which is an index and playback in one are in the focus. But only *PyWB* is setup so far.
+Currently, it is just a *PyWB*. With some init-containers before it, that need to be separated.

@@ -12,6 +12,8 @@ vars:
   PLAYBACK_CHART: ./playback
   MOCKILS_NAME: wa-mocked-ils
   MOCKILS_CHART: ./mocked-ils
+  OUTBACKCDX_NAME: wa-outbackcdx
+  OUTBACKCDX_CHART: ./outbackcdx
   GRAPH_NAME: wa-graph
   GRAPH_CHART: ./graph
   INGEST_NAME: wa-ingest
@@ -50,6 +52,7 @@ tasks:
       - task: install:graph
       - task: install:playback
       - task: install:mocked-ils
+      - task: install:outbackcdx
       - task: install:ingest
       - task: install:pwidresolver
       - task: install:wacalog
@@ -62,6 +65,7 @@ tasks:
       - task: upgrade:graph
       - task: upgrade:playback
       - task: upgrade:mocked-ils
+      - task: upgrade:outbackcdx
       - task: upgrade:ingest
       - task: upgrade:pwidresolver
       - task: upgrade:wacalog
@@ -74,6 +78,7 @@ tasks:
       - task: uninstall:graph
       - task: uninstall:playback
       - task: uninstall:mocked-ils
+      - task: uninstall:outbackcdx
       - task: uninstall:ingest
       - task: uninstall:pwidresolver
       - task: uninstall:wacalog
@@ -87,6 +92,7 @@ tasks:
       - task: check:graph
       - task: check:playback
       - task: check:mocked-ils
+      - task: check:outbackcdx
       - task: check:ingest
       - task: check:pwidresolver
       - task: check:wacalog
@@ -191,6 +197,30 @@ tasks:
         DEPLOYMENT_NAME: wa-mocked-ils
         CHART: ./mocked-ils
 
+
+  install:outbackcdx:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
+        CHART: "{{.OUTBACKCDX_CHART}}"
+
+  upgrade:outbackcdx:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
+        CHART: "{{.OUTBACKCDX_CHART}}"
+
+  check:outbackcdx:
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
+        CHART: "{{.OUTBACKCDX_CHART}}"
+
+  uninstall:outbackcdx:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
+        CHART: "{{.OUTBACKCDX_CHART}}"
 
 
   install:graph:

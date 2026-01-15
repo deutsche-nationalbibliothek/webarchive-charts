@@ -112,6 +112,16 @@ data:
                 url: "https://github.com/AKSW/sparql-file"
                 icon: "fa-solid fa-arrow-up-right-from-square"
                 target: "_blank"
+          - name: "Index"
+            icon: "fa-solid fa-list"
+            subtitle: "OutbackCDX"
+            tag: "cdx"
+            url: {{ .Values.cdxUrl | quote }}
+            quick:
+              - name: "code"
+                url: "https://github.com/nla/outbackcdx"
+                icon: "fa-solid fa-arrow-up-right-from-square"
+                target: "_blank"
       {{- if .Values.mockils }}
       - name: "Mocked Library System"
         icon: "fa-solid fa-ghost"

@@ -3,8 +3,9 @@ kind: ConfigMap
 metadata:
   name: pywb-configmap
 data:
-  run.sh: |
-    #!/bin/sh
-    cd {{ .Values.webarchiveDirectory | quote }};
-    wb-manager init {{ .Values.pywbCollection | quote }};
-    for warc_file in "{{ .Values.warcDirectory }}*/*"; do wb-manager add {{ .Values.pywbCollection }} $warc_file; done;
+  config.yaml: |
+    collections:
+      {{ .Values.pywbCollection }}:
+        archive_paths: {{ .Values.warcDirectory | quote }}
+        #archive_paths: http://remote.example.org/warcs/
+        index_paths: cdx+http://outbackcdx:8080/{{ .Values.pywbCollection }}

@@ -13,80 +13,6 @@ spec:
       labels:
         app: pywb
     spec:
-      initContainers:
-        - name: wacli-list
-          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-          args: ["list"]
-          envFrom:
-            - configMapRef:
-                name: wacli-configmap
-          volumeMounts:
-            - mountPath: {{ .Values.websiteGraphDir | quote }}
-              name: website-graph-dir
-              readOnly: true
-            - mountPath: {{ .Values.queryDirectory | quote }}
-              name: wacli-query-collection
-        - name: wacli-load-warcs
-          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-          args: ["load-warcs"]
-          envFrom:
-            - configMapRef:
-                name: wacli-configmap
-          volumeMounts:
-            - mountPath: {{ .Values.websiteGraphDir | quote }}
-              name: website-graph-dir
-              readOnly: true
-            - mountPath: {{ .Values.rawWarcDirectory | quote }}
-              name: warcs-raw
-            - mountPath: {{ .Values.queryDirectory | quote }}
-              name: wacli-query-collection
-          resources:
-            limits:
-              cpu: 1000m
-              memory: 500Mi
-            requests:
-              cpu: 10m
-              memory: 100Mi
-        - name: wacli-recompress-warcs
-          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-          args: ["recompress-warcs"]
-          envFrom:
-            - configMapRef:
-                name: wacli-configmap
-          volumeMounts:
-            - mountPath: {{ .Values.websiteGraphDir | quote }}
-              name: website-graph-dir
-              readOnly: true
-            - mountPath: {{ .Values.rawWarcDirectory | quote }}
-              name: warcs-raw
-            - mountPath: {{ .Values.warcDirectory | quote }}
-              name: warcs
-            - mountPath: {{ .Values.queryDirectory | quote }}
-              name: wacli-query-collection
-          resources:
-            limits:
-              cpu: 1500m
-              memory: 2000Mi
-            requests:
-              cpu: 1500m
-              memory: 500Mi
-        - name: wb-manager-add
-          image: 'ghcr.io/deutsche-nationalbibliothek/pywb:integration-preImage-uwsgiMount-entrypoint'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-          command: ["/bin/bash"]
-          args: ["/run.sh"]
-          volumeMounts:
-            - mountPath: {{ .Values.warcDirectory | quote }}
-              name: warcs
-            - mountPath: {{ .Values.webarchiveDirectory | quote }}
-              name: webarchive
-            - mountPath: "/run.sh"
-              name: wb-manager-run-sh
-              subPath: "run.sh"
-              readOnly: true
       containers:
         - name: pywb-app
           # image: 'docker.io/webrecorder/pywb:2.8.3'
@@ -97,57 +23,18 @@ spec:
             - name: UWSGI_MOUNT
               value: "{{ .Values.playbackBasePath }}=/pywb/pywb/apps/wayback.py"
           volumeMounts:
-            - mountPath: {{ .Values.webarchiveDirectory | quote }}
-              name: webarchive
-            - mountPath: "/run.sh"
-              name: wb-manager-run-sh
-              subPath: "run.sh"
-              readOnly: true
-        - name: wacli-app
-          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
-          command: ["sleep", "infinity"]
-          envFrom:
-            - configMapRef:
-                name: wacli-configmap
-          volumeMounts:
-            - mountPath: {{ .Values.websiteGraphDir | quote }}
-              name: website-graph-dir
-              readOnly: true
-            - mountPath: {{ .Values.rawWarcDirectory | quote }}
-              name: warcs-raw
             - mountPath: {{ .Values.warcDirectory | quote }}
               name: warcs
-            - mountPath: {{ .Values.webarchiveDirectory | quote }}
-              name: webarchive
-            - mountPath: {{ .Values.queryDirectory | quote }}
-              name: wacli-query-collection
+            - mountPath: "/webarchive"
+              name: pywb-configmap
+              readOnly: true
       volumes:
-        - name: website-graph-dir
-          persistentVolumeClaim:
-            claimName: website-graph-dir-pvc
-        - name: webarchive
-          emptyDir:
-            sizeLimit: 2Gi
-        - name: warcs-raw
-          emptyDir:
-            sizeLimit: 2Gi
         - name: warcs
-          emptyDir:
-            sizeLimit: 2Gi
-        - name: wb-manager-run-sh
+          persistentVolumeClaim:
+            claimName: warcs-pvc
+        - name: pywb-config
           configMap:
             name: pywb-configmap
             items:
-              - key: "run.sh"
-                path: "run.sh"
-        - name: wacli-query-collection
-          configMap:
-            name: wacli-query-collection-configmap
-            items:
-              - key: "remote_query.rq"
-                path: "remote_query.rq"
-              - key: "local_query.rq"
-                path: "local_query.rq"
-              - key: "list_query.rq"
-                path: "list_query.rq"
+              - key: "config.yaml"
+                path: "config.yaml"

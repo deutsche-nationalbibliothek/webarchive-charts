@@ -1,0 +1,124 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: warcload-app
+  labels:
+    app: warcload
+spec:
+  selector:
+    matchLabels:
+      app: warcload
+  template:
+    metadata:
+      labels:
+        app: warcload
+    spec:
+      initContainers:
+        - name: wacli-list
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["list"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+              readOnly: true
+            - mountPath: {{ .Values.queryDirectory | quote }}
+              name: wacli-query-collection
+        - name: wacli-load-warcs
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["load-warcs"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+              readOnly: true
+            - mountPath: {{ .Values.rawWarcDirectory | quote }}
+              name: warcs-raw
+            - mountPath: {{ .Values.queryDirectory | quote }}
+              name: wacli-query-collection
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 500Mi
+            requests:
+              cpu: 10m
+              memory: 100Mi
+        - name: wacli-recompress-warcs
+          image: 'ghcr.io/deutsche-nationalbibliothek/wacli:main'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          args: ["recompress-warcs"]
+          envFrom:
+            - configMapRef:
+                name: wacli-configmap
+          volumeMounts:
+            - mountPath: {{ .Values.websiteGraphDir | quote }}
+              name: website-graph-dir
+              readOnly: true
+            - mountPath: {{ .Values.rawWarcDirectory | quote }}
+              name: warcs-raw
+            - mountPath: {{ .Values.warcDirectory | quote }}
+              name: warcs
+            - mountPath: {{ .Values.queryDirectory | quote }}
+              name: wacli-query-collection
+          resources:
+            limits:
+              cpu: 1500m
+              memory: 2000Mi
+            requests:
+              cpu: 1500m
+              memory: 500Mi
+        - name: wb-manager-add
+          image: 'ghcr.io/deutsche-nationalbibliothek/pywb:integration-preImage-uwsgiMount-entrypoint'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          command: ["/bin/bash"]
+          args: ["/run.sh"]
+          volumeMounts:
+            - mountPath: /data/warcs
+              name: warcs
+            - mountPath: /data/cdx
+              name: cdx
+            - mountPath: "/run.sh"
+              name: cdx-indexer-run-sh
+              subPath: "run.sh"
+              readOnly: true
+      containers:
+        - name: sleep
+          image: 'docker.io/library/alpine'
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          command: ["sh"]
+          args: ["-c", "while [ true ]; do echo 1 & sleep infinity; done;"]
+      volumes:
+        - name: website-graph-dir
+          persistentVolumeClaim:
+            claimName: website-graph-dir-pvc
+        - name: cdx
+          persistentVolumeClaim:
+            claimName: cdx-pvc
+        - name: warcs
+          persistentVolumeClaim:
+            claimName: warcs-pvc
+        - name: warcs-raw
+          emptyDir:
+            sizeLimit: 2Gi
+        - name: cdx-indexer-run-sh
+          configMap:
+            name: warcload-configmap
+            items:
+              - key: "run.sh"
+                path: "run.sh"
+        - name: wacli-query-collection
+          configMap:
+            name: wacli-query-collection-configmap
+            items:
+              - key: "remote_query.rq"
+                path: "remote_query.rq"
+              - key: "local_query.rq"
+                path: "local_query.rq"
+              - key: "list_query.rq"
+                path: "list_query.rq"

@@ -26,7 +26,7 @@ spec:
             - mountPath: {{ .Values.warcDirectory | quote }}
               name: warcs
             - mountPath: "/webarchive"
-              name: pywb-configmap
+              name: pywb-config
               readOnly: true
       volumes:
         - name: warcs

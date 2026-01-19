@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: warcload-configmap
+data:
+  run.sh: |
+    #!/bin/sh
+    cd /data/warcs;
+    for warc_file in "*"; do cdx-indexer $warc_file > /data/cdx/${warc_file%.warc.gz}.cdx; done;
+    cd /data/cdx;
+    for cdx_file in "*"; do curl -X POST --data-binary @$cdx_file http://outbackcdx:8080/outbackcdx/{{ .Values.pywbCollection }}; done;

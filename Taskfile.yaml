@@ -22,6 +22,8 @@ vars:
   PWIDRESOLVER_CHART: ./pwidresolver
   WACALOG_NAME: wa-wacalog
   WACALOG_CHART: ./wacalog
+  WARCLOAD_NAME: wa-warcload
+  WARCLOAD_CHART: ./warcload
 
 tasks:
   default:
@@ -56,6 +58,7 @@ tasks:
       - task: install:ingest
       - task: install:pwidresolver
       - task: install:wacalog
+      - task: install:warcload
 
   upgrade:
     desc:  Upgrade the deployed webarchive setup
@@ -69,6 +72,7 @@ tasks:
       - task: upgrade:ingest
       - task: upgrade:pwidresolver
       - task: upgrade:wacalog
+      - task: upgrade:warcload
 
   uninstall:
     desc:  Uninstall the deployed webarchive setup
@@ -82,6 +86,7 @@ tasks:
       - task: uninstall:ingest
       - task: uninstall:pwidresolver
       - task: uninstall:wacalog
+      - task: uninstall:warcload
 
   check:
     aliases: [lint]
@@ -96,6 +101,7 @@ tasks:
       - task: check:ingest
       - task: check:pwidresolver
       - task: check:wacalog
+      - task: check:warcload
 
 
   install:common:
@@ -322,6 +328,30 @@ tasks:
         DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
         CHART: "{{.WACALOG_CHART}}"
 
+
+  install:warcload:
+    - task: install:any
+      vars:
+        DEPLOYMENT_NAME: "{{.WARCLOAD_NAME}}"
+        CHART: "{{.WARCLOAD_CHART}}"
+
+  upgrade:warcload:
+    - task: upgrade:any
+      vars:
+        DEPLOYMENT_NAME: "{{.WARCLOAD_NAME}}"
+        CHART: "{{.WARCLOAD_CHART}}"
+
+  check:warcload:
+    - task: check:any
+      vars:
+        DEPLOYMENT_NAME: "{{.WARCLOAD_NAME}}"
+        CHART: "{{.WARCLOAD_CHART}}"
+
+  uninstall:warcload:
+    - task: uninstall:any
+      vars:
+        DEPLOYMENT_NAME: "{{.WARCLOAD_NAME}}"
+        CHART: "{{.WARCLOAD_CHART}}"
 
   debug:
     desc: Collect some information helpful for debugging

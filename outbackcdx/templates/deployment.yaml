@@ -15,5 +15,6 @@ spec:
     spec:
       containers:
         - name: outbackcdx-app
-          image: 'docker.io/nlagovau/outbackcdx:1.1.0'
+          image: 'docker.io/nlagovau/outbackcdx:1.1.1'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          command: ["java", "-jar", "outbackcdx.jar", "-v", "-d", "/cdx-data", "-p", "8080", "-b", "0.0.0.0", "--context-path", "/outbackcdx"]

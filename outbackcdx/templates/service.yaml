@@ -12,16 +12,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: outbackcdx-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
     - http:
         paths:
-          - path: /outbackcdx(/|$)(.*)
-            pathType: ImplementationSpecific
+          - path: /outbackcdx
+            pathType: Prefix
             backend:
               service:
                 name: outbackcdx-service

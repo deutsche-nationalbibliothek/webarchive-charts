@@ -5,7 +5,17 @@ metadata:
 data:
   run.sh: |
     #!/bin/sh
-    cd /data/warcs;
-    for warc_file in "*"; do cdx-indexer $warc_file > /data/cdx/${warc_file%.warc.gz}.cdx; done;
+    cd /data/warcs
+    for warc_file in */*
+    do
+      echo ${warc_file}
+      mkdir -p "/data/cdx/$(dirname "$warc_file")"
+    done
+    cdx-indexer --sort --recurse --output ../cdx/ .
+
     cd /data/cdx;
-    for cdx_file in "*"; do curl -X POST --data-binary @$cdx_file http://outbackcdx:8080/outbackcdx/{{ .Values.pywbCollection }}; done;
+    for cdx_file in */*
+    do
+      echo ${cdx_file}
+      curl -X POST --data-binary @${cdx_file} http://outbackcdx-service:8080/outbackcdx/{{ .Values.pywbCollection }}
+    done

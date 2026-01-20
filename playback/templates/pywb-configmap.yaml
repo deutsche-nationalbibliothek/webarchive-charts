@@ -8,4 +8,4 @@ data:
       {{ .Values.pywbCollection }}:
         archive_paths: {{ .Values.warcDirectory | quote }}
         #archive_paths: http://remote.example.org/warcs/
-        index_paths: cdx+http://outbackcdx:8080/{{ .Values.pywbCollection }}
+        index_paths: cdx+http://outbackcdx-service:8080/outbackcdx/{{ .Values.pywbCollection }}

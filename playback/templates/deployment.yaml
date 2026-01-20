@@ -25,7 +25,8 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.warcDirectory | quote }}
               name: warcs
-            - mountPath: "/webarchive"
+            - mountPath: "/webarchive/config.yaml"
+              subPath: "config.yaml"
               name: pywb-config
               readOnly: true
       volumes:

@@ -141,3 +141,7 @@ Containers with * are init containers
 │               Repository               │  │    Validation    │
 └────────────────────────────────────────┘<─└──────────────────┘
 ```
+
+# Debugging Notes
+
+To access some internal port, you can use port forwarding. In the Taskfile some respective tasks are specified.

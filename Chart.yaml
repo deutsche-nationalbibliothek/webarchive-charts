@@ -22,3 +22,14 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.16.0"
+
+dependencies:
+  - name: airflow
+    version: 1.21.0
+    repository: https://airflow.apache.org
+  - name: versitygw
+    version: 0.3.1
+    repository: oci://ghcr.io/versity/versitygw/charts
+  - name: fuseki
+    version: 0.2.0
+    repository: https://charts.zazuko.com/

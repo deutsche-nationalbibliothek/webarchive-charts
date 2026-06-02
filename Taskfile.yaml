@@ -304,3 +304,50 @@ tasks:
     internal: true
     cmds:
       - helm uninstall {{.DEPLOYMENT_NAME}}
+
+  helm:dependencies:
+    desc: Install and update Helm chart dependencies
+    cmds:
+      - helm dependency build
+
+  helm:dependencies:update:
+    desc: Install and update Helm chart dependencies
+    cmds:
+      - helm dependency update
+
+  helm:setup:repo:
+    desc: Add the Apache Airflow Helm repository to the local Helm configuration
+    cmds:
+      - helm repo add apache-airflow https://airflow.apache.org
+      - helm repo add zazuko https://charts.zazuko.com
+
+
+  port-forward:airflow:
+    desc: Forward the api server port to 8080 in 0.0.0.0
+    interactive: true
+    cmds:
+      - kubectl port-forward --address=0.0.0.0 services/airflow-api-server 8080:8080
+
+  port-forward:s3:api:
+    desc: Forward the api server port to 8080 in 0.0.0.0
+    interactive: true
+    cmds:
+      - kubectl port-forward --address=0.0.0.0 services/airflow-versitygw 7070:7070
+
+  port-forward:s3:admin:
+    desc: Forward the api server port to 8080 in 0.0.0.0
+    interactive: true
+    cmds:
+      - kubectl port-forward --address=0.0.0.0 services/airflow-versitygw 7071:7071
+
+  port-forward:s3:webui:
+    desc: Forward the api server port to 8080 in 0.0.0.0
+    interactive: true
+    cmds:
+      - kubectl port-forward --address=0.0.0.0 services/airflow-versitygw 8082:8080
+
+  port-forward:fuseki:
+    desc: Forward the api server port to 8080 in 0.0.0.0
+    interactive: true
+    cmds:
+      - kubectl port-forward --address=0.0.0.0 services/airflow-fuseki 3030:3030

@@ -1,0 +1,12 @@
+dependencies:
+- name: airflow
+  repository: https://airflow.apache.org
+  version: 1.21.0
+- name: versitygw
+  repository: oci://ghcr.io/versity/versitygw/charts
+  version: 0.3.1
+- name: fuseki
+  repository: https://charts.zazuko.com/
+  version: 0.2.0
+digest: sha256:ea849943d93ecc19bd9a1455bed80aa80292b63f21a5210a3973868db4f93748
+generated: "2026-05-20T11:45:07.745018852+02:00"

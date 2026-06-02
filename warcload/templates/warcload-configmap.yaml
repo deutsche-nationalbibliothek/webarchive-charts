@@ -5,7 +5,9 @@ metadata:
 data:
   run.sh: |
     #!/bin/sh
+    id
     cd /data/warcs
+    ls -la
     for warc_file in */*
     do
       echo ${warc_file}
@@ -13,7 +15,8 @@ data:
     done
     cdx-indexer --sort --recurse --output ../cdx/ .
 
-    cd /data/cdx;
+    cd /data/cdx
+    ls -la
     for cdx_file in */*
     do
       echo ${cdx_file}

@@ -74,7 +74,7 @@ spec:
               cpu: 1500m
               memory: 500Mi
         - name: wb-manager-add
-          image: 'ghcr.io/deutsche-nationalbibliothek/pywb:integration-preImage-uwsgiMount-entrypoint'
+          image: 'docker.io/webrecorder/pywb:2.9.1'
           imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
           command: ["/bin/bash"]
           args: ["/run.sh"]

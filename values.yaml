@@ -1,0 +1,42 @@
+airflow:
+  dags:
+    persistence:
+      enabled: true
+      existingClaim: dags-pvc
+    gitSync:
+      enabled: false
+
+versitygw:
+  auth:
+    accessKey: myaccesskey
+    secretKey: mysecretkey
+  serviceAccount:
+    create: true
+    name: airflow-versitygw-s3
+  admin:
+    enabled: true
+  webui:
+    enabled: true
+    apiGateways:
+      - http://localhost:7070
+    adminGateways:
+      - http://localhost:7071
+  gateway:
+    region: eu-central-1
+    backend:
+      type: posix
+
+fuseki:
+  volumeMounts:
+    - mountPath: /fuseki/configuration/config.ttl
+      name: config-ttl
+      subPath: "config.ttl"
+      readOnly: true
+
+  volumes:
+    - name: config-ttl
+      configMap:
+        name: fuseki-configmap
+        items:
+          - key: "config.ttl"
+            path: "config.ttl"

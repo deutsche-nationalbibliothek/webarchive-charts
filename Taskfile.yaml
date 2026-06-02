@@ -5,25 +5,25 @@ env:
 
 vars:
   COMMON_NAME: wa-common
-  COMMON_CHART: ./common
+  COMMON_CHART: ./charts/common
   DASHBOARD_NAME: wa-dashboard
-  DASHBOARD_CHART: ./dashboard
+  DASHBOARD_CHART: ./charts/dashboard
   PLAYBACK_NAME: wa-playback
-  PLAYBACK_CHART: ./playback
+  PLAYBACK_CHART: ./charts/playback
   MOCKILS_NAME: wa-mocked-ils
-  MOCKILS_CHART: ./mocked-ils
+  MOCKILS_CHART: ./charts/mocked-ils
   OUTBACKCDX_NAME: wa-outbackcdx
-  OUTBACKCDX_CHART: ./outbackcdx
+  OUTBACKCDX_CHART: ./charts/outbackcdx
   GRAPH_NAME: wa-graph
-  GRAPH_CHART: ./graph
+  GRAPH_CHART: ./charts/graph
   INGEST_NAME: wa-ingest
-  INGEST_CHART: ./ingest
+  INGEST_CHART: ./charts/ingest
   PWIDRESOLVER_NAME: wa-pwidresolver
-  PWIDRESOLVER_CHART: ./pwidresolver
+  PWIDRESOLVER_CHART: ./charts/pwidresolver
   WACALOG_NAME: wa-wacalog
-  WACALOG_CHART: ./wacalog
+  WACALOG_CHART: ./charts/wacalog
   WARCLOAD_NAME: wa-warcload
-  WARCLOAD_CHART: ./warcload
+  WARCLOAD_CHART: ./charts/warcload
 
 tasks:
   default:

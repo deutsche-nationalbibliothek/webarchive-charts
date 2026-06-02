@@ -16,37 +16,34 @@ sparql_update_endpoint = (
     "http://airflow-fuseki.default.svc.cluster.local:3030/ds/update"
 )
 
-TARGET_BUCKET_NAME = "waingest"
+TARGET_BUCKET_NAME = "webarchive"
 
 ARAS_REST_BASE = "http://etc.dnb.de/aras/"
 ARAS_REPO = "warc"
 
-PROV_IRI = "https://example.org/oia-duesseldorf/oGet"
+PROV_IRI = "https://webarchiv.dnb.de/workflow/recompress/v1"
 
 
 @dag(
     schedule=None,  # "@once"
-    description="A k8n dag",
+    description="A recompress dag",
     tags=["wacli"],
 )
-def s3_kubernetes_aras_pull_job():
+def job_index():
 
     @task.kubernetes(
-        image="ghcr.io/deutsche-nationalbibliothek/aras-py:main-s3",
+        image="ghcr.io/deutsche-nationalbibliothek/warcio:feature-oci-image-s3",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
             "AWS_ENDPOINT_URL_S3": "http://airflow-versitygw.default.svc.cluster.local:7070",
             "AWS_DEFAULT_REGION": "eu-central-1",
         },
     )
-    def aras_download(job: dict):
-        import s3fs
-        from io import DEFAULT_BUFFER_SIZE
-        from aras_py.run import get_stream
+    def index(job: dict):
+        from warcio.recompressor import StreamRecompressor
+        from s3fs import S3FileSystem
 
-        # load with aras-py and write to s3
-
-        s3 = s3fs.S3FileSystem()
+        s3 = S3FileSystem()
 
         try:
             s3.mkdir(TARGET_BUCKET_NAME, create_parents=True)
@@ -54,27 +51,30 @@ def s3_kubernetes_aras_pull_job():
             pass
 
         print(
-            f"I will now download the files for {job['idn']} and upload them to the s3 bucket {TARGET_BUCKET_NAME}. ({job['job_iri']})."
+            f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), recompress it and upload it to the s3 bucket {TARGET_BUCKET_NAME}. ({job['job_iri']})."
         )
 
-        stream_iter = get_stream(ARAS_REST_BASE, ARAS_REPO, job["idn"])
+        # Download the file according to the graphs file spec
+        # recompress it and upload it
 
-        job["files"] = []
+        #!/bin/sh
+        # id
+        # cd /data/warcs
+        # ls -la
+        # for warc_file in */*
+        # do
+        # echo ${warc_file}
+        # mkdir -p "/data/cdx/$(dirname "$warc_file")"
+        # done
+        # cdx-indexer --sort --recurse --output ../cdx/ .
 
-        for file_name, stream, metadata in stream_iter:
-            print(
-                f"download idn: {job['idn']}, metadata: {str(metadata)} to {file_name}"
-            )
-            with (
-                s3.open(f"{TARGET_BUCKET_NAME}/{file_name}", "wb") as target_io,
-                stream() as source_io,
-            ):
-                while chunk := source_io.read(DEFAULT_BUFFER_SIZE):
-                    target_io.write(chunk)
-            job["files"] += [file_name]
-
-        print(s3.info(TARGET_BUCKET_NAME))
-        print(s3.ls(TARGET_BUCKET_NAME))
+        # cd /data/cdx
+        # ls -la
+        # for cdx_file in */*
+        # do
+        # echo ${cdx_file}
+        # curl -X POST --data-binary @${cdx_file} http://outbackcdx-service:8080/outbackcdx/{{ .Values.pywbCollection }}
+        # done
 
         return job
 
@@ -92,7 +92,6 @@ def s3_kubernetes_aras_pull_job():
         PREFIX wa: <https://webarchiv.dnb.de/>
         PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
         PREFIX prov: <http://www.w3.org/ns/prov#>
-        PREFIX ex: <https://example.org/>
 
         INSERT DATA {
             GRAPH wa:data {
@@ -109,7 +108,7 @@ def s3_kubernetes_aras_pull_job():
         """
             + "\n".join(
                 [
-                    f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo <{PROV_IRI}> ."
+                    f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo <{PROV_IRI}>; prov:wasDerivedFrom <{file_iri}> ."
                     for file_iri, file_name in file_iris.items()
                 ]
             )
@@ -135,14 +134,23 @@ def s3_kubernetes_aras_pull_job():
         r.raise_for_status()
         return job
 
+    triple_pattern = """
+    ?source_file wal:filename ?source_filename ;
+        wal:bucket ?source_bucket .
+    """
+
     jobs_done(
-        register_files.expand(
-            job=aras_download.expand(
-                job=get_jobs("?idn", "wal:ArasPullJob", {"wal:idn": "?idn"})
+        job=index.expand(
+            job=get_jobs(
+                "?source_file ?source_filename ?source_bucket",
+                "wal:RecompressJob",
+                {"wal:file": "?source_file"},
+                triple_pattern=triple_pattern,
             )
         )
+
     )
     # job_done.expand(job=job_execution.expand(job=get_jobs("?idn", "wal:ArasPullJob", {"wal:idn": "?idn"})))
 
 
-s3_kubernetes_aras_pull_job()
+job_index()

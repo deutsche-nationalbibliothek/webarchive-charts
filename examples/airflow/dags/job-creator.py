@@ -16,6 +16,67 @@ sparql_update_endpoint = (
 )
 
 
+recompress_update = """
+PREFIX wa: <https://webarchiv.dnb.de/>
+PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX ex: <https://example.org/>
+
+INSERT {
+    GRAPH wa:jobs {
+        ?job a wal:Job, wal:RecompressJob ;
+            wal:file ?file .
+    }
+} WHERE {
+    ?file a wal:File ;
+        prov:wasAttributedTo <https://example.org/oia-duesseldorf/oGet> .
+
+    FILTER NOT EXISTS {
+        ?recompressedFile a wal:File ;
+            wal:fileStatus ex:clean ;
+            prov:wasDerivedFrom ?file .
+    }
+
+    FILTER NOT EXISTS {
+        ?recompressJob a wal:RecompressJob ;
+            wal:file ?file .
+    }
+
+    BIND (UUID() as ?job)
+}
+"""
+
+index_update = """
+PREFIX wa: <https://webarchiv.dnb.de/>
+PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX ex: <https://example.org/>
+
+INSERT {
+    GRAPH wa:jobs {
+        ?job a wal:Job, wal:IndexJob ;
+            wal:file ?file .
+    }
+} WHERE {
+    ?file a wal:File ;
+        wal:fileStatus ex:clean .
+
+    FILTER NOT EXISTS {
+        ?file wal:fileStatus ex:indexed .
+    }
+
+    FILTER NOT EXISTS {
+        ?recompressJob a wal:IndexJob ;
+            wal:file ?file .
+    }
+
+    BIND (UUID() as ?job)
+}
+"""
+
+job_updates = [recompress_update, index_update]
+
+
 @dag(
     schedule=None,  # "@once"
     description="Creates jobs",
@@ -27,52 +88,23 @@ def job_creator():
     def create_jobs():
         import requests
 
-        job_update = """
-        PREFIX wa: <https://webarchiv.dnb.de/>
-        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-        PREFIX prov: <http://www.w3.org/ns/prov#>
-        PREFIX ex: <https://example.org/>
+        for update in job_updates:
+            r = requests.post(
+                sparql_update_endpoint,
+                auth=("admin", "admin"),
+                headers={
+                    "Accept": "application/sparql-results+json,*/*;q=0.9",
+                    "Content-Type": "application/sparql-update",
+                },
+                data=update,
+            )
 
-        INSERT {
-            GRAPH wa:jobs {
-                ?job wal:Job, wal:RecompressJob ;
-                    wal:file ?file .
-            }
-        } WHERE {
-            ?file a wal:File ;
-                prov:wasAttributedTo <https://example.org/oia-duesseldorf/oGet> .
+            print(r)
+            print(r.text)
 
-            FILTER NOT EXISTS {
-                ?recompressedFile a wal:File ;
-                    wal:fileStatus ex:clean ;
-                    prov:wasDerivedFrom ?file .
-            }
+            r.raise_for_status()
 
-            FILTER NOT EXISTS {
-                ?recompressJob a wal:Job, wal:RecompressJob ;
-                    wal:file ?file .
-            }
-
-            BIND (UUID() as ?job)
-        }
-        """
-
-        r = requests.post(
-            sparql_update_endpoint,
-            auth=("admin", "admin"),
-            headers={
-                "Accept": "application/sparql-results+json,*/*;q=0.9",
-                "Content-Type": "application/sparql-update",
-            },
-            data=job_update,
-        )
-
-        print(r)
-        print(r.text)
-
-        r.raise_for_status()
-
-        create_jobs()
+    create_jobs()
 
 
 job_creator()

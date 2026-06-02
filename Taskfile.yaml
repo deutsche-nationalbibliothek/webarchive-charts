@@ -44,6 +44,12 @@ tasks:
       - ssh-keygen -R $(minikube ip)
       - scp -r -i $(minikube ssh-key) examples/hostdata docker@$(minikube ip):/home/docker/
 
+  install:copy-example-dags:
+    desc: Copy the example dags to the deployment
+    cmds:
+      - kubectl cp examples/airflow/dags/* airflow/airflow-worker-0:/opt/airflow/dags
+
+
 
   install:
     aliases: [deploy]

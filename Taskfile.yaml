@@ -60,20 +60,6 @@ tasks:
       - task: install:wacalog
       - task: install:warcload
 
-  upgrade:
-    desc:  Upgrade the deployed webarchive setup
-    deps:
-      - task: upgrade:common
-      - task: upgrade:dashboard
-      - task: upgrade:graph
-      - task: upgrade:playback
-      - task: upgrade:mocked-ils
-      - task: upgrade:outbackcdx
-      - task: upgrade:ingest
-      - task: upgrade:pwidresolver
-      - task: upgrade:wacalog
-      - task: upgrade:warcload
-
   uninstall:
     desc:  Uninstall the deployed webarchive setup
     deps:
@@ -110,12 +96,6 @@ tasks:
         DEPLOYMENT_NAME: wa-common
         CHART: ./common
 
-  upgrade:common:
-    - task: upgrade:any
-      vars:
-        DEPLOYMENT_NAME: wa-common
-        CHART: ./common
-
   check:common:
     - task: check:any
       vars:
@@ -131,12 +111,6 @@ tasks:
 
   install:dashboard:
     - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-dashboard
-        CHART: ./dashboard
-
-  upgrade:dashboard:
-    - task: upgrade:any
       vars:
         DEPLOYMENT_NAME: wa-dashboard
         CHART: ./dashboard
@@ -160,12 +134,6 @@ tasks:
         DEPLOYMENT_NAME: wa-playback
         CHART: ./playback
 
-  upgrade:playback:
-    - task: upgrade:any
-      vars:
-        DEPLOYMENT_NAME: wa-playback
-        CHART: ./playback
-
   check:playback:
     - task: check:any
       vars:
@@ -181,12 +149,6 @@ tasks:
 
   install:mocked-ils:
     - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-mocked-ils
-        CHART: ./mocked-ils
-
-  upgrade:mocked-ils:
-    - task: upgrade:any
       vars:
         DEPLOYMENT_NAME: wa-mocked-ils
         CHART: ./mocked-ils
@@ -210,12 +172,6 @@ tasks:
         DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
         CHART: "{{.OUTBACKCDX_CHART}}"
 
-  upgrade:outbackcdx:
-    - task: upgrade:any
-      vars:
-        DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
-        CHART: "{{.OUTBACKCDX_CHART}}"
-
   check:outbackcdx:
     - task: check:any
       vars:
@@ -231,12 +187,6 @@ tasks:
 
   install:graph:
     - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-graph
-        CHART: ./graph
-
-  upgrade:graph:
-    - task: upgrade:any
       vars:
         DEPLOYMENT_NAME: wa-graph
         CHART: ./graph
@@ -260,12 +210,6 @@ tasks:
         DEPLOYMENT_NAME: wa-ingest
         CHART: ./ingest
 
-  upgrade:ingest:
-    - task: upgrade:any
-      vars:
-        DEPLOYMENT_NAME: wa-ingest
-        CHART: ./ingest
-
   check:ingest:
     - task: check:any
       vars:
@@ -281,12 +225,6 @@ tasks:
 
   install:pwidresolver:
     - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-pwidresolver
-        CHART: "{{.PWIDRESOLVER_CHART}}"
-
-  upgrade:pwidresolver:
-    - task: upgrade:any
       vars:
         DEPLOYMENT_NAME: wa-pwidresolver
         CHART: "{{.PWIDRESOLVER_CHART}}"
@@ -310,12 +248,6 @@ tasks:
         DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
         CHART: "{{.WACALOG_CHART}}"
 
-  upgrade:wacalog:
-    - task: upgrade:any
-      vars:
-        DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
-        CHART: "{{.WACALOG_CHART}}"
-
   check:wacalog:
     - task: check:any
       vars:
@@ -331,12 +263,6 @@ tasks:
 
   install:warcload:
     - task: install:any
-      vars:
-        DEPLOYMENT_NAME: "{{.WARCLOAD_NAME}}"
-        CHART: "{{.WARCLOAD_CHART}}"
-
-  upgrade:warcload:
-    - task: upgrade:any
       vars:
         DEPLOYMENT_NAME: "{{.WARCLOAD_NAME}}"
         CHART: "{{.WARCLOAD_CHART}}"
@@ -364,13 +290,7 @@ tasks:
     desc: Install command
     internal: true
     cmds:
-      - helm install -f {{.COMMON_CHART}}/values.yaml -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.DEPLOYMENT_NAME}} {{.CHART}}
-
-  upgrade:any:
-    desc: Upgrade command
-    internal: true
-    cmds:
-      - helm upgrade -f {{.COMMON_CHART}}/values.yaml -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.DEPLOYMENT_NAME}} {{.CHART}}
+      - helm upgrade --install -f {{.COMMON_CHART}}/values.yaml -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.DEPLOYMENT_NAME}} {{.CHART}}
 
   check:any:
     desc: Check command

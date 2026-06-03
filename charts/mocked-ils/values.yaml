@@ -1,1 +1,2 @@
-imagePullPolicy: Always
+global:
+  imagePullPolicy: Always

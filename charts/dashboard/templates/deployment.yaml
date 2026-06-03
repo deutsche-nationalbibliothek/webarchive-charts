@@ -16,7 +16,7 @@ spec:
       containers:
         - name: dashboard-app
           image: 'docker.io/b4bz/homer:latest'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
           env:
             - name: SUBFOLDER
               value: {{ .Values.dashboardBasePath | quote }}

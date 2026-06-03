@@ -16,7 +16,7 @@ spec:
       initContainers:
         - name: wacalog-template-clone
           image: 'registry.k8s.io/git-sync/git-sync:v4.5.0'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
           args:
             - "--repo=https://github.com/deutsche-nationalbibliothek/wacalog"
             - "--root=/data"
@@ -28,7 +28,7 @@ spec:
               name: wacalog-templates
         - name: wacalog-build
           image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
           workingDir: /data/latest
           # command: ["sleep", "1000"]
           command: ["mkdocs", "build"]
@@ -44,7 +44,7 @@ spec:
       containers:
         - name: wacalog-serve
           image: 'docker.io/lipanski/docker-static-website:latest'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
           command: ["/busybox-httpd"]
           args: ["-f", "-p", "8080", "-h", "/data"]
           volumeMounts:

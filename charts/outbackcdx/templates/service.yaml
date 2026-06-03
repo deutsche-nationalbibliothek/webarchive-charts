@@ -47,7 +47,7 @@ metadata:
   annotations:
     haproxy.router.openshift.io/set-forwarded-headers: never
 spec:
-  host: {{ .Values.routerHost | quote }}
+  host: {{ .Values.global.routerHost | quote }}
   path: /outbackcdx
   to:
     kind: Service

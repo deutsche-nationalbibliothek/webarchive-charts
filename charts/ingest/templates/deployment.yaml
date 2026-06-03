@@ -16,7 +16,7 @@ spec:
       containers:
         - name: wapmh-app
           image: 'ghcr.io/deutsche-nationalbibliothek/wapmh:main'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
           envFrom:
             - configMapRef:
                 name: wapmh-configmap

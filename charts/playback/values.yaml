@@ -1,0 +1,3 @@
+pywbCollection: "warcs"
+playbackBasePath: "/wayback"
+warcDirectory: "/data/warcs/"

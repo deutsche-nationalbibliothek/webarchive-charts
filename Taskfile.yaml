@@ -48,6 +48,15 @@ tasks:
       - kubectl cp examples/airflow/dags/* airflow/airflow-worker-0:/opt/airflow/dags
 
 
+  install:top:
+    desc: Install top level deployment
+    cmds:
+      - helm upgrade --install webarchive .
+
+  uninstall:top:
+    desc: Install top level deployment
+    cmds:
+      - helm uninstall webarchive
 
   install:
     aliases: [deploy]

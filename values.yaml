@@ -40,3 +40,6 @@ fuseki:
         items:
           - key: "config.ttl"
             path: "config.ttl"
+
+global:
+  imagePullPolicy: IfNotPresent

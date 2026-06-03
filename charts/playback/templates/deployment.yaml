@@ -17,7 +17,7 @@ spec:
         - name: pywb-app
           image: 'docker.io/webrecorder/pywb:2.9.1'
           # image: 'ghcr.io/deutsche-nationalbibliothek/pywb:integration-preImage-uwsgiMount-entrypoint'
-          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
           command: ["uwsgi"]
           # args: ["-c", "while [ true ]; do echo 1 & sleep infinity; done;"]
           args: ["/uwsgi/uwsgi.ini"]

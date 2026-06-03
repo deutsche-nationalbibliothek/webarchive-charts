@@ -48,7 +48,7 @@ kind: Route
 metadata:
   name: graph-apps-route
 spec:
-  host: {{ .Values.routerHost | quote }}
+  host: {{ .Values.global.routerHost | quote }}
   path: /sparql
   to:
     kind: Service

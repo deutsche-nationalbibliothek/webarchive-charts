@@ -1,1 +1,2 @@
 queryDirectory: "/data/queries/"
+sparqlEndpoint: "http://graph-service:8080/"

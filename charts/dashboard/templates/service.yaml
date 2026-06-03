@@ -45,7 +45,7 @@ kind: Route
 metadata:
   name: dashboard-apps-route
 spec:
-  host: {{ .Values.routerHost | quote }}
+  host: {{ .Values.global.routerHost | quote }}
   path: /dashboard
   to:
     kind: Service

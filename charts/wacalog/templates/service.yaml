@@ -45,7 +45,7 @@ kind: Route
 metadata:
   name: wacalog-apps-route
 spec:
-  host: {{ .Values.routerHost | quote }}
+  host: {{ .Values.global.routerHost | quote }}
   path: /wacalog
   to:
     kind: Service

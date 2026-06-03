@@ -1,0 +1,7 @@
+graph:
+  sparqlTitleData: "http://mock-sparql-service:8080/"
+  arasRestBase: "http://mockils-service:8080/"
+
+pwidresolver:
+  pwidResolverBasePath: "/pwidresolver"
+  pwidResolverLoglevel: "DEBUG"

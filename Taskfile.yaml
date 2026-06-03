@@ -51,7 +51,7 @@ tasks:
   install:top:
     desc: Install top level deployment
     cmds:
-      - helm upgrade --install webarchive .
+      - helm upgrade --install -f values-{{.ENV}}.yaml webarchive .
 
   uninstall:top:
     desc: Install top level deployment
@@ -318,28 +318,28 @@ tasks:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/airflow-api-server 8080:8080
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-api-server 8080:8080
 
   port-forward:s3:api:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/airflow-versitygw 7070:7070
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 7070:7070
 
   port-forward:s3:admin:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/airflow-versitygw 7071:7071
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 7071:7071
 
   port-forward:s3:webui:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/airflow-versitygw 8082:8080
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 8082:8080
 
   port-forward:fuseki:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/airflow-fuseki 3030:3030
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-fuseki 3030:3030

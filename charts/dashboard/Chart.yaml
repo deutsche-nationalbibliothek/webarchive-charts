@@ -1,5 +1,5 @@
 apiVersion: v2
-name: dashboard-chart
+name: dashboard
 description: The helm chart to deploy the dashboard.
 
 # A chart can be either an 'application' or a 'library' chart.

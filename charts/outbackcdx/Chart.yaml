@@ -1,5 +1,5 @@
 apiVersion: v2
-name: outbackcdx-chart
+name: outbackcdx
 description: The helm chart to deploy an outback cdx index.
 
 # A chart can be either an 'application' or a 'library' chart.

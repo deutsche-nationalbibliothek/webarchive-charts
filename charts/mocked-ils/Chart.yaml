@@ -1,5 +1,5 @@
 apiVersion: v2
-name: mockils-chart
+name: mockils
 description: The helm chart to deploy a mocked ils.
 
 # A chart can be either an 'application' or a 'library' chart.

@@ -1,5 +1,5 @@
 apiVersion: v2
-name: pwidresolver-chart
+name: pwidresolver
 description: The helm chart to deploy the PWID resolver.
 
 # A chart can be either an 'application' or a 'library' chart.

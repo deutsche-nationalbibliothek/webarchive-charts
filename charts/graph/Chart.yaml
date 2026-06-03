@@ -1,5 +1,5 @@
 apiVersion: v2
-name: graph-chart
+name: graph
 description: The helm chart to deploy a knowledge graph system.
 
 # A chart can be either an 'application' or a 'library' chart.

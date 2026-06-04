@@ -1,19 +1,7 @@
 from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
 
-secret_env_access_key = Secret(
-    "env", "AWS_ACCESS_KEY_ID", "airflow-versitygw-credentials", "rootAccessKeyId"
-)
-secret_env_secret_access_key = Secret(
-    "env",
-    "AWS_SECRET_ACCESS_KEY",
-    "airflow-versitygw-credentials",
-    "rootSecretAccessKey",
-)
-
-sparql_update_endpoint = (
-    "http://airflow-fuseki.default.svc.cluster.local:3030/ds/update"
-)
+sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
 
 recompress_update = """

@@ -3,18 +3,16 @@ from airflow.providers.cncf.kubernetes.secret import Secret
 from boilerplate import get_jobs, jobs_done
 
 secret_env_access_key = Secret(
-    "env", "AWS_ACCESS_KEY_ID", "airflow-versitygw-credentials", "rootAccessKeyId"
+    "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
 )
 secret_env_secret_access_key = Secret(
     "env",
     "AWS_SECRET_ACCESS_KEY",
-    "airflow-versitygw-credentials",
+    "webarchive-versitygw-credentials",
     "rootSecretAccessKey",
 )
 
-sparql_update_endpoint = (
-    "http://airflow-fuseki.default.svc.cluster.local:3030/ds/update"
-)
+sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
 TARGET_BUCKET_NAME = "webarchive"
 
@@ -35,7 +33,7 @@ def job_index():
         image="ghcr.io/deutsche-nationalbibliothek/warcio:feature-oci-image-s3",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": "http://airflow-versitygw.default.svc.cluster.local:7070",
+            "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
             "AWS_DEFAULT_REGION": "eu-central-1",
         },
     )

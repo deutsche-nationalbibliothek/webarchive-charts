@@ -3,23 +3,17 @@ from airflow.providers.cncf.kubernetes.secret import Secret
 from boilerplate import get_jobs, jobs_done
 
 secret_env_access_key = Secret(
-    "env", "AWS_ACCESS_KEY_ID", "airflow-versitygw-credentials", "rootAccessKeyId"
+    "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
 )
 secret_env_secret_access_key = Secret(
     "env",
     "AWS_SECRET_ACCESS_KEY",
-    "airflow-versitygw-credentials",
+    "webarchive-versitygw-credentials",
     "rootSecretAccessKey",
 )
 
-sparql_update_endpoint = (
-    "http://airflow-fuseki.airflow.svc.cluster.local:3030/ds/update"
-)
+sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
-TARGET_BUCKET_NAME = "waingest"
-
-ARAS_REST_BASE = "http://etc.dnb.de/aras/"
-ARAS_REPO = "warc"
 
 PROV_IRI = "https://example.org/oia-duesseldorf/oGet"
 
@@ -35,7 +29,7 @@ def s3_kubernetes_aras_pull_job():
         image="ghcr.io/deutsche-nationalbibliothek/aras-py:main-s3",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": "http://airflow-versitygw.airflow.svc.cluster.local:7070",
+            "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
             "AWS_DEFAULT_REGION": "eu-central-1",
         },
     )
@@ -45,6 +39,10 @@ def s3_kubernetes_aras_pull_job():
         from aras_py.run import get_stream
 
         # load with aras-py and write to s3
+        TARGET_BUCKET_NAME = "waingest"
+
+        ARAS_REST_BASE = "http://mockils-service:8080/"
+        ARAS_REPO = "warc"
 
         s3 = s3fs.S3FileSystem()
 
@@ -81,6 +79,7 @@ def s3_kubernetes_aras_pull_job():
     @task
     def register_files(job: dict):
         import requests
+        TARGET_BUCKET_NAME = "waingest"
 
         file_iris = {
             "https://example.org/file/" + file_name: file_name

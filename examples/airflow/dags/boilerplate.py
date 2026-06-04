@@ -1,9 +1,7 @@
 from airflow.sdk import task
 
-sparql_query_endpoint = "http://airflow-fuseki.default.svc.cluster.local:3030/ds/query"
-sparql_update_endpoint = (
-    "http://airflow-fuseki.default.svc.cluster.local:3030/ds/update"
-)
+sparql_query_endpoint = "http://webarchive-fuseki:3030/ds/query"
+sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
 
 @task
@@ -25,15 +23,18 @@ def get_jobs(
         GRAPH wa:jobs {{
             ?job a {rdf_type} ;
     """
-        + ";\n".join([f"{prop[0]} {prop[1]}" for prop in properties.items()])
-        + triple_pattern
-        + f""" .
-            FILTER NOT EXISTS {{ ?job wal:status wal:done }}
-        }}
+        + ";\n".join([f"{prop[0]} {prop[1]}" for prop in properties.items()]) + " . "
+        + """
+            FILTER NOT EXISTS { ?job wal:status wal:done }
+        }"""
+        + triple_pattern +
+        f"""
     }}
     limit {limit}
     """
     )
+
+    print(job_query)
 
     r = requests.post(
         sparql_query_endpoint,

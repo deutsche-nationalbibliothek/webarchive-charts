@@ -3,31 +3,29 @@ version: "3"
 env:
     ENV: '{{.ENV | default "minikube" }}'
 
-vars:
-  COMMON_NAME: wa-common
-  COMMON_CHART: ./charts/common
-  DASHBOARD_NAME: wa-dashboard
-  DASHBOARD_CHART: ./charts/dashboard
-  PLAYBACK_NAME: wa-playback
-  PLAYBACK_CHART: ./charts/playback
-  MOCKILS_NAME: wa-mocked-ils
-  MOCKILS_CHART: ./charts/mocked-ils
-  OUTBACKCDX_NAME: wa-outbackcdx
-  OUTBACKCDX_CHART: ./charts/outbackcdx
-  GRAPH_NAME: wa-graph
-  GRAPH_CHART: ./charts/graph
-  INGEST_NAME: wa-ingest
-  INGEST_CHART: ./charts/ingest
-  PWIDRESOLVER_NAME: wa-pwidresolver
-  PWIDRESOLVER_CHART: ./charts/pwidresolver
-  WACALOG_NAME: wa-wacalog
-  WACALOG_CHART: ./charts/wacalog
-
 tasks:
   default:
     desc: List the tasks
     cmds:
       - task -l
+
+  install:
+    aliases: [deploy]
+    desc: Install/deploy the webarchive setup
+    deps:
+      - helm upgrade --install -f values-{{.ENV}}.yaml webarchive .
+
+  uninstall:
+    desc:  Uninstall the deployed webarchive setup
+    deps:
+      - helm uninstall webarchive
+
+  check:
+    aliases: [lint]
+    desc: Verify the syntax
+    cmds:
+      - helm lint {{.CHART}}
+      - helm install --debug --dry-run -f values-{{.ENV}}.yaml webarchive .
 
 
   setup:minikube:
@@ -47,230 +45,6 @@ tasks:
     cmds:
       - kubectl cp examples/airflow/dags/* airflow/airflow-worker-0:/opt/airflow/dags
 
-
-  install:top:
-    desc: Install top level deployment
-    cmds:
-      - helm upgrade --install -f values-{{.ENV}}.yaml webarchive .
-
-  uninstall:top:
-    desc: Install top level deployment
-    cmds:
-      - helm uninstall webarchive
-
-  install:
-    aliases: [deploy]
-    desc: Install/deploy the webarchive setup
-    deps:
-      - task: install:common
-      - task: install:dashboard
-      - task: install:graph
-      - task: install:playback
-      - task: install:mocked-ils
-      - task: install:outbackcdx
-      - task: install:ingest
-      - task: install:pwidresolver
-      - task: install:wacalog
-
-  uninstall:
-    desc:  Uninstall the deployed webarchive setup
-    deps:
-      - task: uninstall:common
-      - task: uninstall:dashboard
-      - task: uninstall:graph
-      - task: uninstall:playback
-      - task: uninstall:mocked-ils
-      - task: uninstall:outbackcdx
-      - task: uninstall:ingest
-      - task: uninstall:pwidresolver
-      - task: uninstall:wacalog
-
-  check:
-    aliases: [lint]
-    desc: Verify the syntax
-    cmds:
-      - task: check:common
-      - task: check:dashboard
-      - task: check:graph
-      - task: check:playback
-      - task: check:mocked-ils
-      - task: check:outbackcdx
-      - task: check:ingest
-      - task: check:pwidresolver
-      - task: check:wacalog
-
-
-  install:common:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-common
-        CHART: ./common
-
-  check:common:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: wa-common
-        CHART: ./common
-
-  uninstall:common:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: wa-common
-        CHART: ./common
-
-
-  install:dashboard:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-dashboard
-        CHART: ./dashboard
-
-  check:dashboard:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: wa-dashboard
-        CHART: ./dashboard
-
-  uninstall:dashboard:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: wa-dashboard
-        CHART: ./dashboard
-
-
-  install:playback:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-playback
-        CHART: ./playback
-
-  check:playback:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: wa-playback
-        CHART: ./playback
-
-  uninstall:playback:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: wa-playback
-        CHART: ./playback
-
-
-  install:mocked-ils:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-mocked-ils
-        CHART: ./mocked-ils
-
-  check:mocked-ils:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: wa-mocked-ils
-        CHART: ./mocked-ils
-
-  uninstall:mocked-ils:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: wa-mocked-ils
-        CHART: ./mocked-ils
-
-
-  install:outbackcdx:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
-        CHART: "{{.OUTBACKCDX_CHART}}"
-
-  check:outbackcdx:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
-        CHART: "{{.OUTBACKCDX_CHART}}"
-
-  uninstall:outbackcdx:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: "{{.OUTBACKCDX_NAME}}"
-        CHART: "{{.OUTBACKCDX_CHART}}"
-
-
-  install:graph:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-graph
-        CHART: ./graph
-
-  check:graph:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: wa-graph
-        CHART: ./graph
-
-  uninstall:graph:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: wa-graph
-        CHART: ./graph
-
-
-  install:ingest:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-ingest
-        CHART: ./ingest
-
-  check:ingest:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: wa-ingest
-        CHART: ./ingest
-
-  uninstall:ingest:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: wa-ingest
-        CHART: ./ingest
-
-
-  install:pwidresolver:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: wa-pwidresolver
-        CHART: "{{.PWIDRESOLVER_CHART}}"
-
-  check:pwidresolver:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: wa-pwidresolver
-        CHART: "{{.PWIDRESOLVER_CHART}}"
-
-  uninstall:pwidresolver:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: wa-pwidresolver
-        CHART: "{{.PWIDRESOLVER_CHART}}"
-
-
-  install:wacalog:
-    - task: install:any
-      vars:
-        DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
-        CHART: "{{.WACALOG_CHART}}"
-
-  check:wacalog:
-    - task: check:any
-      vars:
-        DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
-        CHART: "{{.WACALOG_CHART}}"
-
-  uninstall:wacalog:
-    - task: uninstall:any
-      vars:
-        DEPLOYMENT_NAME: "{{.WACALOG_NAME}}"
-        CHART: "{{.WACALOG_CHART}}"
-
-
   debug:
     desc: Collect some information helpful for debugging
     summary: |
@@ -278,24 +52,6 @@ tasks:
     cmds:
       - helm get manifest {{.PLAYBACK_NAME}}
 
-  install:any:
-    desc: Install command
-    internal: true
-    cmds:
-      - helm upgrade --install -f {{.COMMON_CHART}}/values.yaml -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.DEPLOYMENT_NAME}} {{.CHART}}
-
-  check:any:
-    desc: Check command
-    internal: true
-    cmds:
-      - helm lint {{.CHART}}
-      - helm install --debug --dry-run -f {{.COMMON_CHART}}/values.yaml -f {{.COMMON_CHART}}/values-{{.ENV}}.yaml {{.DEPLOYMENT_NAME}} {{.CHART}}
-
-  uninstall:any:
-    desc: Uninstall command
-    internal: true
-    cmds:
-      - helm uninstall {{.DEPLOYMENT_NAME}}
 
   helm:dependencies:
     desc: Install and update Helm chart dependencies

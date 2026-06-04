@@ -12,12 +12,12 @@ tasks:
   install:
     aliases: [deploy]
     desc: Install/deploy the webarchive setup
-    deps:
+    cmds:
       - helm upgrade --install -f values-{{.ENV}}.yaml webarchive .
 
   uninstall:
     desc:  Uninstall the deployed webarchive setup
-    deps:
+    cmds:
       - helm uninstall webarchive
 
   check:

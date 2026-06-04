@@ -137,7 +137,7 @@ def s3_kubernetes_aras_pull_job():
     jobs_done(
         register_files.expand(
             job=aras_download.expand(
-                job=get_jobs("?idn", "wal:ArasPullJob", {"wal:idn": "?idn"})
+                job=get_jobs(["idn"], "wal:ArasPullJob", {"wal:idn": "?idn"})
             )
         )
     )

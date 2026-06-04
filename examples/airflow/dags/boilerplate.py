@@ -6,7 +6,7 @@ sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
 @task
 def get_jobs(
-    projection: str = "",
+    projection: str = [],
     rdf_type: str = "wal:Job",
     properties: dict = {},
     triple_pattern: str = "",
@@ -19,7 +19,7 @@ def get_jobs(
         f"""
     PREFIX wa: <https://webarchiv.dnb.de/>
     PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-    SELECT ?job {projection} {{
+    SELECT ?job {" ".join(f"?{var}" for var in projection)} {{
         GRAPH wa:jobs {{
             ?job a {rdf_type} ;
     """
@@ -47,7 +47,7 @@ def get_jobs(
     )
     try:
         return [
-            {"job_iri": job["job"]["value"], "idn": job["idn"]["value"]}
+            {"job_iri": job["job"]["value"], **{var: job[var]["value"] for var in projection}}
             for job in r.json()["results"]["bindings"]
         ]
     except JSONDecodeError:

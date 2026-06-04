@@ -133,7 +133,7 @@ def s3_kubernetes_recompress_job():
         register_files.expand(
             job=recompress.expand(
                 job=get_jobs(
-                    "?source_file ?source_filename ?source_bucket",
+                    ["source_file", "source_filename", "source_bucket"],
                     "wal:RecompressJob",
                     {"wal:file": "?source_file"},
                     triple_pattern=triple_pattern,

@@ -32,6 +32,7 @@ def s3_kubernetes_aras_pull_job():
             "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
             "AWS_DEFAULT_REGION": "eu-central-1",
         },
+        do_xcom_push=True,
     )
     def aras_download(job: dict):
         import s3fs

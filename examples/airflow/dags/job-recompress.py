@@ -34,7 +34,7 @@ def s3_kubernetes_recompress_job():
         do_xcom_push=True,
     )
     def recompress(job: dict):
-        from warcio.recompressor import StreamRecompressor
+        from warcio.recompressor import Recompressor
         from s3fs import S3FileSystem
 
         TARGET_BUCKET_NAME = "webarchive"
@@ -56,16 +56,14 @@ def s3_kubernetes_recompress_job():
         path_in_s3fs = f"s3://{job['source_bucket']}/{job['source_filename']}"
         path_out_s3fs = f"s3://{TARGET_BUCKET_NAME}/{job['source_filename']}"
 
-        with (
-            s3.open(path_in_s3fs, "rb") as source_io,
-            s3.open(path_out_s3fs, "wb") as target_io,
-        ):
-            print("start recompression")
-            StreamRecompressor(source_io, target_io).decompress_recompress()
-            print("end recompression")
+        print("start recompression")
+        Recompressor(path_in_s3fs, path_out_s3fs).recompress()
+        print("end recompression")
 
         print(s3.info(TARGET_BUCKET_NAME))
         print(s3.ls(TARGET_BUCKET_NAME))
+
+        job["files"] = [job['source_filename']]
 
         return job
 
@@ -73,8 +71,10 @@ def s3_kubernetes_recompress_job():
     def register_files(job: dict):
         import requests
 
+        TARGET_BUCKET_NAME = "webarchive"
+
         file_iris = {
-            "https://example.org/file/" + file_name: file_name
+            "https://example.org/file/" + TARGET_BUCKET_NAME + "/" + file_name: file_name
             for file_name in job["files"]
         }
 

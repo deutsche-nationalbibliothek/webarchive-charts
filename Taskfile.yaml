@@ -42,8 +42,10 @@ tasks:
 
   install:copy-example-dags:
     desc: Copy the example dags to the deployment
-    cmds:
-      - kubectl cp examples/airflow/dags/* airflow/airflow-worker-0:/opt/airflow/dags
+    cmd: |
+      for file in examples/airflow/dags/*; do
+        kubectl cp $file default/webarchive-worker-0:/opt/airflow/dags -c worker;
+      done;
 
   debug:
     desc: Collect some information helpful for debugging

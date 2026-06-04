@@ -5,15 +5,15 @@ airflow:
       existingClaim: dags-pvc
     gitSync:
       enabled: false
-  config:
-    webserver:
-      base_url: "http://192.168.39.238/airflow"
+  # config:
+  #   webserver:
+  #     base_url: "http://192.168.39.238/airflow"
+  # issue: https://github.com/apache/airflow/issues/58417
   ingress:
     enabled: true
     apiServer:
       ingressClassName: nginx
-      path: /airflow
-      pathType: Prefix
+      path: /airflow(/|$)(.*)
 
 versitygw:
   auth:

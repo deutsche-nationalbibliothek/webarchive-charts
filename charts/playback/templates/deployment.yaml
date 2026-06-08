@@ -24,6 +24,20 @@ spec:
           env:
             - name: UWSGI_MOUNT
               value: "{{ .Values.playbackBasePath }}=/pywb/pywb/apps/wayback.py"
+            - name: AWS_ENDPOINT_URL_S3
+              value: {{ .Values.s3Endpoint | quote }}
+            - name: AWS_DEFAULT_REGION
+              value: {{ .Values.s3DefaultRegion | quote }}
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.s3SecretKeyName | quote }}
+                  key: rootAccessKeyId
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.s3SecretKeyName | quote }}
+                  key: rootSecretAccessKey
           volumeMounts:
             - mountPath: {{ .Values.warcDirectory | quote }}
               name: warcs

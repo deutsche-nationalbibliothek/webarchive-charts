@@ -1,3 +1,6 @@
 pywbCollection: "warcs"
 playbackBasePath: "/wayback"
-warcDirectory: "/data/warcs/"
+warcDirectory: "s3://webarchive/"
+s3Endpoint: "http://webarchive-versitygw:7070"
+s3DefaultRegion: "eu-central-1"
+s3SecretKeyName: "webarchive-versitygw-credentials"

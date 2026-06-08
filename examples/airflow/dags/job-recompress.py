@@ -83,13 +83,14 @@ def s3_kubernetes_recompress_job():
         PREFIX wa: <https://webarchiv.dnb.de/>
         PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
         PREFIX prov: <http://www.w3.org/ns/prov#>
+        PREFIX ex: <https://example.org/>
 
         INSERT DATA {
             GRAPH wa:data {
         """
             + "\n".join(
                 [
-                    f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{TARGET_BUCKET_NAME}" .'
+                    f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{TARGET_BUCKET_NAME}" ; wal:fileStatus ex:clean.'
                     for file_iri, file_name in file_iris.items()
                 ]
             )

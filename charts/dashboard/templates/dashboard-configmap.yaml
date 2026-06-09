@@ -80,6 +80,16 @@ data:
                 url: "https://github.com/deutsche-nationalbibliothek/pwidresolver"
                 icon: "fa-solid fa-arrow-up-right-from-square"
                 target: "_blank"
+          - name: "Workflows"
+            icon: "fa-solid fa-chart-diagram"
+            subtitle: "Airflow"
+            tag: "workflow"
+            url: {{ .Values.airflowUrl | quote }}
+            quick:
+              - name: "upstream"
+                url: "https://airflow.apache.org/"
+                icon: "fa-solid fa-arrow-up-right-from-square"
+                target: "_blank"
           - name: "Ingest"
             icon: "fa-solid fa-download"
             subtitle: "OAI-PMH"

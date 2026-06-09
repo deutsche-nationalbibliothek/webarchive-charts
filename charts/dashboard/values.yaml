@@ -6,6 +6,7 @@ pwidResolverUrl: "/pwidresolver"
 wapmhUrl: "/wapmh"
 graphUrl: "/sparql"
 cdxUrl: "/outbackcdx"
+airflowUrl: "/airflow"
 mockils: true
 mockilsGraphUrl: "/mockils-sparql"
 mockilsArasUrl: "/mockils"

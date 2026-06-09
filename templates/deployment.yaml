@@ -59,4 +59,33 @@ data:
       tdb2:location "/fuseki/databases/ds" ;
       tdb2:unionDefaultGraph true ;
       .
-
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: airflow-route
+spec:
+  to:
+    kind: Service
+    name: webarchive-api-server
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fuseki-route
+spec:
+  to:
+    kind: Service
+    name: webarchive-fuseki
+  port:
+    targetPort: 3030
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}

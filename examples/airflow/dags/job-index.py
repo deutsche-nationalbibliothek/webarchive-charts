@@ -23,7 +23,7 @@ sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 def job_index():
 
     @task.kubernetes(
-        image="ghcr.io/deutsche-nationalbibliothek/warcio:feature-oci-image-s3",
+        image="ghcr.io/deutsche-nationalbibliothek/cdxj-indexer:feature-oci-image-s3fs",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
             "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
@@ -34,13 +34,12 @@ def job_index():
         do_xcom_push=True,
     )
     def index(job: dict):
-        from warcio.indexer import Indexer
+        from cdxj_indexer import CDXJIndexer
+        from io import StringIO
         from s3fs import S3FileSystem
-        import tempfile
         import os
         import requests
 
-        DEFAULT_CDX_FILEDS = "offset,warc-type,warc-target-uri"
         cdx_url = os.environ.get("OUTBACK_CDX_URL")
         collection = os.environ.get("WARC_COLLECTION")
 
@@ -49,24 +48,20 @@ def job_index():
         s3 = S3FileSystem()
 
         print(
-            f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), index it and push the cdx record to outbackcdx. ({job['job_iri']})."
+            f"I will now read the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), index it and push the cdx record to outbackcdx. ({job['job_iri']})."
         )
 
         path_in_s3fs = f"s3://{job['source_bucket']}/{job['source_filename']}"
 
+        cdx_stream = StringIO()
 
-        # Create a temporary file using Python's tempfile module
-        # with tempfile.NamedTemporaryFile(mode='w', suffix='.cdx') as tmp_cdx_file:
-        with tempfile.TemporaryFile(mode="w+", suffix=".cdx") as tmp_cdx_file, s3.open(path_in_s3fs, "rb") as source_file:
-            Indexer(DEFAULT_CDX_FILEDS, [], None).process_one(source_file, output=tmp_cdx_file, filename=path_in_s3fs)
-
-            tmp_cdx_file.seek(0)
-            cdx_content = tmp_cdx_file.read()
-            print(cdx_content)
-            response = requests.post(cdx_endpoint, data=cdx_content)
+        with s3.open(path_in_s3fs, "rb") as source_file:
+            CDXJIndexer(None, None).process_one(input_=source_file, output=cdx_stream, filename=job['source_filename'])
+            print(cdx_stream.getvalue())
+            response = requests.post(cdx_endpoint, data=cdx_stream.getvalue())
             response.raise_for_status()
 
-            print(f"Successfully uploaded CDX data for {job['source_filename']}")
+            print(f"Successfully uploaded CDX data for {job['source_filename']} ({job['job_iri']})")
 
         return job
 

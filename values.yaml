@@ -21,9 +21,9 @@ versitygw:
   auth:
     accessKey: myaccesskey
     secretKey: mysecretkey
-  serviceAccount:
-    create: true
-    name: airflow-versitygw-s3
+  # serviceAccount:
+  #   create: true
+  #   name: airflow-versitygw-s3
   admin:
     enabled: true
   webui:

@@ -23,6 +23,8 @@ $ task setup:minikube
 # Enables the ingress addon (minikube addons enable ingress)
 $ task install
 # Install the mocked ils and the playback to the minikube
+# Once it is running add the Airflow DAGs
+$ task install:copy-example-dags
 ```
 
 Note: If you need to interoperate with the docker-host inside the minikube, run `eval $(minikube docker-env)`.
@@ -32,7 +34,7 @@ Note: If you need to interoperate with the docker-host inside the minikube, run 
 This assumes you have an aras interface (which exists probably only at the DNB).
 
 ```
-$ ENV=dnb task install:playback
+$ ENV=dnb task install
 ```
 
 ## Playback (pywb)
@@ -40,28 +42,27 @@ $ ENV=dnb task install:playback
 [Pywb](https://github.com/webrecorder/pywb) is served from the `pywb-service` respectively through the `pywb-ingress`.
 
 
-## WARC Handling
+## Workflows and WARC Handling
 
-The downloading, recompression, and indexing is currently done in an init Container.
-This is no good idea but works for now.
-The collection at the DNB requires the recompression step as they are not compressed record based.
-
+The downloading, recompression, and indexing are done as Jobs, that are orchestrated in an RDF graph and executed by Apache Airflow.
+Files are stored in an S3.
+Currently, the WARC files are all recompressed which is required for our data as it is not compressed record based.
 
 ## TODO
 
-- Software:
-  - playback:
-    - solrwayback
-  - Index
-    - OutbackCDX
-  - Object Storage (cache)
+- Workflow Steps
   - Validation
+  - Metadata Extraction
 - Best Practices:
   - liveness check
   - readiness check
-
-https://www.redhat.com/en/blog/9-best-practices-for-deploying-highly-available-applications-to-openshift
-https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+- Ingress for airflow, fuseki, versitygw
+- Error handling:
+  - For failing jobs report job as failed with the following task in airflow
+  - Store errors in graph
+  - Validation, see above
+- Graph handling:
+  - combine fuseki and metadata graph
 
 ## Current Environment
 
@@ -142,6 +143,46 @@ Containers with * are init containers
 └────────────────────────────────────────┘<─└──────────────────┘
 ```
 
-# Debugging Notes
+# Kubernetes/Helm
+
+The repository is a helm chart with dependencies and subcharts.
+
+
+## Kubernetes Dependencies
+
+### Apache Airflow (Workflows)
+
+The setup uses the [helm chart provided by the apache airflow project](https://airflow.apache.org/docs/helm-chart/) and [extends it according to the documentation](https://airflow.apache.org/docs/helm-chart/stable/extending-the-chart.html).
+
+To nicely integrate secrets and connections we need to [follow the documentation](https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/secrets-backends/kubernetes-secrets-backend.html).
+
+- [Repository](https://github.com/airflow-helm/charts)
+- [README](https://github.com/airflow-helm/charts/blob/main/charts/airflow/README.md)
+- [values.yaml](https://github.com/airflow-helm/charts/blob/main/charts/airflow/values.yaml)
+
+### VersityGW (S3 Storage)
+
+The setup uses the [helm chart provided by versity](https://github.com/versity/versitygw).
+
+- [Repository](https://github.com/versity/versitygw)
+- [README](https://github.com/versity/versitygw/blob/main/chart/README.md)
+- [values.yaml](https://github.com/versity/versitygw/blob/main/chart/values.yaml)
+
+### Apache Jena Fuseki (RDF Graph Store)
+
+The setup includes an [Apache Jena Fuseki RDF Graph Store](https://jena.apache.org/documentation/fuseki2/) using the [helm chart provided by zazuko](https://artifacthub.io/packages/helm/zazuko/fuseki).
+
+- [Repository](https://github.com/zazuko/helm-charts)
+- [README](https://github.com/zazuko/helm-charts/blob/main/zazuko/fuseki/README.md)
+- [values.yaml](https://github.com/zazuko/helm-charts/blob/main/zazuko/fuseki/values.yaml)
+
+## Best Practices
+
+These need to be implemented:
+
+- https://www.redhat.com/en/blog/9-best-practices-for-deploying-highly-available-applications-to-openshift
+- https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+
+## Debugging Notes
 
 To access some internal port, you can use port forwarding. In the Taskfile some respective tasks are specified.

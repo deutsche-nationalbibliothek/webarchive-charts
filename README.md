@@ -50,6 +50,8 @@ Currently, the WARC files are all recompressed which is required for our data as
 
 ## TODO
 
+- Software
+  - Job overview
 - Workflow Steps
   - Validation
   - Metadata Extraction

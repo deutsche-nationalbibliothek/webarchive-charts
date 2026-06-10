@@ -74,3 +74,6 @@ fuseki:
   #     - paths:
   #       - path: /fuseki(/|$)(.*)
   #         pathType: ImplementationSpecific
+
+wacalog:
+  enabled: false

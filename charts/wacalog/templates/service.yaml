@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 kind: Service
 apiVersion: v1
 metadata:
@@ -52,4 +53,5 @@ spec:
     name: wacalog-service
   port:
     targetPort: 8080
+{{- end }}
 {{- end }}

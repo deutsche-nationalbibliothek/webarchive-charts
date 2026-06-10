@@ -1,3 +1,4 @@
+{{- if .Values.enabled }}
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -63,3 +64,4 @@ spec:
             items:
               - key: "mkdocs.yml"
                 path: "mkdocs.yml"
+{{- end }}

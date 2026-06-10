@@ -2,7 +2,7 @@ global:
   imagePullPolicy: IfNotPresent
 
 airflow:
-  enabled: false
+  enabled: true
   dags:
     persistence:
       enabled: true
@@ -55,7 +55,7 @@ versitygw:
   #         pathType: ImplementationSpecific
   #         servicePort: s3-api
 fuseki:
-  enabled: false
+  enabled: true
   volumeMounts:
     - mountPath: /fuseki/configuration/config.ttl
       name: config-ttl
@@ -79,25 +79,25 @@ fuseki:
   #         pathType: ImplementationSpecific
 
 graph:
-  enabled: false
+  enabled: true
 
 ingest:
-  enabled: false
+  enabled: true
 
 mockils:
-  enabled: false
+  enabled: true
 
 outbackcdx:
-  enabled: false
+  enabled: true
 
 playback:
-  enabled: false
+  enabled: true
 
 pwidresolver:
-  enabled: false
+  enabled: true
 
 wacalog:
   enabled: false
 
 dashboard:
-  enabled: false
+  enabled: true

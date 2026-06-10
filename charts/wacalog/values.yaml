@@ -1,2 +1,1 @@
-enabled: true
 sparqlEndpoint: "http://graph-service:8080/"

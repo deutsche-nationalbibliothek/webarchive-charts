@@ -1,3 +1,6 @@
+global:
+  imagePullPolicy: IfNotPresent
+
 airflow:
   dags:
     persistence:
@@ -71,6 +74,3 @@ fuseki:
   #     - paths:
   #       - path: /fuseki(/|$)(.*)
   #         pathType: ImplementationSpecific
-
-global:
-  imagePullPolicy: IfNotPresent

@@ -27,9 +27,28 @@ dependencies:
   - name: airflow
     version: 1.21.0
     repository: https://airflow.apache.org
+    condition: airflow.enabled
   - name: versitygw
     version: 0.3.1
     repository: oci://ghcr.io/versity/versitygw/charts
+    condition: versitygw.enabled
   - name: fuseki
     version: 0.2.0
     repository: https://charts.zazuko.com/
+    condition: fuseki.enabled
+  - name: graph
+    condition: graph.enabled
+  - name: ingest
+    condition: ingest.enabled
+  - name: mockils
+    condition: mockils.enabled
+  - name: outbackcdx
+    condition: outbackcdx.enabled
+  - name: playback
+    condition: playback.enabled
+  - name: pwidresolver
+    condition: pwidresolver.enabled
+  - name: wacalog
+    condition: wacalog.enabled
+  - name: dashboard
+    condition: dashboard.enabled

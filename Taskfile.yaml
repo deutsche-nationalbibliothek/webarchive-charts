@@ -24,8 +24,8 @@ tasks:
     aliases: [lint]
     desc: Verify the syntax
     cmds:
-      - helm lint {{.CHART}}
-      - helm install --debug --dry-run -f values-{{.ENV}}.yaml webarchive .
+      - helm lint .
+      - helm install --debug --dry-run=client -f values-{{.ENV}}.yaml webarchive .
 
 
   setup:minikube:

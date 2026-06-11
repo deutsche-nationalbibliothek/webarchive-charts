@@ -25,7 +25,11 @@ tasks:
     desc: Verify the syntax
     cmds:
       - helm lint .
-      - helm install --debug --dry-run=client -f values-{{.ENV}}.yaml webarchive .
+
+  dry-run:
+    desc: Do a dry-run
+    cmds:
+      - helm install --dry-run=client -f values-{{.ENV}}.yaml webarchive .
 
 
   setup:minikube:

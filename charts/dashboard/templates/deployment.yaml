@@ -23,6 +23,8 @@ spec:
           volumeMounts:
             - mountPath: "/www/assets"
               name: dashboard-config
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: dashboard-config
           configMap:

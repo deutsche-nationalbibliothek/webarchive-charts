@@ -45,6 +45,8 @@ spec:
               subPath: "config.yaml"
               name: pywb-config
               readOnly: true
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: warcs
           persistentVolumeClaim:

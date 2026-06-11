@@ -26,6 +26,8 @@ spec:
           volumeMounts:
             - mountPath: "/data"
               name: wacalog-templates
+          resources:
+            {{- toYaml .Values.init.resources | nindent 12 }}
         - name: wacalog-build
           image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql'
           imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
@@ -41,6 +43,8 @@ spec:
               subPath: "mkdocs.yml"
             - mountPath: "/build"
               name: wacalog-build
+          resources:
+            {{- toYaml .Values.init.resources | nindent 12 }}
       containers:
         - name: wacalog-serve
           image: 'docker.io/lipanski/docker-static-website:latest'
@@ -50,6 +54,8 @@ spec:
           volumeMounts:
             - mountPath: "/data/wacalog"
               name: wacalog-build
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: wacalog-templates
           emptyDir:

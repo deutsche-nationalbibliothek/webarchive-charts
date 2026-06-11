@@ -21,6 +21,8 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: cdx-data
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: cdx-data
           emptyDir:

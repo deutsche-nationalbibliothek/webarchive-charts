@@ -23,6 +23,8 @@ spec:
           volumeMounts:
             - mountPath: {{ .Values.queryDirectory | quote }}
               name: wapmh-query-collection
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: wapmh-query-collection
           configMap:

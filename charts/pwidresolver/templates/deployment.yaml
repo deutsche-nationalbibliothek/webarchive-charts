@@ -22,4 +22,6 @@ spec:
               value: {{ .Values.pwidResolverBasePath | quote }}
             - name: LOGGING_LEVEL_ROOT
               value: {{ .Values.pwidResolverLoglevel | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
 

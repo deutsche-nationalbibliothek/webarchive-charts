@@ -57,8 +57,12 @@ versitygw:
   #       - path: /s3(/|$)(.*)
   #         pathType: ImplementationSpecific
   #         servicePort: s3-api
+
 fuseki:
   enabled: true
+  image:
+    repository: ghcr.io/white-gecko/fuseki-geosparql
+    tag: main
   volumeMounts:
     - mountPath: /fuseki/configuration/config.ttl
       name: config-ttl

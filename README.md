@@ -161,6 +161,7 @@ To nicely integrate secrets and connections we need to [follow the documentation
 - [Repository](https://github.com/airflow-helm/charts)
 - [README](https://github.com/airflow-helm/charts/blob/main/charts/airflow/README.md)
 - [values.yaml](https://github.com/airflow-helm/charts/blob/main/charts/airflow/values.yaml)
+- [Parameter Reference](https://airflow.apache.org/docs/helm-chart/stable/parameters-ref.html)
 
 ### VersityGW (S3 Storage)
 

@@ -1,0 +1,152 @@
+# null overrides in parent values.yaml ignored for always-enabled subcharts #32132
+# https://github.com/helm/helm/issues/32132#issuecomment-4497479333
+airflow:
+  enabled: true
+  uid: null
+  gid: null
+  apiServer:
+    resources:
+      limits:
+        cpu: 250m
+        memory: 500Mi
+      requests:
+        cpu: 10m
+        memory: 200Mi
+  scheduler:
+    resources:
+      limits:
+        cpu: 250m
+      requests:
+        cpu: 5m
+  dagProcessor:
+    resources:
+      limits:
+        cpu: 250m
+        memory: 500Mi
+      requests:
+        cpu: 5m
+        memory: 200Mi
+  redis:
+    uid: null
+    resources:
+      limits:
+        cpu: 250m
+      requests:
+        cpu: 5m
+  statsd:
+    uid: null
+    resources:
+      limits:
+        cpu: 250m
+      requests:
+        cpu: 5m
+  postgresql:
+    primary:
+      podSecurityContext:
+        fsGroup: null
+      containerSecurityContext:
+        runAsUser: null
+      resources:
+        limits:
+          cpu: 250m
+        requests:
+          memory: 128Mi
+          cpu: 5m
+        # requests: null
+  triggerer:
+    persistence:
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 250m
+        memory: 500Mi
+      requests:
+        cpu: 5m
+        memory: 200Mi
+        # cpu: null
+  workers:
+    persistence:
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 250m
+        memory: 600Mi
+      requests:
+        cpu: 5m
+        memory: 100Mi
+  logGroomerSidecar:
+    resources:
+      limits:
+        cpu: 250m
+      requests:
+        cpu: 5m
+  migrateDatabaseJob:
+    resources:
+      limits:
+        cpu: 250m
+      requests:
+        cpu: 5m
+  createUserJob:
+    resources:
+      limits:
+        cpu: 250m
+        memory: 500Mi
+      requests:
+        cpu: 5m
+        memory: 200Mi
+versitygw:
+  enabled: true
+  podSecurityContext:
+    fsGroup: null
+  securityContext:
+    runAsUser: null
+    runAsGroup: null
+  resources:
+    limits:
+      cpu: 250m
+    requests:
+      cpu: 5m
+fuseki:
+  enabled: true
+  podSecurityContext:
+    fsGroup: null
+    runAsUser: null
+    runAsGroup: null
+  securityContext:
+    runAsUser: null
+    seLinuxOptions: null
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1900Mi
+    requests:
+      cpu: 10m
+      memory: 500Mi
+
+graph:
+  resources:
+    limits:
+      cpu: 250m
+    requests:
+      cpu: 5m
+
+pwidresolver:
+  resources:
+    limits:
+      cpu: 125m
+    requests:
+      cpu: 2m
+
+dashboard:
+  resources:
+    limits:
+      cpu: 125m
+    requests:
+      cpu: 1m
+
+outbackcdx:
+  resources:
+    limits:
+      cpu: 250m
+    requests:
+      cpu: 5m

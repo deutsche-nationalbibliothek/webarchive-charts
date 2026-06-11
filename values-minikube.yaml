@@ -1,3 +1,13 @@
+# null overrides in parent values.yaml ignored for always-enabled subcharts #32132
+# https://github.com/helm/helm/issues/32132#issuecomment-4497479333
+# the following 6 lines are required
+airflow:
+  enabled: true
+versitygw:
+  enabled: true
+fuseki:
+  enabled: true
+
 graph:
   sparqlTitleData: "http://mock-sparql-service:8080/"
   arasRestBase: "http://mockils-service:8080/"

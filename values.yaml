@@ -41,6 +41,9 @@ versitygw:
     region: eu-central-1
     backend:
       type: posix
+      # https://github.com/versity/versitygw/discussions/1551#discussioncomment-16508001
+      # --nometa to avoid `xattr check failed: xattrs are not supported on this filesystem`
+      args: "--nometa /mnt/data"
   # ingress:
   #   enabled: true
   #   annotations:

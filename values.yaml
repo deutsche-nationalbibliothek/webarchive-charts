@@ -86,10 +86,10 @@ fuseki:
   #         pathType: ImplementationSpecific
 
 graph:
-  enabled: true
+  enabled: false
 
 ingest:
-  enabled: true
+  enabled: false
 
 mockils:
   enabled: true

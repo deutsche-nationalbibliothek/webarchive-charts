@@ -1,7 +1,10 @@
 version: "3"
 
+dotenv: ['custom.env', 'default.env']
+
 env:
-    ENV: '{{.ENV | default "minikube" }}'
+    ENV: '{{ .ENV | default "minikube" }}'
+    NAMESPACE: '{{ .NAMESPACE | default "default" }}'
 
 tasks:
   default:
@@ -13,12 +16,12 @@ tasks:
     aliases: [deploy]
     desc: Install/deploy the webarchive setup
     cmds:
-      - helm upgrade --install -f values-{{.ENV}}.yaml webarchive .
+      - helm upgrade --namespace {{.NAMESPACE}} --install -f values-{{.ENV}}.yaml webarchive .
 
   uninstall:
     desc:  Uninstall the deployed webarchive setup
     cmds:
-      - helm uninstall webarchive
+      - helm uninstall --namespace {{.NAMESPACE}} webarchive
 
   check:
     aliases: [lint]
@@ -48,7 +51,7 @@ tasks:
     desc: Copy the example dags to the deployment
     cmd: |
       for file in examples/airflow/dags/*; do
-        kubectl cp $file default/webarchive-worker-0:/opt/airflow/dags -c worker;
+        kubectl cp $file {{.NAMESPACE}}/webarchive-worker-0:/opt/airflow/dags -c worker;
       done;
 
   debug:
@@ -80,28 +83,28 @@ tasks:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/webarchive-api-server 8080:8080
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-api-server 8080:8080 --namespace {{.NAMESPACE}}
 
   port-forward:s3:api:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 7070:7070
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 7070:7070 --namespace {{.NAMESPACE}}
 
   port-forward:s3:admin:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 7071:7071
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 7071:7071 --namespace {{.NAMESPACE}}
 
   port-forward:s3:webui:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 8082:8080
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 8082:8080 --namespace {{.NAMESPACE}}
 
   port-forward:fuseki:
     desc: Forward the api server port to 8080 in 0.0.0.0
     interactive: true
     cmds:
-      - kubectl port-forward --address=0.0.0.0 services/webarchive-fuseki 3030:3030
+      - kubectl port-forward --address=0.0.0.0 services/webarchive-fuseki 3030:3030 --namespace {{.NAMESPACE}}

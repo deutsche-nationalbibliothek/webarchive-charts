@@ -1,2 +1,4 @@
 values-dnb.yaml
 .helm_ls_cache
+custom.env
+dnb.env

@@ -36,8 +36,8 @@ def s3_kubernetes_aras_pull_job():
     )
     def aras_download(job: dict):
         import s3fs
-        from io import DEFAULT_BUFFER_SIZE
         from aras_py.run import get_stream
+        from shutil import copyfileobj
 
         # load with aras-py and write to s3
         TARGET_BUCKET_NAME = "waingest"
@@ -68,8 +68,7 @@ def s3_kubernetes_aras_pull_job():
                 s3.open(f"{TARGET_BUCKET_NAME}/{file_name}", "wb") as target_io,
                 stream() as source_io,
             ):
-                while chunk := source_io.read(DEFAULT_BUFFER_SIZE):
-                    target_io.write(chunk)
+                copyfileobj(source_io, target_io)
             job["files"] += [file_name]
 
         print(s3.info(TARGET_BUCKET_NAME))
@@ -77,7 +76,7 @@ def s3_kubernetes_aras_pull_job():
 
         return job
 
-    @task
+    @task(trigger_rule="all_done")
     def register_files(job: dict):
         import requests
         TARGET_BUCKET_NAME = "waingest"

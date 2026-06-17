@@ -62,7 +62,7 @@ def job_done(job: dict):
     return _jobs_done([job])
 
 
-@task
+@task(trigger_rule="all_done")
 def jobs_done(jobs: list[dict]):
     return _jobs_done(jobs)
 

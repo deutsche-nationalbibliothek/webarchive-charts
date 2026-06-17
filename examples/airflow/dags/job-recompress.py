@@ -67,7 +67,8 @@ def s3_kubernetes_recompress_job():
 
         return job
 
-    @task
+
+    @task(trigger_rule="all_done")
     def register_files(job: dict):
         import requests
 

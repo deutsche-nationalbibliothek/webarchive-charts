@@ -1,16 +1,15 @@
 version: "3"
 
-dotenv: ['custom.env', 'default.env']
-
-env:
-    ENV: '{{ .ENV | default "minikube" }}'
-    NAMESPACE: '{{ .NAMESPACE | default "default" }}'
+dotenv: ['{{.ENV}}.env', 'custom.env', 'default.env']
 
 tasks:
   default:
     desc: List the tasks
     cmds:
-      - task -l
+      - |
+        echo "ENV: {{.ENV}}"
+        echo "NAMESPACE: {{.NAMESPACE}}"
+        task -l
 
   install:
     aliases: [deploy]

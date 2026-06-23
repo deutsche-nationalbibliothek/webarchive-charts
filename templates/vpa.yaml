@@ -1,0 +1,255 @@
+{{- if .Values.vpa.enabled }}
+{{- if .Capabilities.APIVersions.Has "autoscaling.k8s.io/v1" }}
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: dashboard-app
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: outbackcdx-app
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pwidresolver-app
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pywb-app
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webarchive-api-server
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webarchive-dag-processor
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webarchive-scheduler
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webarchive-statsd
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webarchiv-versitygw
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: webarchiv-fuseki
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: webarchiv-postgresql
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: webarchiv-redis
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: webarchiv-triggerer
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webarchiv-deployment
+spec:
+  resourcePolicy:
+    containerPolicies:
+      - containerName: '*'
+        controlledResources:
+          - cpu
+        controlledValues: RequestsOnly
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: webarchiv-worker
+  updatePolicy:
+    updateMode: {{ .Values.vpa.updateMode | quote }}
+{{- end }}
+{{- end }}

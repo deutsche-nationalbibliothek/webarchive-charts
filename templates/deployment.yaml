@@ -64,7 +64,7 @@ data:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: airflow-route
+  name: airflow
 spec:
   to:
     kind: Service
@@ -78,7 +78,7 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: fuseki-route
+  name: fuseki
 spec:
   to:
     kind: Service

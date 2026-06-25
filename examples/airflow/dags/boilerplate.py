@@ -23,12 +23,13 @@ def get_jobs(
         GRAPH wa:jobs {{
             ?job a {rdf_type} ;
     """
-        + ";\n".join([f"{prop[0]} {prop[1]}" for prop in properties.items()]) + " . "
+        + ";\n".join([f"{prop[0]} {prop[1]}" for prop in properties.items()])
+        + " . "
         + """
             FILTER NOT EXISTS { ?job wal:status wal:done }
         }"""
-        + triple_pattern +
-        f"""
+        + triple_pattern
+        + f"""
     }}
     limit {limit}
     """
@@ -47,7 +48,10 @@ def get_jobs(
     )
     try:
         return [
-            {"job_iri": job["job"]["value"], **{var: job[var]["value"] for var in projection}}
+            {
+                "job_iri": job["job"]["value"],
+                **{var: job[var]["value"] for var in projection},
+            }
             for job in r.json()["results"]["bindings"]
         ]
     except JSONDecodeError:
@@ -58,30 +62,73 @@ def get_jobs(
 
 
 @task
-def job_done(job: dict):
+def job_done(job: dict = None):
     return _jobs_done([job])
 
 
 @task(trigger_rule="all_done")
-def jobs_done(jobs: list[dict]):
+def jobs_done(jobs: list[dict] = None):
     return _jobs_done(jobs)
 
 
 def _jobs_done(jobs: list[dict]):
     import requests
+    from textwrap import dedent
 
-    job_update = (
+    job_update = dedent(
         """
-    PREFIX wa: <https://webarchiv.dnb.de/>
-    PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-    INSERT DATA {
-        GRAPH wa:jobs {
-    """
-        + "\n".join([f"<{job['job_iri']}> wal:status wal:done ." for job in jobs])
-        + """
+        PREFIX wa: <https://webarchiv.dnb.de/>
+        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+        INSERT DATA {
+            GRAPH wa:jobs {
+        """
+            + "\n".join([f"<{job['job_iri']}> wal:status wal:done ." for job in jobs])
+            + """
+            }
         }
-    }
-    """
+        """
+    )
+
+    r = requests.post(
+        sparql_update_endpoint,
+        auth=("admin", "admin"),
+        headers={
+            "Accept": "application/sparql-results+json,*/*;q=0.9",
+            "Content-Type": "application/sparql-update",
+        },
+        data=job_update,
+    )
+
+    print(r)
+    print(r.text)
+
+    r.raise_for_status()
+
+
+def jobs_failed(jobs: list[dict]):
+    import requests
+    from textwrap import dedent
+
+    triples = []
+
+    for job in jobs:
+        triples += f"<{job['job_iri']}> wal:status wal:failed ."
+        if "error_report" in job:
+            triples += f"<{job['job_iri']}> wal:report \"\"\"{job['error_report']}\"\"\" ."
+
+
+    job_update = dedent(
+        """
+        PREFIX wa: <https://webarchiv.dnb.de/>
+        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+        INSERT DATA {
+            GRAPH wa:jobs {
+        """
+            + "\n".join(triples)
+            + """
+            }
+        }
+        """
     )
 
     r = requests.post(

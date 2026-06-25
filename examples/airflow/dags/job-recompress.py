@@ -1,6 +1,6 @@
 from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
-from boilerplate import get_jobs, jobs_done
+from boilerplate import get_jobs, jobs_done, jobs_failed
 
 secret_env_access_key = Secret(
     "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
@@ -24,6 +24,15 @@ PROV_IRI = "https://webarchiv.dnb.de/workflow/recompress/v1"
 )
 def s3_kubernetes_recompress_job():
 
+    def job_failed(context):
+        task_instance = context.task_instance
+        job_iri = task_instance.xcom_pull(key="job")
+        print(f"job {job_iri} failed")
+        print(context)
+        print(context.get("exception").args)
+        print(f"job_iri: {job_iri}")
+        jobs_failed([{"job_iri": job_iri}])
+
     @task.kubernetes(
         image="ghcr.io/deutsche-nationalbibliothek/warcio:feature-oci-image-s3",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
@@ -32,6 +41,7 @@ def s3_kubernetes_recompress_job():
             "AWS_DEFAULT_REGION": "eu-central-1",
         },
         do_xcom_push=True,
+        on_failure_callback=job_failed,
     )
     def recompress(job: dict):
         from warcio.recompressor import Recompressor

@@ -97,6 +97,7 @@ mockils:
 
 outbackcdx:
   enabled: true
+  pvcName: cdx-pvc
 
 playback:
   enabled: true

@@ -25,5 +25,5 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: cdx-data
-          emptyDir:
-            sizeLimit: 2Gi
+          persistentVolumeClaim:
+            claimName: {{ .Values.pvcName | quote }}

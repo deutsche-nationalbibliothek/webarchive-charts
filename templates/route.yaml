@@ -1,0 +1,29 @@
+{{- if .Capabilities.APIVersions.Has "route.openshift.io/v1" }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: airflow
+spec:
+  to:
+    kind: Service
+    name: webarchive-api-server
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fuseki
+spec:
+  to:
+    kind: Service
+    name: webarchive-fuseki
+  port:
+    targetPort: 3030
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+{{- end }}

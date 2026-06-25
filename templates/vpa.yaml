@@ -3,7 +3,7 @@
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-dashboard-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -21,7 +21,7 @@ spec:
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-outbackcdx-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -39,7 +39,7 @@ spec:
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-pwidresolver-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -57,7 +57,7 @@ spec:
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-pywb-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -75,7 +75,7 @@ spec:
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-api-server-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -93,7 +93,7 @@ spec:
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-dag-processor-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -111,7 +111,7 @@ spec:
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-scheduler-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -129,7 +129,7 @@ spec:
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-statsd-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -147,7 +147,7 @@ spec:
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-versitygw-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -158,14 +158,14 @@ spec:
   targetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: webarchiv-versitygw
+    name: webarchive-versitygw
   updatePolicy:
     updateMode: {{ .Values.vpa.updateMode | quote }}
 ---
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-fuseki-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -176,14 +176,14 @@ spec:
   targetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: webarchiv-fuseki
+    name: webarchive-fuseki
   updatePolicy:
     updateMode: {{ .Values.vpa.updateMode | quote }}
 ---
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-postgresql-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -194,14 +194,14 @@ spec:
   targetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: webarchiv-postgresql
+    name: webarchive-postgresql
   updatePolicy:
     updateMode: {{ .Values.vpa.updateMode | quote }}
 ---
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-redis-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -212,14 +212,14 @@ spec:
   targetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: webarchiv-redis
+    name: webarchive-redis
   updatePolicy:
     updateMode: {{ .Values.vpa.updateMode | quote }}
 ---
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-triggerer-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -230,14 +230,14 @@ spec:
   targetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: webarchiv-triggerer
+    name: webarchive-triggerer
   updatePolicy:
     updateMode: {{ .Values.vpa.updateMode | quote }}
 ---
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: webarchiv-deployment
+  name: webarchive-worker-vpa
 spec:
   resourcePolicy:
     containerPolicies:
@@ -248,7 +248,7 @@ spec:
   targetRef:
     apiVersion: apps/v1
     kind: StatefulSet
-    name: webarchiv-worker
+    name: webarchive-worker
   updatePolicy:
     updateMode: {{ .Values.vpa.updateMode | quote }}
 {{- end }}

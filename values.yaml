@@ -113,3 +113,7 @@ wacalog:
 
 dashboard:
   enabled: true
+
+vpa:
+  enabled: true
+  updateMode: "Off"

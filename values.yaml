@@ -44,7 +44,10 @@ versitygw:
       # https://github.com/versity/versitygw/discussions/1551#discussioncomment-16508001
       # --nometa to avoid `xattr check failed: xattrs are not supported on this filesystem`
       # but be aware of https://github.com/versity/versitygw/wiki/POSIX-metadata
-      # args: "--nometa /mnt/data"
+      # args: "--nometa /mnt/data/buckets"
+      args: "--sidecar /mnt/metadata /mnt/data"
+  sidecar:
+    enabled: true
   # ingress:
   #   enabled: true
   #   annotations:

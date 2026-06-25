@@ -28,10 +28,10 @@ dependencies:
     version: 1.21.0
     repository: https://airflow.apache.org
     condition: airflow.enabled
-  - name: versitygw
-    version: 0.3.1
-    repository: oci://ghcr.io/versity/versitygw/charts
-    condition: versitygw.enabled
+  # - name: versitygw
+  #   version: 0.3.1
+  #   repository: oci://ghcr.io/versity/versitygw/charts
+  #   condition: versitygw.enabled
   - name: fuseki
     version: 0.2.0
     repository: https://charts.zazuko.com/
@@ -52,3 +52,5 @@ dependencies:
     condition: wacalog.enabled
   - name: dashboard
     condition: dashboard.enabled
+  - name: versitygw
+    condition: versitygw.enabled

@@ -23,6 +23,8 @@ airflow:
 
 versitygw:
   enabled: false
+  strategy:
+    type: Recreate
   auth:
     accessKey: myaccesskey
     secretKey: mysecretkey

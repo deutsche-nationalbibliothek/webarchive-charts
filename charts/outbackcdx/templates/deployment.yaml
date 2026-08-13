@@ -8,6 +8,8 @@ spec:
   selector:
     matchLabels:
       app: outbackcdx
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:

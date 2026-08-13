@@ -42,15 +42,26 @@ def s3_kubernetes_recompress_job():
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
+        pod_template_dict={
+            "spec": {
+                "containers": [
+                    {
+                        "name": "base",
+                        "resources": {
+                            "limits": {"cpu": "500m", "memory": "1Gi"},
+                            "requests": {"cpu": "500m", "memory": "1Gi"},
+                        },
+                    }
+                ]
+            }
+        },
     )
-    def recompress(job: dict, task_instance):
+    def recompress(job: dict):
         from warcio.recompressor import Recompressor
         from s3fs import S3FileSystem
         from warcio.warcwriter import WARCWriter
         from warcio.archiveiterator import ArchiveIterator
         import gzip
-
-        task_instance.xcom_push(key="job", value=job)
 
         TARGET_BUCKET_NAME = "webarchive"
 

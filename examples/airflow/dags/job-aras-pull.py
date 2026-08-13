@@ -43,6 +43,28 @@ def s3_kubernetes_aras_pull_job():
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
+        pod_template_dict={
+            "spec": {
+                "containers": [
+                    {
+                        "name": "base",
+                        "resources": {
+                            "limits": {"cpu": "100m", "memory": "512Mi"},
+                            "requests": {"cpu": "100m", "memory": "512Mi"},
+                        },
+                    },
+                    # The xcom-sidecar resources are retrieved via sidecar_container_resources=self.hook.get_xcom_sidecar_container_resources()
+                    # https://github.com/apache/airflow/blob/1b246e8c1eb9b077b180df5b8f0fd7b10e83b0ab/providers/cncf/kubernetes/src/airflow/providers/cncf/kubernetes/operators/pod.py#L1665
+                    #  {
+                    #     "name": "airflow-xcom-sidecar",
+                    #     "resources": {
+                    #         "limits": {"cpu": "50m", "memory": "128Mi"},
+                    #         "requests": {"cpu": "50m", "memory": "128Mi"},
+                    #     },
+                    # },
+                ]
+            }
+        },
     )
     def aras_download(job: dict):
         import s3fs

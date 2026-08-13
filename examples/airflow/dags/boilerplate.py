@@ -26,7 +26,7 @@ def get_jobs(
         + ";\n".join([f"{prop[0]} {prop[1]}" for prop in properties.items()])
         + " . "
         + """
-            FILTER NOT EXISTS { ?job wal:status wal:done }
+            FILTER NOT EXISTS { ?job wal:status ?status . VALUES ?status { wal:done wal:failed wal:skip } }
         }"""
         + triple_pattern
         + f"""

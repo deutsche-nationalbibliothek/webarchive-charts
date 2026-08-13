@@ -7,39 +7,81 @@ airflow:
   apiServer:
     resources:
       limits:
-        cpu: 250m
-        memory: 500Mi
+        cpu: 400m
+        memory: 512Mi
       requests:
-        cpu: 10m
-        memory: 200Mi
+        cpu: 400m
+        memory: 512Mi
+    startupProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 30
+      timeoutSeconds: 60
+    # readinessProbe:
+    #   initialDelaySeconds: 60
+    #   periodSeconds: 30
+    #   timeoutSeconds: 10
   scheduler:
     resources:
       limits:
-        cpu: 250m
+        cpu: 360m
+        memory: 400Mi
       requests:
-        cpu: 5m
+        cpu: 360m
+        memory: 400Mi
+    startupProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 60
+      timeoutSeconds: 40
+    livenessProbe:
+      initialDelaySeconds: 30
+      timeoutSeconds: 40
+      periodSeconds: 60
+    logGroomerSidecar:
+      resources:
+        limits:
+          cpu: 5m
+          memory: 150Mi
+        requests:
+          cpu: 5m
+          memory: 150Mi
   dagProcessor:
     resources:
       limits:
-        cpu: 250m
-        memory: 500Mi
+        cpu: 360m
+        memory: 512Mi
       requests:
-        cpu: 5m
-        memory: 200Mi
+        cpu: 360m
+        memory: 512Mi
+    livenessProbe:
+      initialDelaySeconds: 30
+      timeoutSeconds: 40
+      periodSeconds: 60
+    logGroomerSidecar:
+      resources:
+        limits:
+          cpu: 5m
+          memory: 150Mi
+        requests:
+          cpu: 5m
+          memory: 150Mi
   redis:
     uid: null
     resources:
       limits:
-        cpu: 250m
+        cpu: 5m
+        memory: 64Mi
       requests:
         cpu: 5m
+        memory: 64Mi
   statsd:
     uid: null
     resources:
       limits:
-        cpu: 250m
+        cpu: 5m
+        memory: 64Mi
       requests:
         cpu: 5m
+        memory: 64Mi
   postgresql:
     primary:
       podSecurityContext:
@@ -48,52 +90,95 @@ airflow:
         runAsUser: null
       resources:
         limits:
-          cpu: 250m
+          cpu: 100m
+          memory: 256Mi
         requests:
-          memory: 128Mi
-          cpu: 5m
+          cpu: 100m
+          memory: 256Mi
         # requests: null
   triggerer:
     persistence:
       size: 10Gi
     resources:
       limits:
-        cpu: 250m
-        memory: 500Mi
+        cpu: 300m
+        memory: 600Mi
       requests:
-        cpu: 5m
-        memory: 200Mi
+        cpu: 300m
+        memory: 600Mi
         # cpu: null
+    livenessProbe:
+      initialDelaySeconds: 60
+      timeoutSeconds: 60
+      periodSeconds: 120
+    logGroomerSidecar:
+      resources:
+        limits:
+          cpu: 5m
+          memory: 150Mi
+        requests:
+          cpu: 5m
+          memory: 150Mi
   workers:
     persistence:
       size: 10Gi
-    resources:
-      limits:
-        cpu: 250m
-        memory: 600Mi
-      requests:
-        cpu: 5m
-        memory: 100Mi
-  logGroomerSidecar:
-    resources:
-      limits:
-        cpu: 250m
-      requests:
-        cpu: 5m
+    celery:
+      resources:
+        limits:
+          cpu: 1250m
+          memory: 4Gi
+        requests:
+          cpu: 1000m
+          memory: 4Gi
+      livenessProbe:
+        initialDelaySeconds: 30
+        periodSeconds: 60
+        timeoutSeconds: 40
+      logGroomerSidecar:
+        resources:
+          limits:
+            cpu: 5m
+            memory: 150Mi
+          requests:
+            cpu: 5m
+            memory: 150Mi
+    kubernetes:
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+        requests:
+          cpu: 1000m
+          memory: 1Gi
+      # Add this to set default resources for KubernetesPodOperator tasks:
+      podTemplate:
+        spec:
+          containers:
+            - name: base
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+                requests:
+                  cpu: 500m
+                  memory: 1Gi
   migrateDatabaseJob:
     resources:
       limits:
-        cpu: 250m
+        cpu: 500m
+        memory: 256Mi
       requests:
-        cpu: 5m
+        cpu: 125m
+        memory: 256Mi
   createUserJob:
     resources:
       limits:
-        cpu: 250m
-        memory: 500Mi
+        cpu: 125m
+        memory: 256Mi
       requests:
-        cpu: 5m
-        memory: 200Mi
+        cpu: 125m
+        memory: 256Mi
+
 versitygw:
   enabled: true
   podSecurityContext:
@@ -104,8 +189,11 @@ versitygw:
   resources:
     limits:
       cpu: 250m
+      memory: 200Mi
     requests:
-      cpu: 5m
+      cpu: 125m
+      memory: 200Mi
+
 fuseki:
   enabled: true
   podSecurityContext:
@@ -117,36 +205,49 @@ fuseki:
     seLinuxOptions: null
   resources:
     limits:
+      cpu: 1000m
+      memory: 4Gi
+    requests:
       cpu: 500m
-      memory: 1900Mi
-    requests:
-      cpu: 10m
-      memory: 500Mi
-
-graph:
-  resources:
-    limits:
-      cpu: 250m
-    requests:
-      cpu: 5m
+      memory: 4Gi
+  readinessProbe:
+    timeoutSeconds: 5
+    periodSeconds: 30
 
 pwidresolver:
+  pwidResolverLoglevel: "DEBUG"
   resources:
     limits:
-      cpu: 125m
+      cpu: 10m
+      memory: 256Mi
     requests:
-      cpu: 2m
+      cpu: 10m
+      memory: 256Mi
+
+playback:
+  enabled: true
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
 
 dashboard:
   resources:
     limits:
-      cpu: 125m
+      cpu: 5m
+      memory: 32Mi
     requests:
-      cpu: 1m
+      cpu: 5m
+      memory: 32Mi
 
 outbackcdx:
   resources:
     limits:
-      cpu: 250m
+      cpu: 1500m
+      memory: 1Gi
     requests:
-      cpu: 5m
+      cpu: 1000m
+      memory: 1Gi

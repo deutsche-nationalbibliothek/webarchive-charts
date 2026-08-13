@@ -74,7 +74,12 @@ def s3_kubernetes_recompress_job():
             pass
 
         print(
-            f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), recompress it and upload it to the s3 bucket {TARGET_BUCKET_NAME}. ({job['job_iri']})."
+            f"""Executing Job: <{job['job_iri']}>
+
+                I will do the following:
+                1. download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']})
+                2a. recompress it and
+                2b. in the same run upload it to the s3 bucket {TARGET_BUCKET_NAME}."""
         )
 
         # Download the file according to the graphs file spec
@@ -108,6 +113,7 @@ def s3_kubernetes_recompress_job():
 
         print(s3.info(TARGET_BUCKET_NAME))
         print(s3.ls(TARGET_BUCKET_NAME))
+        print(f"wrote recompressed file directly to {path_out_s3fs}")
 
         job["files"] = [job["source_filename"]]
 
@@ -120,7 +126,10 @@ def s3_kubernetes_recompress_job():
         TARGET_BUCKET_NAME = "webarchive"
 
         file_iris = {
-            "https://example.org/file/" + TARGET_BUCKET_NAME + "/" + file_name: file_name
+            "https://example.org/file/"
+            + TARGET_BUCKET_NAME
+            + "/"
+            + file_name: file_name
             for file_name in job["files"]
         }
 

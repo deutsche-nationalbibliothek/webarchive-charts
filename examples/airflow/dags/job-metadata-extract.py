@@ -97,7 +97,7 @@ def s3_kubernetes_metadata_extract_job():
 
         wa = Namespace("https://webarchiv.dnb.de/")
 
-        store = SPARQLUpdateStore(query_endpoint=sparql_update_endpoint, returnFormat="turtle", auth=("admin", "admin"))
+        store = SPARQLUpdateStore(update_endpoint=sparql_update_endpoint, auth=("admin", "admin"))
         remote_graph = Graph(store=store, identifier=wa.warc)
         remote_graph += seed_graph
 

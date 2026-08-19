@@ -29,17 +29,24 @@ def s3_kubernetes_metadata_extract_job():
         print("job_failed was called")
         print(context)
         task_instance = context["task_instance"]
-        exception = context["exception"]
-        print(exception)
         # Can we get remote_pod from the exception or from the task_instance?
         print(task_instance)
         job_iri = task_instance.xcom_pull(key="job")
         print(f"job {job_iri} failed")
-        print(context)
-        print(context.get("exception").args)
+        exception = context.get("exception")
+        # We want to get from AirflowException > remote_pod.status.container_statuses[name=base].state.terminated.reason
+        # if AirflowException
+        import json
+        remote_pod_string = "".join(exception.args.splitlines()[1:])
+        print(remote_pod_string)
+        remote_pod = json.loads(remote_pod_string)
+        print(remote_pod)
+
+        # if ApiException
+        # TODO get Reason, HTTP response headers, and HTTP response body
+
         print(f"job_iri: {job_iri}")
         jobs_failed([{"job_iri": job_iri}])
-        # We want to get from AirflowException > remote_pod.status.container_statuses[name=base].state.terminated.reason
 
     @task.kubernetes(
         # image="ghcr.io/white-gecko/warc-metadata2rdf:main-s3",

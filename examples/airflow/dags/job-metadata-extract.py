@@ -47,6 +47,7 @@ def s3_kubernetes_metadata_extract_job():
         env_vars={
             "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
             "AWS_DEFAULT_REGION": "eu-central-1",
+            "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
@@ -65,15 +66,19 @@ def s3_kubernetes_metadata_extract_job():
         },
     )
     def metadata_extract(job: dict):
+        import os
+
         from rdflib import Graph, URIRef
         from rdflib.namespace import Namespace
-        from rdflib.plugins.stores.sparqlstore import SPARQLStore
+        from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
         from s3fs import S3FileSystem
         from warcmetadata.extraction import extract_metadata_simple
         from warcmetadata.utils import get_seed_record, guess_seed_request
 
         s3 = S3FileSystem(config_kwargs={"retries": {"mode": "adaptive"}})
         # How could a socket.gaierror be handled propperly
+
+        sparql_update_endpoint = os.environ["SPARQL_UPDATE_ENDPOINT"]
 
         print(
             f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), and extract its metadata. ({job['job_iri']})."
@@ -92,7 +97,7 @@ def s3_kubernetes_metadata_extract_job():
 
         wa = Namespace("https://webarchiv.dnb.de/")
 
-        store = SPARQLStore(query_endpoint=sparql_update_endpoint, returnFormat="turtle", auth=("admin", "admin"))
+        store = SPARQLUpdateStore(query_endpoint=sparql_update_endpoint, returnFormat="turtle", auth=("admin", "admin"))
         remote_graph = Graph(store=store, identifier=wa.warc)
         remote_graph += seed_graph
 

@@ -57,11 +57,12 @@ def s3_kubernetes_recompress_job():
         },
     )
     def recompress(job: dict):
-        from warcio.recompressor import Recompressor
-        from s3fs import S3FileSystem
-        from warcio.warcwriter import WARCWriter
-        from warcio.archiveiterator import ArchiveIterator
         import gzip
+
+        from s3fs import S3FileSystem
+        from warcio.archiveiterator import ArchiveIterator
+        from warcio.recompressor import Recompressor
+        from warcio.warcwriter import WARCWriter
 
         TARGET_BUCKET_NAME = "webarchive"
 
@@ -198,7 +199,6 @@ def s3_kubernetes_recompress_job():
             )
         )
     )
-    # job_done.expand(job=job_execution.expand(job=get_jobs("?idn", "wal:ArasPullJob", {"wal:idn": "?idn"})))
 
 
 s3_kubernetes_recompress_job()

@@ -42,7 +42,8 @@ def s3_kubernetes_metadata_extract_job():
         # We want to get from AirflowException > remote_pod.status.container_statuses[name=base].state.terminated.reason
 
     @task.kubernetes(
-        image="ghcr.io/white-gecko/warc-metadata2rdf:main-s3",
+        # image="ghcr.io/white-gecko/warc-metadata2rdf:main-s3",
+        image="ghcr.io/white-gecko/warc-metadata2rdf@sha256:61c57230da9f72178b78dd11a0910c2b0ef0d08f093d05b3046467a94838b9df",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
             "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",

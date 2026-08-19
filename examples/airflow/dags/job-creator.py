@@ -1,5 +1,5 @@
-from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
+from airflow.sdk import dag, task
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
@@ -62,7 +62,35 @@ INSERT {
 }
 """
 
-job_updates = [recompress_update, index_update]
+metadata_extract_update = """
+PREFIX wa: <https://webarchiv.dnb.de/>
+PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX ex: <https://example.org/>
+
+INSERT {
+    GRAPH wa:jobs {
+        ?job a wal:Job, wal:MetadataExtractJob ;
+            wal:file ?file .
+    }
+} WHERE {
+    ?file a wal:File ;
+        wal:fileStatus ex:clean .
+
+    FILTER NOT EXISTS {
+        ?file wal:fileStatus ex:metadata_extracted .
+    }
+
+    FILTER NOT EXISTS {
+        ?recompressJob a wal:MetadataExtractJob ;
+            wal:file ?file .
+    }
+
+    BIND (UUID() as ?job)
+}
+"""
+
+job_updates = [recompress_update, index_update, metadata_extract_update]
 
 
 @dag(

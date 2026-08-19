@@ -14,7 +14,7 @@ secret_env_secret_access_key = Secret(
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
-PROV_IRI = "https://webarchiv.dnb.de/workflow/extract-metadata-warc/v1"
+PROV_IRI = "https://webarchiv.dnb.de/workflow/metadata-extract-warc/v1"
 
 
 @dag(
@@ -22,7 +22,7 @@ PROV_IRI = "https://webarchiv.dnb.de/workflow/extract-metadata-warc/v1"
     description="Extract Structured WARC Metadata",
     tags=["wacli"],
 )
-def s3_kubernetes_recompress_job():
+def s3_kubernetes_metadata_extract_job():
 
     def job_failed(context):
         task_instance = context.task_instance
@@ -42,13 +42,27 @@ def s3_kubernetes_recompress_job():
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
+        pod_template_dict={
+            "spec": {
+                "containers": [
+                    {
+                        "name": "base",
+                        "resources": {
+                            "limits": {"cpu": "100m", "memory": "512Mi"},
+                            "requests": {"cpu": "100m", "memory": "512Mi"},
+                        },
+                    },
+                ]
+            }
+        },
     )
-    def recompress(job: dict, task_instance):
+    def metadata_extract(job: dict):
+        from rdflib import Graph, URIRef
+        from rdflib.namespace import Namespace
+        from rdflib.plugins.stores.sparqlstore import SPARQLStore
         from s3fs import S3FileSystem
         from warcmetadata.extraction import extract_metadata_simple
-        from rdflib import URIRef
-
-        task_instance.xcom_push(key="job", value=job)
+        from warcmetadata.utils import get_seed_record, guess_seed_request
 
         s3 = S3FileSystem(config_kwargs={"retries": {"mode": "adaptive"}})
         # How could a socket.gaierror be handled propperly
@@ -57,86 +71,27 @@ def s3_kubernetes_recompress_job():
             f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), and extract its metadata. ({job['job_iri']})."
         )
 
-        # Download the file according to the graphs file spec
-        # recompress it and upload it
-
         path_in_s3fs = f"s3://{job['source_bucket']}/{job['source_filename']}"
 
         print("start metadata extraction")
 
         with s3.open(path_in_s3fs, "rb") as stream_in:
             graph = extract_metadata_simple(stream_in, URIRef(job['source_file']))
-        # Recompressor(path_in_s3fs, path_out_s3fs).recompress()
+            seed_graph = get_seed_record(graph, **guess_seed_request(graph))
+
         print("end metadata extraction")
+        print("start add metadata to graph")
 
-        # TODO write metadata to graph
+        wa = Namespace("https://webarchiv.dnb.de/")
 
+        store = SPARQLStore(query_endpoint=sparql_update_endpoint, returnFormat="turtle", auth=("admin", "admin"))
+        remote_graph = Graph(store=store, identifier=wa.warc)
+        remote_graph += seed_graph
 
-        job["files"] = [job["source_filename"]]
+        print("end add metadata to graph")
 
         return job
 
-    @task(trigger_rule="all_done")
-    def register_files(job: dict):
-        import requests
-
-        TARGET_BUCKET_NAME = "webarchive"
-
-        file_iris = {
-            "https://example.org/file/"
-            + TARGET_BUCKET_NAME
-            + "/"
-            + file_name: file_name
-            for file_name in job["files"]
-        }
-
-        file_update = (
-            """
-        PREFIX wa: <https://webarchiv.dnb.de/>
-        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-        PREFIX prov: <http://www.w3.org/ns/prov#>
-        PREFIX ex: <https://example.org/>
-
-        INSERT DATA {
-            GRAPH wa:data {
-        """
-            + "\n".join(
-                [
-                    f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{TARGET_BUCKET_NAME}" ; wal:fileStatus ex:clean.'
-                    for file_iri, file_name in file_iris.items()
-                ]
-            )
-            + """
-            }
-            GRAPH wa:prov {
-        """
-            + "\n".join(
-                [
-                    f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo <{PROV_IRI}>; prov:wasDerivedFrom <{file_iri}> ."
-                    for file_iri, file_name in file_iris.items()
-                ]
-            )
-            + """
-            }
-        }
-        """
-        )
-
-        r = requests.post(
-            sparql_update_endpoint,
-            auth=("admin", "admin"),
-            headers={
-                "Accept": "application/sparql-results+json,*/*;q=0.9",
-                "Content-Type": "application/sparql-update",
-            },
-            data=file_update,
-        )
-
-        print(r)
-        print(r.text)
-
-        r.raise_for_status()
-        return job
 
     triple_pattern = """
     ?source_file wal:filename ?source_filename ;
@@ -144,16 +99,15 @@ def s3_kubernetes_recompress_job():
     """
 
     jobs_done(
-        job=recompress.expand(
+        metadata_extract.expand(
             job=get_jobs(
                 ["source_file", "source_filename", "source_bucket"],
-                "wal:RecompressJob",
+                "wal:MetadataExtractJob",
                 {"wal:file": "?source_file"},
                 triple_pattern=triple_pattern,
             )
         )
     )
-    # job_done.expand(job=job_execution.expand(job=get_jobs("?idn", "wal:ArasPullJob", {"wal:idn": "?idn"})))
 
 
-s3_kubernetes_recompress_job()
+s3_kubernetes_metadata_extract_job()

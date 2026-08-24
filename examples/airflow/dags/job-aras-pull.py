@@ -114,7 +114,7 @@ def s3_kubernetes_aras_pull_job():
         TARGET_BUCKET_NAME = "waingest"
 
         file_iris = {
-            "https://example.org/file/" + file_name: file_name
+            "https://webarchiv.dnb.de/file/" + file_name: file_name
             for file_name in job["files"]
         }
 

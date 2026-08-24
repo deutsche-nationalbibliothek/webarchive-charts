@@ -1,1 +1,1 @@
-sparqlEndpoint: "http://graph-service:8080/"
+sparqlEndpoint: "http://webarchive-fuseki:3030/ds/query"

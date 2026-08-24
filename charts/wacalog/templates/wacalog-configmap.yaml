@@ -18,7 +18,7 @@ data:
       - mkrdf:
           # graph_file: data/websites.ttl
           sparql_endpoint: {{ .Values.sparqlEndpoint | quote }}
-          base_iri: https://d-nb.info/
+          base_iri: https://webarchiv.dnb.de/
           class_template_map:
               http://purl.org/lobid/lv#ArchivedWebPage: archivedwebpage.html
               http://purl.org/ontology/bibo/Website: website.html

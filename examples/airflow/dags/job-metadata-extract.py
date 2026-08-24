@@ -114,18 +114,69 @@ def s3_kubernetes_metadata_extract_job():
         return job
 
 
+    @task(trigger_rule="all_done")
+    def register_files(job: dict):
+        import requests
+
+        file_update = (
+            """
+        PREFIX wa: <https://webarchiv.dnb.de/>
+        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+        PREFIX prov: <http://www.w3.org/ns/prov#>
+        PREFIX ex: <https://example.org/>
+
+        INSERT DATA {
+            GRAPH wa:data {
+        """
+            + f'<{job['source_file']}> wal:fileStatus ex:metadata_extracted.'
+            + """
+            }
+        }
+        """
+        )
+
+
+        # """
+        #     GRAPH wa:prov {
+        # """ + "\n".join(
+        #     [
+        #         f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo <{PROV_IRI}>; prov:wasDerivedFrom <{job['source_file']}> ."
+        #     ]
+        # ) + """
+        # }
+        # """
+
+        r = requests.post(
+            sparql_update_endpoint,
+            auth=("admin", "admin"),
+            headers={
+                "Accept": "application/sparql-results+json,*/*;q=0.9",
+                "Content-Type": "application/sparql-update",
+            },
+            data=file_update,
+        )
+
+        print(r)
+        print(r.text)
+
+        r.raise_for_status()
+        return job
+
+
     triple_pattern = """
     ?source_file wal:filename ?source_filename ;
         wal:bucket ?source_bucket .
     """
 
     jobs_done(
-        metadata_extract.expand(
-            job=get_jobs(
-                ["source_file", "source_filename", "source_bucket"],
-                "wal:MetadataExtractJob",
-                {"wal:file": "?source_file"},
-                triple_pattern=triple_pattern,
+        register_files.expand(
+            job=metadata_extract.expand(
+                job=get_jobs(
+                    ["source_file", "source_filename", "source_bucket"],
+                    "wal:MetadataExtractJob",
+                    {"wal:file": "?source_file"},
+                    triple_pattern=triple_pattern,
+                )
             )
         )
     )

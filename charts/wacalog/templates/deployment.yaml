@@ -27,7 +27,7 @@ spec:
             - mountPath: "/data"
               name: wacalog-templates
           resources:
-            {{- toYaml .Values.init.resources | nindent 12 }}
+            {{- toYaml .Values.initClone.resources | nindent 12 }}
         - name: wacalog-build
           image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql'
           imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
@@ -44,7 +44,7 @@ spec:
             - mountPath: "/build"
               name: wacalog-build
           resources:
-            {{- toYaml .Values.init.resources | nindent 12 }}
+            {{- toYaml .Values.initBuild.resources | nindent 12 }}
       containers:
         - name: wacalog-serve
           image: 'docker.io/lipanski/docker-static-website:latest'

@@ -1,1 +1,9 @@
 sparqlEndpoint: "http://webarchive-fuseki:3030/ds/query"
+
+resources: {}
+
+initClone:
+  resources: {}
+
+initBuild:
+  resources: {}

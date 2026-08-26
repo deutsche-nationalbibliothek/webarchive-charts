@@ -111,7 +111,7 @@ pwidresolver:
   enabled: true
 
 wacalog:
-  enabled: false
+  enabled: true
 
 dashboard:
   enabled: true

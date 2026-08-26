@@ -1,6 +1,16 @@
-from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
-from boilerplate import get_jobs, jobs_done, jobs_failed
+from airflow.sdk import dag, task
+from boilerplate import (
+    FILE_BASE_IRI,
+    PREFIXES,
+    PROV_BASE_IRI,
+    get_jobs,
+    jobs_done,
+    jobs_failed,
+)
+
+PROV_IRI = f"<{PROV_BASE_IRI}oGet>"
+JOB_TYPE_IRI = "dalajobs:ArasPullJob"
 
 secret_env_access_key = Secret(
     "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
@@ -13,10 +23,6 @@ secret_env_secret_access_key = Secret(
 )
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
-
-
-PROV_IRI = "https://example.org/oia-duesseldorf/oGet"
-
 
 @dag(
     schedule=None,  # "@once"
@@ -114,19 +120,15 @@ def s3_kubernetes_aras_pull_job():
         TARGET_BUCKET_NAME = "waingest"
 
         file_iris = {
-            "https://webarchiv.dnb.de/file/" + file_name: file_name
+            FILE_BASE_IRI + file_name: file_name
             for file_name in job["files"]
         }
 
         file_update = (
-            """
-        PREFIX wa: <https://webarchiv.dnb.de/>
-        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-        PREFIX prov: <http://www.w3.org/ns/prov#>
-        PREFIX ex: <https://example.org/>
+            PREFIXES + """
 
         INSERT DATA {
-            GRAPH wa:data {
+            GRAPH wag:data {
         """
             + "\n".join(
                 [
@@ -136,11 +138,11 @@ def s3_kubernetes_aras_pull_job():
             )
             + """
             }
-            GRAPH wa:prov {
+            GRAPH wag:prov {
         """
             + "\n".join(
                 [
-                    f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo <{PROV_IRI}> ."
+                    f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo {PROV_IRI} ."
                     for file_iri, file_name in file_iris.items()
                 ]
             )
@@ -169,7 +171,7 @@ def s3_kubernetes_aras_pull_job():
     jobs_done(
         register_files.expand(
             job=aras_download.expand(
-                job=get_jobs(["idn"], "wal:ArasPullJob", {"wal:idn": "?idn"})
+                job=get_jobs(["idn"], JOB_TYPE_IRI, {"wal:idn": "?idn"})
             )
         )
     )

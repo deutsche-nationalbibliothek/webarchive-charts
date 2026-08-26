@@ -14,6 +14,7 @@ secret_env_secret_access_key = Secret(
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
+JOB_TYPE_IRI = "dalajobs:IndexJob"
 
 @dag(
     schedule=None,  # "@once"
@@ -74,7 +75,7 @@ def job_index():
         index.expand(
             job=get_jobs(
                 ["source_file", "source_filename", "source_bucket"],
-                "wal:IndexJob",
+                JOB_TYPE_IRI,
                 {"wal:file": "?source_file"},
                 triple_pattern=triple_pattern,
             )

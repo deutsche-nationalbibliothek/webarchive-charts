@@ -1,32 +1,28 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
 from airflow.sdk import dag, task
+from boilerplate import PREFIXES
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
 
-recompress_update = """
-PREFIX wa: <https://webarchiv.dnb.de/>
-PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-PREFIX prov: <http://www.w3.org/ns/prov#>
-PREFIX ex: <https://example.org/>
-
+recompress_update = PREFIXES + """
 INSERT {
-    GRAPH wa:jobs {
-        ?job a wal:Job, wal:RecompressJob ;
+    GRAPH wag:jobs {
+        ?job a wal:Job, dalajobs:RecompressJob ;
             wal:file ?file .
     }
 } WHERE {
     ?file a wal:File ;
-        prov:wasAttributedTo <https://example.org/oia-duesseldorf/oGet> .
+        prov:wasAttributedTo wapplan:oGet .
 
     FILTER NOT EXISTS {
         ?recompressedFile a wal:File ;
-            wal:fileStatus ex:clean ;
+            wal:fileStatus filestatus:clean ;
             prov:wasDerivedFrom ?file .
     }
 
     FILTER NOT EXISTS {
-        ?recompressJob a wal:RecompressJob ;
+        ?recompressJob a dalajobs:RecompressJob ;
             wal:file ?file .
     }
 
@@ -34,27 +30,22 @@ INSERT {
 }
 """
 
-index_update = """
-PREFIX wa: <https://webarchiv.dnb.de/>
-PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-PREFIX prov: <http://www.w3.org/ns/prov#>
-PREFIX ex: <https://example.org/>
-
+index_update = PREFIXES + """
 INSERT {
-    GRAPH wa:jobs {
-        ?job a wal:Job, wal:IndexJob ;
+    GRAPH wag:jobs {
+        ?job a wal:Job, dalajobs:IndexJob ;
             wal:file ?file .
     }
 } WHERE {
     ?file a wal:File ;
-        wal:fileStatus ex:clean .
+        wal:fileStatus filestatus:clean .
 
     FILTER NOT EXISTS {
-        ?file wal:fileStatus ex:indexed .
+        ?file wal:fileStatus filestatus:indexed .
     }
 
     FILTER NOT EXISTS {
-        ?recompressJob a wal:IndexJob ;
+        ?recompressJob a dalajobs:IndexJob ;
             wal:file ?file .
     }
 
@@ -62,27 +53,22 @@ INSERT {
 }
 """
 
-metadata_extract_update = """
-PREFIX wa: <https://webarchiv.dnb.de/>
-PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-PREFIX prov: <http://www.w3.org/ns/prov#>
-PREFIX ex: <https://example.org/>
-
+metadata_extract_update = PREFIXES + """
 INSERT {
-    GRAPH wa:jobs {
-        ?job a wal:Job, wal:MetadataExtractJob ;
+    GRAPH wag:jobs {
+        ?job a wal:Job, dalajobs:MetadataExtractJob ;
             wal:file ?file .
     }
 } WHERE {
     ?file a wal:File ;
-        wal:fileStatus ex:clean .
+        wal:fileStatus filestatus:clean .
 
     FILTER NOT EXISTS {
-        ?file wal:fileStatus ex:metadata_extracted .
+        ?file wal:fileStatus filestatus:metadata_extracted .
     }
 
     FILTER NOT EXISTS {
-        ?recompressJob a wal:MetadataExtractJob ;
+        ?recompressJob a dalajobs:MetadataExtractJob ;
             wal:file ?file .
     }
 

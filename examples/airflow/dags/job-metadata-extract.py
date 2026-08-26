@@ -1,6 +1,6 @@
 from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
-from boilerplate import get_jobs, jobs_done, jobs_failed
+from boilerplate import get_jobs, jobs_done, jobs_failed, PROV_BASE_IRI, PREFIXES
 
 secret_env_access_key = Secret(
     "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
@@ -14,7 +14,8 @@ secret_env_secret_access_key = Secret(
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
-PROV_IRI = "https://webarchiv.dnb.de/workflow/metadata-extract-warc/v1"
+PROV_IRI = f"<{PROV_BASE_IRI}metadata-extract-warc:v1>"
+JOB_TYPE_IRI = "dalajobs:MetadataExtractJob"
 
 
 @dag(
@@ -119,16 +120,11 @@ def s3_kubernetes_metadata_extract_job():
         import requests
 
         file_update = (
-            """
-        PREFIX wa: <https://webarchiv.dnb.de/>
-        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-        PREFIX prov: <http://www.w3.org/ns/prov#>
-        PREFIX ex: <https://example.org/>
-
+            PREFIXES + """
         INSERT DATA {
-            GRAPH wa:data {
+            GRAPH wag:data {
         """
-            + f'<{job['source_file']}> wal:fileStatus ex:metadata_extracted.'
+            + f'<{job['source_file']}> wal:fileStatus filestatus:metadata_extracted.'
             + """
             }
         }
@@ -137,10 +133,10 @@ def s3_kubernetes_metadata_extract_job():
 
 
         # """
-        #     GRAPH wa:prov {
+        #     GRAPH wag:prov {
         # """ + "\n".join(
         #     [
-        #         f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo <{PROV_IRI}>; prov:wasDerivedFrom <{job['source_file']}> ."
+        #         f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo {PROV_IRI}; prov:wasDerivedFrom <{job['source_file']}> ."
         #     ]
         # ) + """
         # }
@@ -173,7 +169,7 @@ def s3_kubernetes_metadata_extract_job():
             job=metadata_extract.expand(
                 job=get_jobs(
                     ["source_file", "source_filename", "source_bucket"],
-                    "wal:MetadataExtractJob",
+                    JOB_TYPE_IRI,
                     {"wal:file": "?source_file"},
                     triple_pattern=triple_pattern,
                 )

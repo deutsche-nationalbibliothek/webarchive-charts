@@ -1,6 +1,13 @@
-from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
-from boilerplate import get_jobs, jobs_done, jobs_failed
+from airflow.sdk import dag, task
+from boilerplate import (
+    FILE_BASE_IRI,
+    PREFIXES,
+    PROV_BASE_IRI,
+    get_jobs,
+    jobs_done,
+    jobs_failed,
+)
 
 secret_env_access_key = Secret(
     "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
@@ -14,8 +21,8 @@ secret_env_secret_access_key = Secret(
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
-PROV_IRI = "https://webarchiv.dnb.de/workflow/recompress/v1"
-
+PROV_IRI = f"<{PROV_BASE_IRI}recompress:v1>"
+JOB_TYPE_IRI = "dalajobs:RecompressJob"
 
 @dag(
     schedule=None,  # "@once"
@@ -127,7 +134,7 @@ def s3_kubernetes_recompress_job():
         TARGET_BUCKET_NAME = "webarchive"
 
         file_iris = {
-            "https://example.org/file/"
+            FILE_BASE_IRI
             + TARGET_BUCKET_NAME
             + "/"
             + file_name: file_name
@@ -135,28 +142,23 @@ def s3_kubernetes_recompress_job():
         }
 
         file_update = (
-            """
-        PREFIX wa: <https://webarchiv.dnb.de/>
-        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
-        PREFIX prov: <http://www.w3.org/ns/prov#>
-        PREFIX ex: <https://example.org/>
-
+            PREFIXES + """
         INSERT DATA {
-            GRAPH wa:data {
+            GRAPH wag:data {
         """
             + "\n".join(
                 [
-                    f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{TARGET_BUCKET_NAME}" ; wal:fileStatus ex:clean.'
+                    f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{TARGET_BUCKET_NAME}" ; wal:fileStatus filestatus:clean.'
                     for file_iri, file_name in file_iris.items()
                 ]
             )
             + """
             }
-            GRAPH wa:prov {
+            GRAPH wag:prov {
         """
             + "\n".join(
                 [
-                    f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo <{PROV_IRI}>; prov:wasDerivedFrom <{file_iri}> ."
+                    f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo {PROV_IRI}; prov:wasDerivedFrom <{file_iri}> ."
                     for file_iri, file_name in file_iris.items()
                 ]
             )
@@ -192,7 +194,7 @@ def s3_kubernetes_recompress_job():
             job=recompress.expand(
                 job=get_jobs(
                     ["source_file", "source_filename", "source_bucket"],
-                    "wal:RecompressJob",
+                    JOB_TYPE_IRI,
                     {"wal:file": "?source_file"},
                     triple_pattern=triple_pattern,
                 )

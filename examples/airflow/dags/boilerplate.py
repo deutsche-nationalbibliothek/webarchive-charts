@@ -1,8 +1,58 @@
+from textwrap import dedent
+
+import requests
 from airflow.sdk import task
+from requests.exceptions import JSONDecodeError
 
 sparql_query_endpoint = "http://webarchive-fuseki:3030/ds/query"
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
+BASE_IRI = "https://d-nb.info/"
+
+WEBARCHIVE_BASE_IRI = BASE_IRI + "webarchive/"
+GRAPH_BASE_IRI = WEBARCHIVE_BASE_IRI + "graphs/"
+FILE_BASE_IRI = WEBARCHIVE_BASE_IRI + "files/"
+
+PROV_BASE_IRI = BASE_IRI + "provenance/webarchive/plan#"
+
+WAL_NAMESPACE = BASE_IRI + "standards/elementset/wal#"
+FILESTATUS_NAMESPACE = BASE_IRI + "standards/vocab/filestatus#"
+DALAJOBS_NAMESPACE = BASE_IRI + "standards/vocab/datalakejobs#"
+
+PREFIXES = dedent(f"""
+    PREFIX wag: <{GRAPH_BASE_IRI}>
+    PREFIX wal: <{WAL_NAMESPACE}>
+    PREFIX filestatus: <{FILESTATUS_NAMESPACE}>
+    PREFIX dalajobs: <{DALAJOBS_NAMESPACE}>
+    PREFIX prov: <http://www.w3.org/ns/prov#>
+    PREFIX wapplan: <{PROV_BASE_IRI}>
+    """)
+
+PREFIXES + """
+filestatus:clean
+filestatus:indexed
+filestatus:metadata_extracted
+"""
+
+PREFIXES + """
+wapplan:oGet
+"""
+
+PREFIXES + """
+wal:fileStatus
+wal:File
+wal:Job
+wal:bucket
+wal:filename
+wal:idn
+"""
+
+PREFIXES + """
+dalajobs:RecompressJob
+dalajobs:IndexJob
+dalajobs:MetadataExtractJob
+dalajobs:ArasPullJob
+"""
 
 @task
 def get_jobs(
@@ -12,15 +62,11 @@ def get_jobs(
     triple_pattern: str = "",
     limit: int = 10,
 ):
-    import requests
-    from requests.exceptions import JSONDecodeError
 
     job_query = (
-        f"""
-    PREFIX wa: <https://webarchiv.dnb.de/>
-    PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+        PREFIXES + f"""
     SELECT ?job {" ".join(f"?{var}" for var in projection)} {{
-        GRAPH wa:jobs {{
+        GRAPH wag:jobs {{
             ?job a {rdf_type} ;
     """
         + ";\n".join([f"{prop[0]} {prop[1]}" for prop in properties.items()])
@@ -72,15 +118,11 @@ def jobs_done(jobs: list[dict] = None):
 
 
 def _jobs_done(jobs: list[dict]):
-    import requests
-    from textwrap import dedent
 
     job_update = dedent(
-        """
-        PREFIX wa: <https://webarchiv.dnb.de/>
-        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+        PREFIXES + """
         INSERT DATA {
-            GRAPH wa:jobs {
+            GRAPH wag:jobs {
         """
             + "\n".join([f"<{job['job_iri']}> wal:status wal:done ." for job in jobs])
             + """
@@ -106,8 +148,6 @@ def _jobs_done(jobs: list[dict]):
 
 
 def jobs_failed(jobs: list[dict]):
-    import requests
-    from textwrap import dedent
 
     triples = []
 
@@ -118,11 +158,9 @@ def jobs_failed(jobs: list[dict]):
 
 
     job_update = dedent(
-        """
-        PREFIX wa: <https://webarchiv.dnb.de/>
-        PREFIX wal: <https://d-nb.info/standards/elementset/wal#>
+        PREFIXES + """
         INSERT DATA {
-            GRAPH wa:jobs {
+            GRAPH wag:jobs {
         """
             + "\n".join(triples)
             + """

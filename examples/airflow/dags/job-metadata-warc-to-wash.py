@@ -1,11 +1,11 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
 from airflow.sdk import dag, task
+from boilerplate import PREFIXES
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 
 
-metadata_warc_to_wash_update = """
-prefix wa: <https://webarchiv.dnb.de/>
+metadata_warc_to_wash_update = PREFIXES + """
 prefix bibo: <http://purl.org/ontology/bibo/>
 prefix dc: <http://purl.org/dc/elements/1.1/>
 prefix dct: <http://purl.org/dc/terms/>
@@ -15,7 +15,7 @@ prefix lv: <http://purl.org/lobid/lv#>
 prefix dowarc: <https://github.com/DOWARC/dowarc#>
 
 insert {
-    graph wa:warc {
+    graph wag:warc {
         ?website
             a bibo:Website ; # Website
             dc:type bibo:Website ;
@@ -38,7 +38,7 @@ insert {
         ?seedUrl a schema:WebPage .
     }
 } where {
-    graph wa:warc {
+    graph wag:warc {
         ?warcfile dct:relation ?request, ?response .
 
         ?request dowarc:WARC-Target-URI ?seedUrl ;

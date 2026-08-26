@@ -53,13 +53,13 @@ insert {
             dowarc:WARC-Warcinfo-ID ?warcinfo .
 
         bind("webarchiv.dnb.de" as ?archive_domain)
-        bind(concat(str(wa:warc), "/") as ?base)
+        bind(concat(str(wag:warc), "/") as ?base)
 
         # the date does not yet work for pwids
         bind(iri(concat("urn:pwid:", ?archive_domain, ":", str(?date), ":page:", str(?seedUrl))) as ?pwid)
 
         bind(iri(concat(str(?base), struuid())) as ?snapshot)
-        bind(iri(concat(str(?base), struuid())) as ?website)
+        bind(iri(concat(str(?base), sha256(?seedUrl))) as ?website)
     }
 }
 """

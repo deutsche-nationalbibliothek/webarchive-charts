@@ -112,6 +112,12 @@ pwidresolver:
 
 wacalog:
   enabled: true
+  # insert the output of `minikube ip` as host part.
+  playbackBase: "http://192.168.39.38/wayback/warcs/"
+  mkrdf:
+    sparqlEndpoint: "http://webarchive-fuseki:3030/ds/query"
+    baseIri: "https://d-nb.info/webarchive/"
+    homeIri: "https://d-nb.info/webarchive/"
 
 dashboard:
   enabled: true

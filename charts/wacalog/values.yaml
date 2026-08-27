@@ -1,5 +1,3 @@
-sparqlEndpoint: "http://webarchive-fuseki:3030/ds/query"
-
 resources: {}
 
 initClone:
@@ -7,3 +5,9 @@ initClone:
 
 initBuild:
   resources: {}
+
+playbackBase: "http://your-host.example/wayback/warcs/"
+mkrdf:
+  sparqlEndpoint: "http://webarchive-fuseki:3030/ds/query"
+  baseIri: "https://webarchiv.dnb.de/"
+  homeIri: "https://webarchiv.dnb.de/"

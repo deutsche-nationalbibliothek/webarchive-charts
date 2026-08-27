@@ -5,7 +5,7 @@ metadata:
 data:
   mkdocs.yml: |
     site_name: DNB Webarchive Katalog
-    playback_base: http://webarchiv.apps.dnb.de/wayback/warcs/
+    playback_base: {{ .Values.playbackBase | quote }}
     logo_path: resources/images/logo.png
     theme:
       name: null
@@ -17,8 +17,8 @@ data:
     plugins:
       - mkrdf:
           # graph_file: data/websites.ttl
-          sparql_endpoint: {{ .Values.sparqlEndpoint | quote }}
-          base_iri: https://webarchiv.dnb.de/
+          sparql_endpoint: {{ .Values.mkrdf.sparqlEndpoint | quote }}
+          base_iri: {{ .Values.mkrdf.baseIri | quote }}
           class_template_map:
               http://purl.org/lobid/lv#ArchivedWebPage: archivedwebpage.html
               http://purl.org/ontology/bibo/Website: website.html
@@ -26,11 +26,12 @@ data:
               https://github.com/DOWARC/dowarc#WARCfile: warcfile.html
               https://github.com/DOWARC/dowarc#WARCrecord: warcrecord.html
           instance_template_map:
+              {{ .Values.mkrdf.homeIri | quote }}: home.html
               https://webarchiv.apps.dnb.de/wacalog/: home.html
     hooks:
       - plugins/datetime_format.py
   index.md: |
-    resource_iri: https://webarchiv.dnb.de/
+    resource_iri: {{ .Values.mkrdf.homeIri | quote }}
     template: home.html
 
     # Das Webarchiv der Zukunft

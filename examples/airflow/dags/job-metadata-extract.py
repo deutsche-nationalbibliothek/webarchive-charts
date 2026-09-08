@@ -97,6 +97,10 @@ def s3_kubernetes_metadata_extract_job():
 
         print("start metadata extraction")
 
+        # This is the current implementation for the OIA files, where we guess the seed record from a WARC file under the assumption
+        # that we have one crawl per file with one seed.
+        # TODO: once we also have crawl jobs, we will know the seed urls from the crawl jobs and somehow have to get the conclusion to the respective records.
+
         with s3.open(path_in_s3fs, "rb") as stream_in:
             graph = extract_metadata_simple(stream_in, URIRef(job['source_file']))
             seed_graph = get_seed_record(graph, **guess_seed_request(graph))

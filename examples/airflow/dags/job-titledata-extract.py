@@ -63,7 +63,8 @@ def s3_kubernetes_titledata_extract_job():
             "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
             "AWS_DEFAULT_REGION": aws_default_region,
             "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint,
-            "SPARQL_UPDATE_AUTH_TUPLE": sparql_update_auth_tuple
+            "SPARQL_UPDATE_AUTH_TUPLE_USERNAME": sparql_update_auth_tuple[0],
+            "SPARQL_UPDATE_AUTH_TUPLE_PASSWORD": sparql_update_auth_tuple[1],
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
@@ -96,7 +97,7 @@ def s3_kubernetes_titledata_extract_job():
         # How could a socket.gaierror be handled propperly
 
         sparql_update_endpoint = os.environ["SPARQL_UPDATE_ENDPOINT"]
-        sparql_update_auth_tuple = os.environ["SPARQL_UPDATE_AUTH_TUPLE"]
+        sparql_update_auth_tuple = (os.environ["SPARQL_UPDATE_AUTH_TUPLE_USERNAME"], os.environ["SPARQL_UPDATE_AUTH_TUPLE_PASSWORD"])
 
         print(
             f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), and extract the title from the contained website. ({job['job_iri']})."

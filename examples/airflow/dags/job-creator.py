@@ -77,7 +77,31 @@ INSERT {
 }
 """
 
-job_updates = [recompress_update, index_update, metadata_extract_update]
+titledata_extract_update = PREFIXES + """
+INSERT {
+    GRAPH wag:jobs {
+        ?job a wal:Job, dalajobs:TitledataExtractJob ;
+            wal:file ?file .
+    }
+} WHERE {
+    ?file a wal:File ;
+        wal:fileStatus filestatus:metadata_extracted .
+
+    FILTER NOT EXISTS {
+        ?file wal:fileStatus filestatus:titledata_extracted .
+    }
+
+    FILTER NOT EXISTS {
+        ?recompressJob a dalajobs:TitledataExtractJob ;
+            wal:file ?file .
+    }
+
+    BIND (UUID() as ?job)
+}
+"""
+
+
+job_updates = [recompress_update, index_update, metadata_extract_update, titledata_extract_update]
 
 
 @dag(

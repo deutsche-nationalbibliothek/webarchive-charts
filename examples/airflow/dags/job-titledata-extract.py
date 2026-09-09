@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 from airflow.providers.cncf.kubernetes.secret import Secret
 from airflow.sdk import dag, task
 from boilerplate import PREFIXES, PROV_BASE_IRI, get_jobs, jobs_done, jobs_failed
@@ -19,7 +21,7 @@ aws_endpoint_url_s3 = "http://webarchive-versitygw:7070"
 aws_default_region = "eu-central-1"
 
 PROV_IRI = f"<{PROV_BASE_IRI}title-extract-warc:v1>"
-JOB_TYPE_IRI = "dalajobs:TitleExtractJob"
+JOB_TYPE_IRI = "dalajobs:TitledataExtractJob"
 
 
 @dag(
@@ -60,7 +62,8 @@ def s3_kubernetes_titledata_extract_job():
         env_vars={
             "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
             "AWS_DEFAULT_REGION": aws_default_region,
-            "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint
+            "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint,
+            "SPARQL_UPDATE_AUTH_TUPLE": sparql_update_auth_tuple
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
@@ -93,6 +96,7 @@ def s3_kubernetes_titledata_extract_job():
         # How could a socket.gaierror be handled propperly
 
         sparql_update_endpoint = os.environ["SPARQL_UPDATE_ENDPOINT"]
+        sparql_update_auth_tuple = os.environ["SPARQL_UPDATE_AUTH_TUPLE"]
 
         print(
             f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), and extract the title from the contained website. ({job['job_iri']})."
@@ -103,8 +107,8 @@ def s3_kubernetes_titledata_extract_job():
         print("start title data extraction")
 
         # TODO get the record_id and bibo_website_uri
-        select_record_id = "<urn:uuid:…>"
-        bibo_website = "https://…"
+        select_record_id = job["record_id"]
+        bibo_website = job["bibo_website"]
 
         record_graph = Graph()
         with s3.open(path_in_s3fs, "rb") as stream_in:
@@ -137,7 +141,7 @@ def s3_kubernetes_titledata_extract_job():
         INSERT DATA {
             GRAPH wag:data {
         """
-            + f'<{job['source_file']}> wal:fileStatus filestatus:title_extracted.'
+            + f'<{job['source_file']}> wal:fileStatus filestatus:titledata_extracted.'
             + """
             }
         }
@@ -172,7 +176,7 @@ def s3_kubernetes_titledata_extract_job():
         return job
 
 
-    triple_pattern = """
+    triple_pattern = dedent("""
     ?source_file wal:filename ?source_filename ;
         wal:bucket ?source_bucket .
 
@@ -183,10 +187,10 @@ def s3_kubernetes_titledata_extract_job():
         dct:isPartOf ?bibo_website .
 
     ?record a dowarc:WARCrecord ;
-        dowarc:WARC-Warcinfo-ID warcinfo ;
+        dowarc:WARC-Warcinfo-ID ?warcinfo ;
         dowarc:WARC-Type "response" ;
         dowarc:WARC-Record-ID ?record_id .
-    """
+    """)
 
     jobs_done(
         register_files.expand(

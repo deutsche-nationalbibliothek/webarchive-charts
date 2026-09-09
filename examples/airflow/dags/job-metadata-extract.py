@@ -1,6 +1,6 @@
 from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
-from boilerplate import get_jobs, jobs_done, jobs_failed, PROV_BASE_IRI, PREFIXES
+from boilerplate import get_jobs, jobs_done, jobs_failed, PROV_BASE_IRI, PREFIXES, GRAPH_BASE_IRI
 
 secret_env_access_key = Secret(
     "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
@@ -56,7 +56,8 @@ def s3_kubernetes_metadata_extract_job():
         env_vars={
             "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
             "AWS_DEFAULT_REGION": "eu-central-1",
-            "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint
+            "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint,
+            "GRAPH_BASE_IRI": GRAPH_BASE_IRI
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
@@ -88,6 +89,7 @@ def s3_kubernetes_metadata_extract_job():
         # How could a socket.gaierror be handled propperly
 
         sparql_update_endpoint = os.environ["SPARQL_UPDATE_ENDPOINT"]
+        graph_base_iri = os.environ["GRAPH_BASE_IRI"]
 
         print(
             f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), and extract its metadata. ({job['job_iri']})."
@@ -108,10 +110,10 @@ def s3_kubernetes_metadata_extract_job():
         print("end metadata extraction")
         print("start add metadata to graph")
 
-        wa = Namespace("https://webarchiv.dnb.de/")
+        WAG = Namespace(graph_base_iri)
 
         store = SPARQLUpdateStore(update_endpoint=sparql_update_endpoint, auth=("admin", "admin"))
-        remote_graph = Graph(store=store, identifier=wa.warc)
+        remote_graph = Graph(store=store, identifier=WAG.warc)
         remote_graph += seed_graph
 
         print("end add metadata to graph")

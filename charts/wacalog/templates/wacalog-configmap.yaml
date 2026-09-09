@@ -20,14 +20,14 @@ data:
           sparql_endpoint: {{ .Values.mkrdf.sparqlEndpoint | quote }}
           base_iri: {{ .Values.mkrdf.baseIri | quote }}
           class_template_map:
-              http://purl.org/lobid/lv#ArchivedWebPage: archivedwebpage.html
-              http://purl.org/ontology/bibo/Website: website.html
-              http://purl.org/ontology/bibo/Series: collection.html
-              https://github.com/DOWARC/dowarc#WARCfile: warcfile.html
-              https://github.com/DOWARC/dowarc#WARCrecord: warcrecord.html
+            http://purl.org/lobid/lv#ArchivedWebPage: archivedwebpage.html
+            http://purl.org/ontology/bibo/Website: website.html
+            http://purl.org/ontology/bibo/Series: collection.html
+            https://github.com/DOWARC/dowarc#WARCfile: warcfile.html
+            https://github.com/DOWARC/dowarc#WARCrecord: warcrecord.html
           instance_template_map:
-              {{ .Values.mkrdf.homeIri | quote }}: home.html
-              https://webarchiv.apps.dnb.de/wacalog/: home.html
+            {{ .Values.mkrdf.homeIri | quote }}: home.html
+            https://webarchiv.apps.dnb.de/wacalog/: home.html
     hooks:
       - plugins/datetime_format.py
   index.md: |

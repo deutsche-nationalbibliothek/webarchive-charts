@@ -17,15 +17,25 @@ PROV_BASE_IRI = BASE_IRI + "provenance/webarchive/plan#"
 
 WAL_NAMESPACE = BASE_IRI + "standards/elementset/wal#"
 FILESTATUS_NAMESPACE = BASE_IRI + "standards/vocab/filestatus#"
+JOBSTATUS_NAMESPACE = BASE_IRI + "standards/vocab/jobstatus#"
 DALAJOBS_NAMESPACE = BASE_IRI + "standards/vocab/datalakejobs#"
 
 PREFIXES = dedent(f"""
-    PREFIX wag: <{GRAPH_BASE_IRI}>
-    PREFIX wal: <{WAL_NAMESPACE}>
-    PREFIX filestatus: <{FILESTATUS_NAMESPACE}>
-    PREFIX dalajobs: <{DALAJOBS_NAMESPACE}>
-    PREFIX prov: <http://www.w3.org/ns/prov#>
     PREFIX wapplan: <{PROV_BASE_IRI}>
+    PREFIX wal: <{WAL_NAMESPACE}>
+    PREFIX wag: <{GRAPH_BASE_IRI}>
+    PREFIX dalajobs: <{DALAJOBS_NAMESPACE}>
+    PREFIX filestatus: <{FILESTATUS_NAMESPACE}>
+    PREFIX jobstatus: <{JOBSTATUS_NAMESPACE}>
+
+    PREFIX prov: <http://www.w3.org/ns/prov#>
+    PREFIX bibo: <http://purl.org/ontology/bibo/>
+    PREFIX dc: <http://purl.org/dc/elements/1.1/>
+    PREFIX dct: <http://purl.org/dc/terms/>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    PREFIX schema: <https://schema.org/>
+    PREFIX lv: <http://purl.org/lobid/lv#>
+    PREFIX dowarc: <https://github.com/DOWARC/dowarc#>
     """)
 
 PREFIXES + """
@@ -40,6 +50,7 @@ wapplan:oGet
 
 PREFIXES + """
 wal:fileStatus
+wal:jobStatus
 wal:File
 wal:Job
 wal:bucket
@@ -63,7 +74,7 @@ def get_jobs(
     limit: int = 10,
 ):
 
-    job_query = (
+    job_query = dedent(
         PREFIXES + f"""
     SELECT ?job {" ".join(f"?{var}" for var in projection)} {{
         GRAPH wag:jobs {{
@@ -72,7 +83,10 @@ def get_jobs(
         + ";\n".join([f"{prop[0]} {prop[1]}" for prop in properties.items()])
         + " . "
         + """
-            FILTER NOT EXISTS { ?job wal:status ?status . VALUES ?status { wal:done wal:failed wal:skip } }
+            FILTER NOT EXISTS {
+                ?job wal:jobStatus ?status .
+                VALUES ?status { jobstatus:done jobstatus:failed jobstatus:skip }
+            }
         }"""
         + triple_pattern
         + f"""
@@ -108,12 +122,12 @@ def get_jobs(
 
 
 @task
-def job_done(job: dict = None):
+def job_done(job: dict | None = None):
     return _jobs_done([job])
 
 
 @task(trigger_rule="all_done")
-def jobs_done(jobs: list[dict] = None):
+def jobs_done(jobs: list[dict] | None = None):
     return _jobs_done(jobs)
 
 
@@ -124,7 +138,7 @@ def _jobs_done(jobs: list[dict]):
         INSERT DATA {
             GRAPH wag:jobs {
         """
-            + "\n".join([f"<{job['job_iri']}> wal:status wal:done ." for job in jobs])
+            + "\n".join([f"<{job['job_iri']}> wal:jobStatus jobstatus:done ." for job in jobs])
             + """
             }
         }
@@ -152,7 +166,7 @@ def jobs_failed(jobs: list[dict]):
     triples = []
 
     for job in jobs:
-        triples += f"<{job['job_iri']}> wal:status wal:failed ."
+        triples += f"<{job['job_iri']}> wal:jobStatus jobstatus:failed ."
         if "error_report" in job:
             triples += f"<{job['job_iri']}> wal:report \"\"\"{job['error_report']}\"\"\" ."
 

@@ -59,7 +59,7 @@ insert {
         bind(iri(concat("urn:pwid:", ?archive_domain, ":", str(?date), ":page:", str(?seedUrl))) as ?pwid)
 
         bind(iri(concat(str(?base), struuid())) as ?snapshot)
-        bind(iri(concat(str(?base), sha256(?seedUrl))) as ?website)
+        bind(iri(concat(str(?base), sha256(str(?seedUrl)))) as ?website)
     }
 }
 """

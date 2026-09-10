@@ -3,6 +3,7 @@ from airflow.sdk import dag, task
 from boilerplate import PREFIXES
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
+sparql_update_auth_tuple = ("admin", "admin")
 
 
 metadata_warc_to_wash_update = PREFIXES + """
@@ -81,7 +82,7 @@ def job_metadata_warc_to_wash():
         for update in metadata_updates:
             r = requests.post(
                 sparql_update_endpoint,
-                auth=("admin", "admin"),
+                auth=sparql_update_auth_tuple,
                 headers={
                     "Accept": "application/sparql-results+json,*/*;q=0.9",
                     "Content-Type": "application/sparql-update",

@@ -30,7 +30,7 @@ spec:
             {{- toYaml .Values.initClone.resources | nindent 12 }}
         - name: wacalog-build
           # image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql'
-          image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql@sha256:47cad343f84d6970ef316fb493d16b0b56138158c11ebe939851e602a16bb814'
+          image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql@sha256:12f07af71920767fae5c933e714d5912d5422421cf60d1af30383f0e3b05bd41'
           imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
           workingDir: /data/latest
           # command: ["sleep", "1000"]

@@ -2,7 +2,14 @@ from textwrap import dedent
 
 from airflow.providers.cncf.kubernetes.secret import Secret
 from airflow.sdk import dag, task
-from boilerplate import PREFIXES, PROV_BASE_IRI, get_jobs, jobs_done, jobs_failed
+from boilerplate import (
+    GRAPH_BASE_IRI,
+    PREFIXES,
+    PROV_BASE_IRI,
+    get_jobs,
+    jobs_done,
+    jobs_failed,
+)
 
 secret_env_access_key = Secret(
     "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
@@ -66,6 +73,7 @@ def s3_kubernetes_titledata_extract_job():
             "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint,
             "SPARQL_UPDATE_AUTH_TUPLE_USERNAME": sparql_update_auth_tuple[0],
             "SPARQL_UPDATE_AUTH_TUPLE_PASSWORD": sparql_update_auth_tuple[1],
+            "GRAPH_BASE_IRI": GRAPH_BASE_IRI,
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
@@ -95,13 +103,13 @@ def s3_kubernetes_titledata_extract_job():
         from s3fs import S3FileSystem
 
         s3 = S3FileSystem(config_kwargs={"retries": {"mode": "adaptive"}})
-        # How could a socket.gaierror be handled propperly
 
         sparql_update_endpoint = os.environ["SPARQL_UPDATE_ENDPOINT"]
         sparql_update_auth_tuple = (
             os.environ["SPARQL_UPDATE_AUTH_TUPLE_USERNAME"],
             os.environ["SPARQL_UPDATE_AUTH_TUPLE_PASSWORD"],
         )
+        graph_base_iri = os.environ["GRAPH_BASE_IRI"]
 
         print(
             f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), and extract the title from the contained website. ({job['job_iri']})."
@@ -111,9 +119,9 @@ def s3_kubernetes_titledata_extract_job():
 
         print("start title data extraction")
 
-        # TODO get the record_id and bibo_website_uri
-        select_record_id = job["record_id"]
+        select_record_id = f"<{job['record_id']}>"
         bibo_website = job["bibo_website"]
+        print(f"look for: {bibo_website} in record {select_record_id}")
 
         record_graph = Graph()
         with s3.open(path_in_s3fs, "rb") as stream_in:
@@ -126,12 +134,12 @@ def s3_kubernetes_titledata_extract_job():
         print("end title data extraction")
         print("start add title data to graph")
 
-        wa = Namespace("https://webarchiv.dnb.de/")
+        WAG = Namespace(graph_base_iri)
 
         store = SPARQLUpdateStore(
             update_endpoint=sparql_update_endpoint, auth=sparql_update_auth_tuple
         )
-        remote_graph = Graph(store=store, identifier=wa.warc)
+        remote_graph = Graph(store=store, identifier=WAG.warc)
         remote_graph += record_graph
 
         print("end add title data to graph")

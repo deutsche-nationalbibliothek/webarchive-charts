@@ -1,6 +1,13 @@
-from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
-from boilerplate import get_jobs, jobs_done, jobs_failed, PROV_BASE_IRI, PREFIXES, GRAPH_BASE_IRI
+from airflow.sdk import dag, task
+from boilerplate import (
+    GRAPH_BASE_IRI,
+    PREFIXES,
+    PROV_BASE_IRI,
+    get_jobs,
+    jobs_done,
+    jobs_failed,
+)
 
 secret_env_access_key = Secret(
     "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"

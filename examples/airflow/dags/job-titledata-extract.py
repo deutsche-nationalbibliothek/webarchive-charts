@@ -44,6 +44,7 @@ def s3_kubernetes_titledata_extract_job():
         # We want to get from AirflowException > remote_pod.status.container_statuses[name=base].state.terminated.reason
         # if AirflowException
         import json
+
         remote_pod_string = "".join(exception.args.splitlines()[1:])
         print(remote_pod_string)
         remote_pod = json.loads(remote_pod_string)
@@ -97,7 +98,10 @@ def s3_kubernetes_titledata_extract_job():
         # How could a socket.gaierror be handled propperly
 
         sparql_update_endpoint = os.environ["SPARQL_UPDATE_ENDPOINT"]
-        sparql_update_auth_tuple = (os.environ["SPARQL_UPDATE_AUTH_TUPLE_USERNAME"], os.environ["SPARQL_UPDATE_AUTH_TUPLE_PASSWORD"])
+        sparql_update_auth_tuple = (
+            os.environ["SPARQL_UPDATE_AUTH_TUPLE_USERNAME"],
+            os.environ["SPARQL_UPDATE_AUTH_TUPLE_PASSWORD"],
+        )
 
         print(
             f"I will now download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']}), and extract the title from the contained website. ({job['job_iri']})."
@@ -124,7 +128,9 @@ def s3_kubernetes_titledata_extract_job():
 
         wa = Namespace("https://webarchiv.dnb.de/")
 
-        store = SPARQLUpdateStore(update_endpoint=sparql_update_endpoint, auth=sparql_update_auth_tuple)
+        store = SPARQLUpdateStore(
+            update_endpoint=sparql_update_endpoint, auth=sparql_update_auth_tuple
+        )
         remote_graph = Graph(store=store, identifier=wa.warc)
         remote_graph += record_graph
 
@@ -132,23 +138,22 @@ def s3_kubernetes_titledata_extract_job():
 
         return job
 
-
     @task(trigger_rule="all_done")
     def register_files(job: dict):
         import requests
 
         file_update = (
-            PREFIXES + """
+            PREFIXES
+            + """
         INSERT DATA {
             GRAPH wag:data {
         """
-            + f'<{job['source_file']}> wal:fileStatus filestatus:titledata_extracted.'
+            + f"<{job['source_file']}> wal:fileStatus filestatus:titledata_extracted."
             + """
             }
         }
         """
         )
-
 
         # """
         #     GRAPH wag:prov {
@@ -175,7 +180,6 @@ def s3_kubernetes_titledata_extract_job():
 
         r.raise_for_status()
         return job
-
 
     triple_pattern = dedent("""
     ?source_file wal:filename ?source_filename ;
@@ -205,7 +209,13 @@ def s3_kubernetes_titledata_extract_job():
         register_files.expand(
             job=titledata_extract.expand(
                 job=get_jobs(
-                    ["source_file", "source_filename", "source_bucket", "record_id", "bibo_website"],
+                    [
+                        "source_file",
+                        "source_filename",
+                        "source_bucket",
+                        "record_id",
+                        "bibo_website",
+                    ],
                     JOB_TYPE_IRI,
                     {"wal:file": "?source_file"},
                     triple_pattern=triple_pattern,

@@ -28,7 +28,7 @@ insert {
             dc:type lv:ArchivedWebPage ;
             dc:identifier ?pwid ;
             dc:date ?date ;
-            dc:relation ?website, ?warcinfo, ?warcfile ;
+            dc:relation ?website, ?request, ?warcinfo, ?warcfile ;
             dc:source ?seedUrl ;
             dct:created ?date ;
             dct:isPartOf ?website ;
@@ -42,16 +42,19 @@ insert {
     graph wag:warc {
         ?warcfile dct:relation ?request, ?response .
 
-        ?request dowarc:WARC-Target-URI ?seedUrl ;
+        ?request dowarc:WARC-Target-URI ?seedUrl ; # Seed Request
             dowarc:WARC-Type "request" ;
-            dowarc:WARC-Concurrent-To ?response ;
-            dowarc:WARC-Warcinfo-ID ?warcinfo .
+            dowarc:WARC-Concurrent-To ?response .
 
-        ?response dowarc:WARC-Date ?date ;
+        ?response dowarc:WARC-Date ?date ; # Seed Response
             dowarc:WARC-Type "response" ;
             dowarc:WARC-Target-URI ?seedUrl ;
-            dowarc:WARC-Date ?date ;
-            dowarc:WARC-Warcinfo-ID ?warcinfo .
+            dowarc:WARC-Date ?date .
+
+        optional {
+            ?request dowarc:WARC-Warcinfo-ID ?warcinfo .
+            ?response dowarc:WARC-Warcinfo-ID ?warcinfo .
+        }
 
         bind("webarchiv.dnb.de" as ?archive_domain)
         bind(concat(str(wag:warc), "/") as ?base)

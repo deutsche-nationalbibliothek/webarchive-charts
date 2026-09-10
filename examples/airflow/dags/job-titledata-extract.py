@@ -181,14 +181,22 @@ def s3_kubernetes_titledata_extract_job():
     ?source_file wal:filename ?source_filename ;
         wal:bucket ?source_bucket .
 
-    ?bibo_website a bibo:Website .
+    ?bibo_website a bibo:Website ;
+        foaf:primaryTopic ?seedUrl .
 
     ?snapshot a lv:ArchivedWebPage ;
-        dc:relation ?warcinfo, ?source_file ; # The relation from the ?snapshot to the ?warcinfo record should be further specified as crawl record or something. And also a direct reference to the seed request record of the crawl would be nice.
-        dct:isPartOf ?bibo_website .
+        # The relation from the ?snapshot to the ?seed_request record should be further specified
+        # as crawl record or something.
+        dc:relation ?seed_request, ?source_file ;
+        dct:isPartOf ?bibo_website ;
+        foaf:primaryTopic ?seedUrl .
 
-    ?record a dowarc:WARCrecord ;
-        dowarc:WARC-Warcinfo-ID ?warcinfo ;
+    ?seed_request a dowarc:WARCrecord ;
+        dowarc:WARC-Target-URI ?seedUrl ;
+        dowarc:WARC-Type "request" ;
+        dowarc:WARC-Concurrent-To ?response .
+
+    ?response a dowarc:WARCrecord ;
         dowarc:WARC-Type "response" ;
         dowarc:WARC-Record-ID ?record_id .
     """)

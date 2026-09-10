@@ -3,6 +3,7 @@
 # the following 6 lines are required
 airflow:
   enabled: true
+  apiSecretKey: "examplesecrettobechanged"
 versitygw:
   enabled: true
 fuseki:

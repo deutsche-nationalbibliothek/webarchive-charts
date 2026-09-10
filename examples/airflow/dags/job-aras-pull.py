@@ -23,6 +23,16 @@ secret_env_secret_access_key = Secret(
 )
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
+sparql_update_auth_tuple = ("admin", "admin")
+
+aws_endpoint_url_s3 = "http://webarchive-versitygw:7070"
+aws_default_region = "eu-central-1"
+
+target_bucket_name = "waingest"
+
+aras_rest_base = "http://mockils-service:8080/"
+aras_repo = "warc"
+
 
 @dag(
     schedule=None,  # "@once"
@@ -44,8 +54,11 @@ def s3_kubernetes_aras_pull_job():
         image="ghcr.io/deutsche-nationalbibliothek/aras-py:main-s3",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
-            "AWS_DEFAULT_REGION": "eu-central-1",
+            "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
+            "AWS_DEFAULT_REGION": aws_default_region,
+            "TARGET_BUCKET_NAME": target_bucket_name,
+            "ARAS_REST_BASE": aras_rest_base,
+            "ARAS_REPO": aras_repo
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
@@ -73,28 +86,30 @@ def s3_kubernetes_aras_pull_job():
         },
     )
     def aras_download(job: dict):
-        import s3fs
-        from aras_py.run import get_stream
+        import os
         from shutil import copyfileobj
 
-        # load with aras-py and write to s3
-        TARGET_BUCKET_NAME = "waingest"
+        import s3fs
+        from aras_py.run import get_stream
 
-        ARAS_REST_BASE = "http://mockils-service:8080/"
-        ARAS_REPO = "warc"
+        # load with aras-py and write to s3
+        target_bucket_name = os.environ["TARGET_BUCKET_NAME"]
+
+        aras_rest_base = os.environ["ARAS_REST_BASE"]
+        aras_repo = os.environ["ARAS_REPO"]
 
         s3 = s3fs.S3FileSystem()
 
         try:
-            s3.mkdir(TARGET_BUCKET_NAME, create_parents=True)
+            s3.mkdir(target_bucket_name, create_parents=True)
         except FileExistsError:
             pass
 
         print(
-            f"I will now download the files for {job['idn']} and upload them to the s3 bucket {TARGET_BUCKET_NAME}. ({job['job_iri']})."
+            f"I will now download the files for {job['idn']} and upload them to the s3 bucket {target_bucket_name}. ({job['job_iri']})."
         )
 
-        stream_iter = get_stream(ARAS_REST_BASE, ARAS_REPO, job["idn"])
+        stream_iter = get_stream(aras_rest_base, aras_repo, job["idn"])
 
         job["files"] = []
 
@@ -103,14 +118,14 @@ def s3_kubernetes_aras_pull_job():
                 f"download idn: {job['idn']}, metadata: {str(metadata)} to {file_name}"
             )
             with (
-                s3.open(f"{TARGET_BUCKET_NAME}/{file_name}", "wb") as target_io,
+                s3.open(f"{target_bucket_name}/{file_name}", "wb") as target_io,
                 stream() as source_io,
             ):
                 copyfileobj(source_io, target_io)
             job["files"] += [file_name]
 
-        print(s3.info(TARGET_BUCKET_NAME))
-        print(s3.ls(TARGET_BUCKET_NAME))
+        print(s3.info(target_bucket_name))
+        print(s3.ls(target_bucket_name))
 
         return job
 
@@ -154,7 +169,7 @@ def s3_kubernetes_aras_pull_job():
 
         r = requests.post(
             sparql_update_endpoint,
-            auth=("admin", "admin"),
+            auth=sparql_update_auth_tuple,
             headers={
                 "Accept": "application/sparql-results+json,*/*;q=0.9",
                 "Content-Type": "application/sparql-update",

@@ -162,7 +162,7 @@ def s3_kubernetes_titledata_extract_job():
 
         r = requests.post(
             sparql_update_endpoint,
-            auth=("admin", "admin"),
+            auth=sparql_update_auth_tuple,
             headers={
                 "Accept": "application/sparql-results+json,*/*;q=0.9",
                 "Content-Type": "application/sparql-update",

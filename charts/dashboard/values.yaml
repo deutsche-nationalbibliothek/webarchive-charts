@@ -1,6 +1,6 @@
 dashboardBasePath: ""
 
-wacalogUrl: "/wacalog"
+wacalogUrl: "/wacalog/"
 waybackUrl: "/wayback"
 pwidResolverUrl: "/pwidresolver"
 wapmhUrl: "/wapmh"

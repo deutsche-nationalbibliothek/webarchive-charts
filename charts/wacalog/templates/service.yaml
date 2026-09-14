@@ -47,9 +47,12 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: wacalog-apps-route
+  # See also: https://docs.redhat.com/en/documentation/openshift_container_platform/4.13/html/networking/configuring-routes#nw-path-based-routes_route-configuration
+  annotations:
+    haproxy.router.openshift.io/rewrite-target: /
 spec:
   host: {{ .Values.global.routerHost | quote }}
-  path: /wacalog
+  path: /wacalog/
   to:
     kind: Service
     name: wacalog-service

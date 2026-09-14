@@ -12,13 +12,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: wacalog-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   ingressClassName: nginx
   rules:
     - http:
         paths:
-          - path: /wacalog
-            pathType: Prefix
+          - path: /wacalog(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: wacalog-service

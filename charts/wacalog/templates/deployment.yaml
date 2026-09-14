@@ -28,40 +28,22 @@ spec:
               name: wacalog-templates
           resources:
             {{- toYaml .Values.initClone.resources | nindent 12 }}
-        - name: wacalog-build
-          # image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql'
-          image: 'ghcr.io/aksw/mkrdf:feature-buildFromSparql@sha256:12f07af71920767fae5c933e714d5912d5422421cf60d1af30383f0e3b05bd41'
+      containers:
+        - name: wacalog-serve
+          # image: 'ghcr.io/aksw/kefar:main'
+          image: 'ghcr.io/aksw/kefar:main@sha256:572a324cdf4185d9cb2b2a360f0f6baefb1afd9df459be019ce189f2de3edf47'
           imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
           workingDir: /data/latest
-          # command: ["sleep", "1000"]
-          command: ["mkdocs", "build"]
-          args: ["-d", "/build"]
           volumeMounts:
             - mountPath: "/data"
               name: wacalog-templates
             - mountPath: "/data/latest/mkdocs.yml"
               name: wacalog-config
               subPath: "mkdocs.yml"
-            - mountPath: "/build"
-              name: wacalog-build
-          resources:
-            {{- toYaml .Values.initBuild.resources | nindent 12 }}
-      containers:
-        - name: wacalog-serve
-          image: 'docker.io/lipanski/docker-static-website:latest'
-          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
-          command: ["/busybox-httpd"]
-          args: ["-f", "-p", "8080", "-h", "/data"]
-          volumeMounts:
-            - mountPath: "/data/wacalog"
-              name: wacalog-build
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: wacalog-templates
-          emptyDir:
-            sizeLimit: 1Gi
-        - name: wacalog-build
           emptyDir:
             sizeLimit: 1Gi
         - name: wacalog-config

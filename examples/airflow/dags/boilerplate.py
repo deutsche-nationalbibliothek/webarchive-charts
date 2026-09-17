@@ -78,7 +78,7 @@ def get_jobs(
     rdf_type: str = "wal:Job",
     properties: dict = {},
     triple_pattern: str = "",
-    limit: int = 10,
+    limit: int = 5,
 ):
 
     job_query = dedent(

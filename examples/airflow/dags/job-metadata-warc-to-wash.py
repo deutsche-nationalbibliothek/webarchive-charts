@@ -60,9 +60,10 @@ insert {
         bind(concat(str(wag:warc), "/") as ?base)
 
         # the date does not yet work for pwids
-        bind(iri(concat("urn:pwid:", ?archive_domain, ":", str(?date), ":page:", str(?seedUrl))) as ?pwid)
+        bind(if(TIMEZONE(?date) = "PT0S"^^xsd:dayTimeDuration, concat(strbefore(replace(str(?date), "Z", "+"), "+"), "Z"), concat(str(?date), "-INVALID")) as ?utc_date)
+        bind(iri(concat("urn:pwid:", ?archive_domain, ":", str(?utc_date), ":page:", str(?seedUrl))) as ?pwid)
 
-        bind(iri(concat(str(?base), struuid())) as ?snapshot)
+        bind(iri(concat(str(?base), sha256(concat(str(?pwid), str(?response))))) as ?snapshot)
         bind(iri(concat(str(?base), sha256(str(?seedUrl)))) as ?website)
     }
 }

@@ -126,6 +126,7 @@ def job_creator():
                 data=update,
             )
 
+            print(update)
             print(r)
             print(r.text)
 

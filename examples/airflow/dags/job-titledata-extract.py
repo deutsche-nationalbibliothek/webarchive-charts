@@ -83,8 +83,8 @@ def s3_kubernetes_titledata_extract_job():
                     {
                         "name": "base",
                         "resources": {
-                            "limits": {"cpu": "100m", "memory": "512Mi"},
-                            "requests": {"cpu": "100m", "memory": "512Mi"},
+                            "limits": {"cpu": "100m", "memory": "128Mi"},
+                            "requests": {"cpu": "100m", "memory": "128Mi"},
                         },
                     },
                 ]

@@ -1,5 +1,5 @@
-from airflow.sdk import dag, task
 from airflow.providers.cncf.kubernetes.secret import Secret
+from airflow.sdk import dag, task
 from boilerplate import get_jobs, jobs_done
 
 secret_env_access_key = Secret(
@@ -35,11 +35,12 @@ def job_index():
         do_xcom_push=True,
     )
     def index(job: dict):
-        from cdxj_indexer import CDXJIndexer
-        from io import StringIO
-        from s3fs import S3FileSystem
         import os
+        from io import StringIO
+
         import requests
+        from cdxj_indexer import CDXJIndexer
+        from s3fs import S3FileSystem
 
         cdx_url = os.environ.get("OUTBACK_CDX_URL")
         collection = os.environ.get("WARC_COLLECTION")

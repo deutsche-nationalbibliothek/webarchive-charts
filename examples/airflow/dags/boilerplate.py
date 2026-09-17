@@ -30,6 +30,7 @@ PREFIXES = dedent(f"""
 
     PREFIX prov: <http://www.w3.org/ns/prov#>
     PREFIX bibo: <http://purl.org/ontology/bibo/>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
     PREFIX dct: <http://purl.org/dc/terms/>
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -39,9 +40,15 @@ PREFIXES = dedent(f"""
     """)
 
 PREFIXES + """
-filestatus:clean
-filestatus:indexed
-filestatus:metadata_extracted
+filestatus:clean rdfs:label "clean" .
+filestatus:indexed rdfs:label "indexed" .
+filestatus:metadata_extracted rdfs:label "Metadata Extracted" .
+"""
+
+PREFIXES + """
+jobstatus:done rdfs:label "done" .
+jobstatus:failed rdfs:label "failed" .
+jobstatus:skip rdfs:label "skip" .
 """
 
 PREFIXES + """
@@ -59,10 +66,10 @@ wal:idn
 """
 
 PREFIXES + """
-dalajobs:RecompressJob
-dalajobs:IndexJob
-dalajobs:MetadataExtractJob
-dalajobs:ArasPullJob
+dalajobs:RecompressJob rdfs:label "Recompress Job" .
+dalajobs:IndexJob rdfs:label "Index Job" .
+dalajobs:MetadataExtractJob rdfs:label "Metadata Extract Job" .
+dalajobs:ArasPullJob rdfs:label "Aras Pull Job" .
 """
 
 @task

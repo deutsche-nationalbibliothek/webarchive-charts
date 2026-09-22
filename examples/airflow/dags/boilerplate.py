@@ -167,6 +167,30 @@ def _jobs_done(jobs: list[dict]):
 
     r.raise_for_status()
 
+def job_failed(context):
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("job_failed was called")
+    print(context)
+    task_instance = context["task_instance"]
+    # Can we get remote_pod from the exception or from the task_instance?
+    print(task_instance)
+    job_iri = task_instance.xcom_pull(key="job")
+    print(f"job {job_iri} failed")
+    exception = context.get("exception")
+    # We want to get from AirflowException > remote_pod.status.container_statuses[name=base].state.terminated.reason
+    # if AirflowException
+    import json
+
+    remote_pod_string = "".join(exception.args.splitlines()[1:])
+    print(remote_pod_string)
+    remote_pod = json.loads(remote_pod_string)
+    print(remote_pod)
+
+    # if ApiException
+    # TODO get Reason, HTTP response headers, and HTTP response body
+
+    print(f"job_iri: {job_iri}")
+    report_job_status([{"job_iri": job_iri}])
 
 def report_job_status(jobs: list[dict]):
 

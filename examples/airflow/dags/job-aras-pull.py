@@ -5,8 +5,8 @@ from boilerplate import (
     PREFIXES,
     PROV_BASE_IRI,
     get_jobs,
+    job_failed,
     jobs_done,
-    report_job_status,
 )
 
 PROV_IRI = f"<{PROV_BASE_IRI}oGet>"
@@ -41,14 +41,6 @@ aras_repo = "warc"
 )
 def s3_kubernetes_aras_pull_job():
 
-    def job_failed(context):
-        task_instance = context.task_instance
-        job_iri = task_instance.xcom_pull(key="job")
-        print(f"job {job_iri} failed")
-        print(context)
-        print(context.get("exception").args)
-        print(f"job_iri: {job_iri}")
-        report_job_status([{"job_iri": job_iri}])
 
     @task.kubernetes(
         image="ghcr.io/deutsche-nationalbibliothek/aras-py:main-s3",

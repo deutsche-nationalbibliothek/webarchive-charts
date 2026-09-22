@@ -8,7 +8,7 @@ from boilerplate import (
     PROV_BASE_IRI,
     get_jobs,
     jobs_done,
-    jobs_failed,
+    report_job_status,
 )
 
 secret_env_access_key = Secret(
@@ -61,7 +61,7 @@ def s3_kubernetes_titledata_extract_job():
         # TODO get Reason, HTTP response headers, and HTTP response body
 
         print(f"job_iri: {job_iri}")
-        jobs_failed([{"job_iri": job_iri}])
+        report_job_status([{"job_iri": job_iri}])
 
     @task.kubernetes(
         # image="ghcr.io/white-gecko/payload2rdf:main-s3",

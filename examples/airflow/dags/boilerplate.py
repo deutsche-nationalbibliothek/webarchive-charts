@@ -168,7 +168,7 @@ def _jobs_done(jobs: list[dict]):
     r.raise_for_status()
 
 
-def jobs_failed(jobs: list[dict]):
+def report_job_status(jobs: list[dict]):
 
     triples = []
 

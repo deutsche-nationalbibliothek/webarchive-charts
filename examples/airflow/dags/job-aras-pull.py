@@ -6,7 +6,7 @@ from boilerplate import (
     PROV_BASE_IRI,
     get_jobs,
     jobs_done,
-    jobs_failed,
+    report_job_status,
 )
 
 PROV_IRI = f"<{PROV_BASE_IRI}oGet>"
@@ -48,7 +48,7 @@ def s3_kubernetes_aras_pull_job():
         print(context)
         print(context.get("exception").args)
         print(f"job_iri: {job_iri}")
-        jobs_failed([{"job_iri": job_iri}])
+        report_job_status([{"job_iri": job_iri}])
 
     @task.kubernetes(
         image="ghcr.io/deutsche-nationalbibliothek/aras-py:main-s3",

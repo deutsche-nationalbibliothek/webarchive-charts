@@ -1,0 +1,19 @@
+version: "3"
+
+dotenv: ['{{.ENV}}.env', 'custom.env', 'default.env']
+
+tasks:
+  default:
+    desc: List the tasks
+    cmds:
+      - |
+        echo "ENV: {{.ENV}}"
+        echo "NAMESPACE: {{.NAMESPACE}}"
+        task -l
+
+  build:
+    aliases: [deploy]
+    desc: Install/deploy the webarchive setup
+    cmds:
+      - cat webarchive-setup-c4.puml | podman run --rm -i -v .:/data:z -w /data docker.io/plantuml/plantuml -tsvg -pipe > "webarchive-setup-c4.svg"
+      - cat webarchive-setup-c4.puml | podman run --rm -i -v .:/data:z -w /data docker.io/plantuml/plantuml -tgng -pipe > "webarchive-setup-c4.png"

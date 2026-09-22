@@ -68,54 +68,7 @@ Currently, the WARC files are all recompressed which is required for our data as
 
 ## Current Environment
 
-```
-Containers with * are init containers
-(block the init process but are cleaned after they have exited).
-
-┌──────────────────┐  ┌──────────────────┐
-│📦 PWID resolver  │.>│📦   Playback     │ pywb-app
-└──────────────────┘  └──────────────────┘
-                               ∧
-                               │
-                      ┌──────────────────┐
-                      │📁Playback Cache  │ .Values.webarchiveDirectory
-                      └──────────────────┘
-                               ∧
-                               │
-                      ┌──────────────────┐
-                      │📦    Index*      │ wb-manager-add
-                      └──────────────────┘
-                               ∧
-                               │
-                      ┌──────────────────┐
-                      │📁  WARC Cache    │ .Values.warcDirectory
-                      └──────────────────┘
-                               ∧
-                               │
-                      ┌──────────────────┐ wacli-recompress-warcs
-                      │📦  Recompress*   │ $ wacli recompress-warcs
-                      └──────────────────┘
-                               ∧
-                               │
-                      ┌──────────────────┐
-                      │📁  RAW Cache     │ .Values.rawWarcDirectory
-                      └──────────────────┘
-                               ∧
-                               │
-┌──────────────────┐  ┌──────────────────┐ wacli-load-warcs
-│ Repository (aras)│─>│📦    Fetch*      │ $ wacli load-warcs
-└──────────────────┘  └──────────────────┘
-                               ∧
-                               │
-                      ┌──────────────────┐
-                      │📄️  Graph Cache   │ .Values.websiteGraphFile
-                      └──────────────────┘
-                               ∧
-                               │
-┌──────────────────┐  ┌──────────────────┐ wacli-load-graph
-│  Catalog/SPARQL  │─>│📦    Query*      │ $ wacli load-graph
-└──────────────────┘  └──────────────────┘
-```
+![Webarchive Setup Diagram (C4)](docu/webarchive-setup-c4.svg)
 
 ## Conceptual Figure of the Data Flow of WARC Files
 

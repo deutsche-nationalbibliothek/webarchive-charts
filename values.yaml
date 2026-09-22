@@ -11,15 +11,39 @@ airflow:
       enabled: false
   # issue: https://github.com/apache/airflow/issues/58417
   config:
+    # api:
+    #   base_url: "/airflow"
     # webserver:
-    #   base_url: "http://192.168.39.238/airflow"
+    #   enable_proxy_fix: true
+    #   base_url: "/airflow"
+    #   static_root: "/airflow/static"
+    #   rbac: true
     core:
       hostname_callable: airflow.utils.net.get_host_ip_address
-  ingress:
-    enabled: true
-    apiServer:
-      ingressClassName: nginx
-      path: /airflow(/|$)(.*)
+  # webserver:
+  #   webserverConfig: |
+  #     from airflow import configuration as conf
+  #     from flask import Flask
+  #     from werkzeug.middleware.proxy_fix import ProxyFix
+
+  #     app = Flask(__name__)
+  #     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+  # apiServer:
+  #   args:
+  #     - bash
+  #     - -c
+  #     - exec airflow api-server --proxy-headers
+  # ingress:
+  #   enabled: true
+  #   apiServer:
+  #     ingressClassName: nginx
+  #     annotations:
+  #       nginx.ingress.kubernetes.io/rewrite-target: /$2
+  #       nginx.ingress.kubernetes.io/use-regex: "true"
+  #     path: /airflow(/|$)(.*)
+  # env:
+  #   - name: FORWARDED_ALLOW_IPS
+  #     value: "*"
 
 versitygw:
   enabled: false

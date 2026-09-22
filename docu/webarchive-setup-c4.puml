@@ -22,9 +22,9 @@ System_Boundary(dnb, "Deutsche Nationalbibliothek") {
             Container(dashboard, "Dashboard", "Homer", "User interface for admins/archivists", $tags="current")
             ' Grouped Components
             System_Boundary(frontends, "Frontend Services") {
-                Container(playback, "Playback (pywb)", "Python", "Web archive playback", $tags="current")
+                Container(playback, "Playback", "pywb", "Web archive playback", $tags="current")
                 Container(pwidresolver, "PWID Resolver", "Python", "URN resolution", $tags="current")
-                Container(wacalog, "WACalog", "Python", "Web archive catalog", $tags="current")
+                Container(wacalog, "Wacalog", "MkRDF, Kefar", "Web archive catalog", $tags="current")
             }
 
             System_Boundary(processing, "Processing Services") {

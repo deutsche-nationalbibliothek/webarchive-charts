@@ -2,12 +2,15 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 ' Improved color scheme for readability
-AddElementTag("current", $fontColor="white")
+AddElementTag("current")
 AddElementTag("deprecated", $fontColor="gray", $bgColor="lightgray", $borderColor="gray")
 AddElementTag("external", $fontColor="white", $bgColor="navy")
+AddElementTag("workflow", $fontColor="black", $bgColor="lightblue")
+AddElementTag("orchestrator", $fontColor="black", $bgColor="#E6F2FF")
 AddRelTag("current", $textColor="white", $lineColor="lightblue")
 AddRelTag("deprecated", $textColor="gray", $lineColor="gray", $lineStyle=DashedLine())
 AddRelTag("external", $textColor="lightblue", $lineColor="cyan", $lineStyle=DashedLine())
+AddRelTag("workflow", $textColor="black", $lineColor="blue")
 
 System_Boundary(dnb, "Deutsche Nationalbibliothek") {
     Person(researcher, "Researcher", "Accesses web archives", $tags="current")
@@ -25,14 +28,14 @@ System_Boundary(dnb, "Deutsche Nationalbibliothek") {
             }
 
             System_Boundary(processing, "Processing Services") {
-                Container(airflow, "Airflow", "Python", "Workflow orchestration", $tags="current") {
+                Container(airflow, "Airflow", "Python", "Workflow orchestration", $tags="current+orchestrator") {
                     System_Boundary(airflow_workflows, "Airflow Workflows") {
-                        Container(job_creator, "Job Creator", "Python", "Creates jobs from file status", $tags="current")
-                        Container(aras_pull, "ARAS Pull", "Python", "Downloads WARC files", $tags="current")
-                        Container(recompress, "Recompress", "Python", "Recompresses WARC files", $tags="current")
-                        Container(metadata_extract, "Metadata Extract", "Python", "Extracts WARC metadata", $tags="current")
-                        Container(title_extract, "Title Extract", "Python", "Extracts title data", $tags="current")
-                        Container(index_job, "Index Job", "Python", "Creates CDX index", $tags="current")
+                        Container(job_creator, "Job Creator", "Python", "Creates jobs from file status", $tags="workflow")
+                        Container(aras_pull, "ARAS Pull", "Python", "Downloads WARC files", $tags="workflow")
+                        Container(recompress, "Recompress", "Python", "Recompresses WARC files", $tags="workflow")
+                        Container(metadata_extract, "Metadata Extract", "Python", "Extracts WARC metadata", $tags="workflow")
+                        Container(title_extract, "Title Extract", "Python", "Extracts title data", $tags="workflow")
+                        Container(index_job, "Index Job", "Python", "Creates CDX index", $tags="workflow")
                     }
                 }
                 Container(ingest, "Ingest (wapmh)", "Python", "OAI-PMH provider (deprecated)", $tags="deprecated")
@@ -82,33 +85,33 @@ Rel(wacalog, fuseki, "Reads from", "SPARQL")
 Rel(ingest, fuseki, "Reads from (deprecated)", "SPARQL", $tags="deprecated")
 
 ' Complete Airflow workflow
-Rel(fuseki, job_creator, "Provides job data", "SPARQL")
-Rel(job_creator, airflow, "Creates jobs", "Airflow API")
+Rel(fuseki, job_creator, "Provides job data", "SPARQL", $tags="workflow")
+Rel(job_creator, fuseki, "Creates jobs", "Airflow API", $tags="workflow")
 
 ' ARAS Pull workflow
-Rel(aras_pull, aras, "Downloads files", "OAI-PMH")
-Rel(aras_pull, versitygw, "Uploads files", "S3 API")
-Rel(aras_pull, fuseki, "Updates status", "SPARQL")
+Rel(aras_pull, aras, "Downloads files", "OAI-PMH", $tags="workflow")
+Rel(aras_pull, versitygw, "Uploads files", "S3 API", $tags="workflow")
+Rel(aras_pull, fuseki, "Updates status", "SPARQL", $tags="workflow")
 
 ' Recompress workflow
-Rel(recompress, versitygw, "Reads/Writes files", "S3 API")
-Rel(recompress, fuseki, "Updates status", "SPARQL")
+Rel(recompress, versitygw, "Reads/Writes files", "S3 API", $tags="workflow")
+Rel(recompress, fuseki, "Updates status", "SPARQL", $tags="workflow")
 
 ' Metadata Extract workflow
-Rel(metadata_extract, versitygw, "Reads files", "S3 API")
-Rel(metadata_extract, fuseki, "Writes metadata/Updates status", "SPARQL")
+Rel(metadata_extract, versitygw, "Reads files", "S3 API", $tags="workflow")
+Rel(metadata_extract, fuseki, "Writes metadata/Updates status", "SPARQL", $tags="workflow")
 
 ' Title Extract workflow
-Rel(title_extract, versitygw, "Reads files", "S3 API")
-Rel(title_extract, fuseki, "Writes metadata/Updates status", "SPARQL")
+Rel(title_extract, versitygw, "Reads files", "S3 API", $tags="workflow")
+Rel(title_extract, fuseki, "Writes metadata/Updates status", "SPARQL", $tags="workflow")
 
 ' Index workflow
-Rel(index_job, versitygw, "Reads files", "S3 API")
-Rel(index_job, outbackcdx, "Updates index", "CDX API")
-Rel(index_job, fuseki, "Updates status", "SPARQL")
+Rel(index_job, versitygw, "Reads files", "S3 API", $tags="workflow")
+Rel(index_job, outbackcdx, "Updates index", "CDX API", $tags="workflow")
+Rel(index_job, fuseki, "Updates status", "SPARQL", $tags="workflow")
 
 ' Job management
-Rel(airflow, fuseki, "Manages job status", "SPARQL")
+Rel(airflow, fuseki, "Manages job status", "SPARQL", $tags="current")
 
 ' Knowledge Graph describes S3 files
 Rel(fuseki, versitygw, "Describes files", "RDF metadata")

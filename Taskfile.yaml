@@ -101,9 +101,3 @@ tasks:
     interactive: true
     cmds:
       - kubectl port-forward --address=0.0.0.0 services/webarchive-versitygw 8082:8080 --namespace {{.NAMESPACE}}
-
-  port-forward:fuseki:
-    desc: Forward the api server port to 8080 in 0.0.0.0
-    interactive: true
-    cmds:
-      - kubectl port-forward --address=0.0.0.0 services/webarchive-fuseki 3030:3030 --namespace {{.NAMESPACE}}

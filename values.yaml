@@ -105,15 +105,15 @@ fuseki:
         items:
           - key: "config.ttl"
             path: "config.ttl"
-  # ingress:
-  #   enabled: true
-  #   annotations:
-  #     nginx.ingress.kubernetes.io/use-regex: "true"
-  #     nginx.ingress.kubernetes.io/rewrite-target: /$2
-  #   hosts:
-  #     - paths:
-  #       - path: /fuseki(/|$)(.*)
-  #         pathType: ImplementationSpecific
+  ingress:
+    enabled: true
+    annotations:
+      nginx.ingress.kubernetes.io/use-regex: "true"
+      nginx.ingress.kubernetes.io/rewrite-target: /$2
+    hosts:
+      - paths:
+        - path: /fuseki(/|$)(.*)
+          pathType: ImplementationSpecific
 
 graph:
   enabled: false

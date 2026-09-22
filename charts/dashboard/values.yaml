@@ -4,7 +4,7 @@ wacalogUrl: "/wacalog/"
 waybackUrl: "/wayback"
 pwidResolverUrl: "/pwidresolver"
 wapmhUrl: "/wapmh"
-graphUrl: "/sparql"
+graphUrl: "/fuseki/"
 cdxUrl: "/outbackcdx"
 airflowUrl: "/airflow"
 mockils: true

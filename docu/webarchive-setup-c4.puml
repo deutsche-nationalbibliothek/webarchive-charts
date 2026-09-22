@@ -1,0 +1,86 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' Improved color scheme for readability
+AddElementTag("current", $fontColor="white")
+AddElementTag("deprecated", $fontColor="gray", $bgColor="lightgray", $borderColor="gray")
+AddElementTag("external", $fontColor="white", $bgColor="navy")
+AddRelTag("current", $textColor="white", $lineColor="lightblue")
+AddRelTag("deprecated", $textColor="gray", $lineColor="gray", $lineStyle=DashedLine())
+AddRelTag("external", $textColor="lightblue", $lineColor="cyan", $lineStyle=DashedLine())
+
+System_Boundary(dnb, "Deutsche Nationalbibliothek") {
+    Person(researcher, "Researcher", "Accesses web archives", $tags="current")
+    Person(archivist, "Archivist", "Manages collections", $tags="current")
+    Person(admin, "Administrator", "Configures system", $tags="current")
+
+    System_Boundary(webarchive, "Webarchive System") {
+        System_Boundary(kubernetes, "Kubernetes Cluster") {
+            Container(dashboard, "Dashboard", "Homer", "User interface for admins/archivists", $tags="current")
+            ' Grouped Components
+            System_Boundary(frontends, "Frontend Services") {
+                Container(playback, "Playback (pywb)", "Python", "Web archive playback", $tags="current")
+                Container(pwidresolver, "PWID Resolver", "Python", "URN resolution", $tags="current")
+                Container(wacalog, "WACalog", "Python", "Web archive catalog", $tags="current")
+            }
+
+            System_Boundary(processing, "Processing Services") {
+                Container(airflow, "Airflow", "Python", "Workflow orchestration", $tags="current")
+                Container(ingest, "Ingest (wapmh)", "Python", "OAI-PMH provider (deprecated)", $tags="deprecated")
+            }
+
+            System_Boundary(datastore, "Data Services") {
+                ContainerDb(fuseki, "Knowledge Graph", "Fuseki", "RDF graph store", $tags="current")
+                Container(versitygw, "S3 storage", "VersityGW", "", $tags="current")
+                Container(outbackcdx, "OutbackCDX", "Java", "CDX Index", $tags="current")
+            }
+        }
+    }
+}
+
+' External Systems
+System(aras, "ARAS", "DNB Archive", $tags="external")
+
+' Corrected Relationships
+' User interactions
+Rel(researcher, playback, "Accesses archives", "HTTP")
+Rel(researcher, pwidresolver, "Resolve archive IRIs", "HTTP")
+Rel(researcher, wacalog, "Browse Collection", "HTTP")
+Rel(archivist, dashboard, "Manages collections", "HTTP")
+Rel(admin, dashboard, "Configures system", "HTTP")
+
+' Dashboard links to all services
+' Rel(dashboard, playback, "Links to", "URLs")
+' Rel(dashboard, pwidresolver, "Links to", "URLs")
+' Rel(dashboard, wacalog, "Links to", "URLs")
+' Rel(dashboard, ingest, "Links to (deprecated)", "URLs", $tags="deprecated")
+' Rel(dashboard, airflow, "Links to", "URLs")
+' Rel(dashboard, fuseki, "Links to", "URLs")
+' Rel(dashboard, outbackcdx, "Links to", "URLs")
+Rel(dashboard, frontends, "Links to", "URLs")
+Rel(dashboard, processing, "Links to", "URLs")
+Rel(dashboard, datastore, "Links to", "URLs")
+
+' Core playback flow
+Rel(playback, outbackcdx, "Resolves URLs", "CDX API")
+Rel(playback, versitygw, "Reads WARC data", "S3 API")
+Rel(pwidresolver, playback, "Returns URLs", "HTTP redirects")
+
+' WACalog reads from knowledge graph
+Rel(wacalog, fuseki, "Reads from", "SPARQL")
+
+' Deprecated ingest (no active relations)
+Rel(ingest, fuseki, "Reads from (deprecated)", "SPARQL", $tags="deprecated")
+
+' Complete Airflow workflow
+Rel(fuseki, airflow, "Provides jobs", "SPARQL")
+Rel(aras, airflow, "Reads WARC files", "OAI-PMH")
+Rel(airflow, versitygw, "Writes WARC files", "S3 API")
+Rel(airflow, fuseki, "Writes metadata", "SPARQL")
+Rel(airflow, outbackcdx, "Updates index", "CDX API")
+
+' Knowledge Graph describes S3 files
+Rel(fuseki, versitygw, "Describes files", "RDF metadata")
+
+SHOW_LEGEND(true)
+@enduml

@@ -14,6 +14,12 @@ secret_env_secret_access_key = Secret(
 
 JOB_TYPE_IRI = "dalajobs:IndexJob"
 
+aws_endpoint_url_s3 = "http://webarchive-versitygw:7070"
+aws_default_region = "eu-central-1"
+
+outback_cdx_url = "http://outbackcdx-service:8080/outbackcdx/"
+warc_collection = "warcs"
+
 
 @dag(
     schedule=None,  # "@once"
@@ -26,10 +32,10 @@ def job_index():
         image="ghcr.io/deutsche-nationalbibliothek/cdxj-indexer:feature-oci-image-s3fs",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
-            "AWS_DEFAULT_REGION": "eu-central-1",
-            "OUTBACK_CDX_URL": "http://outbackcdx-service:8080/outbackcdx/",
-            "WARC_COLLECTION": "warcs",
+            "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
+            "AWS_DEFAULT_REGION": aws_default_region,
+            "OUTBACK_CDX_URL": outback_cdx_url,
+            "WARC_COLLECTION": warc_collection,
         },
         do_xcom_push=True,
     )

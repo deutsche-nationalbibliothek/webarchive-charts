@@ -6,6 +6,7 @@ from requests.exceptions import JSONDecodeError
 
 sparql_query_endpoint = "http://webarchive-fuseki:3030/ds/query"
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
+sparql_update_auth_tuple = ("admin", "admin")
 
 BASE_IRI = "https://d-nb.info/"
 
@@ -39,23 +40,34 @@ PREFIXES = dedent(f"""
     PREFIX dowarc: <https://github.com/DOWARC/dowarc#>
     """)
 
-PREFIXES + """
+(
+    PREFIXES
+    + """
 filestatus:clean rdfs:label "clean" .
 filestatus:indexed rdfs:label "indexed" .
 filestatus:metadata_extracted rdfs:label "Metadata Extracted" .
 """
+)
 
-PREFIXES + """
+(
+    PREFIXES
+    + """
 jobstatus:done rdfs:label "done" .
 jobstatus:failed rdfs:label "failed" .
 jobstatus:skip rdfs:label "skip" .
 """
+)
 
-PREFIXES + """
+(
+    PREFIXES
+    + """
 wapplan:oGet
 """
+)
 
-PREFIXES + """
+(
+    PREFIXES
+    + """
 wal:fileStatus
 wal:jobStatus
 wal:File
@@ -64,13 +76,18 @@ wal:bucket
 wal:filename
 wal:idn
 """
+)
 
-PREFIXES + """
+(
+    PREFIXES
+    + """
 dalajobs:RecompressJob rdfs:label "Recompress Job" .
 dalajobs:IndexJob rdfs:label "Index Job" .
 dalajobs:MetadataExtractJob rdfs:label "Metadata Extract Job" .
 dalajobs:ArasPullJob rdfs:label "Aras Pull Job" .
 """
+)
+
 
 @task
 def get_jobs(
@@ -82,7 +99,8 @@ def get_jobs(
 ):
 
     job_query = dedent(
-        PREFIXES + f"""
+        PREFIXES
+        + f"""
     SELECT ?job {" ".join(f"?{var}" for var in projection)} {{
         GRAPH wag:jobs {{
             ?job a {rdf_type} ;
@@ -106,7 +124,6 @@ def get_jobs(
 
     r = requests.post(
         sparql_query_endpoint,
-        auth=("admin", "admin"),
         headers={
             "Accept": "application/sparql-results+json,*/*;q=0.9",
             "Content-Type": "application/sparql-query",
@@ -141,12 +158,15 @@ def jobs_done(jobs: list[dict] | None = None):
 def _jobs_done(jobs: list[dict]):
 
     job_update = dedent(
-        PREFIXES + """
+        PREFIXES
+        + """
         INSERT DATA {
             GRAPH wag:jobs {
         """
-            + "\n".join([f"<{job['job_iri']}> wal:jobStatus jobstatus:done ." for job in jobs])
-            + """
+        + "\n".join(
+            [f"<{job['job_iri']}> wal:jobStatus jobstatus:done ." for job in jobs]
+        )
+        + """
             }
         }
         """
@@ -154,7 +174,7 @@ def _jobs_done(jobs: list[dict]):
 
     r = requests.post(
         sparql_update_endpoint,
-        auth=("admin", "admin"),
+        auth=sparql_update_auth_tuple,
         headers={
             "Accept": "application/sparql-results+json,*/*;q=0.9",
             "Content-Type": "application/sparql-update",
@@ -166,6 +186,7 @@ def _jobs_done(jobs: list[dict]):
     print(r.text)
 
     r.raise_for_status()
+
 
 def job_failed(context):
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -192,6 +213,7 @@ def job_failed(context):
     print(f"job_iri: {job_iri}")
     report_job_status([{"job_iri": job_iri}])
 
+
 def report_job_status(jobs: list[dict]):
 
     triples = []
@@ -199,16 +221,16 @@ def report_job_status(jobs: list[dict]):
     for job in jobs:
         triples += f"<{job['job_iri']}> wal:jobStatus jobstatus:failed ."
         if "error_report" in job:
-            triples += f"<{job['job_iri']}> wal:report \"\"\"{job['error_report']}\"\"\" ."
-
+            triples += f'<{job["job_iri"]}> wal:report """{job["error_report"]}""" .'
 
     job_update = dedent(
-        PREFIXES + """
+        PREFIXES
+        + """
         INSERT DATA {
             GRAPH wag:jobs {
         """
-            + "\n".join(triples)
-            + """
+        + "\n".join(triples)
+        + """
             }
         }
         """
@@ -216,7 +238,7 @@ def report_job_status(jobs: list[dict]):
 
     r = requests.post(
         sparql_update_endpoint,
-        auth=("admin", "admin"),
+        auth=sparql_update_auth_tuple,
         headers={
             "Accept": "application/sparql-results+json,*/*;q=0.9",
             "Content-Type": "application/sparql-update",

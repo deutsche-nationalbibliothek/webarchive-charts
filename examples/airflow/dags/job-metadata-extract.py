@@ -22,6 +22,9 @@ secret_env_secret_access_key = Secret(
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 sparql_update_auth_tuple = ("admin", "admin")
 
+aws_endpoint_url_s3 = "http://webarchive-versitygw:7070"
+aws_default_region = "eu-central-1"
+
 PROV_IRI = f"<{PROV_BASE_IRI}metadata-extract-warc:v1>"
 JOB_TYPE_IRI = "dalajobs:MetadataExtractJob"
 
@@ -38,8 +41,8 @@ def s3_kubernetes_metadata_extract_job():
         image="ghcr.io/white-gecko/warc-metadata2rdf@sha256:61c57230da9f72178b78dd11a0910c2b0ef0d08f093d05b3046467a94838b9df",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
-            "AWS_DEFAULT_REGION": "eu-central-1",
+            "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
+            "AWS_DEFAULT_REGION": aws_default_region,
             "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint,
             "SPARQL_UPDATE_AUTH_TUPLE_USERNAME": sparql_update_auth_tuple[0],
             "SPARQL_UPDATE_AUTH_TUPLE_PASSWORD": sparql_update_auth_tuple[1],

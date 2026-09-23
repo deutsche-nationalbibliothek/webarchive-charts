@@ -22,6 +22,9 @@ secret_env_secret_access_key = Secret(
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
 sparql_update_auth_tuple = ("admin", "admin")
 
+aws_endpoint_url_s3 = "http://webarchive-versitygw:7070"
+aws_default_region = "eu-central-1"
+
 PROV_IRI = f"<{PROV_BASE_IRI}recompress:v1>"
 JOB_TYPE_IRI = "dalajobs:RecompressJob"
 
@@ -37,8 +40,8 @@ def s3_kubernetes_recompress_job():
         image="ghcr.io/deutsche-nationalbibliothek/warcio:feature-oci-image-s3",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
-            "AWS_DEFAULT_REGION": "eu-central-1",
+            "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
+            "AWS_DEFAULT_REGION": aws_default_region,
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,

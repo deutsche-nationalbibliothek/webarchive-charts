@@ -12,9 +12,8 @@ secret_env_secret_access_key = Secret(
     "rootSecretAccessKey",
 )
 
-sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
-
 JOB_TYPE_IRI = "dalajobs:IndexJob"
+
 
 @dag(
     schedule=None,  # "@once"
@@ -58,12 +57,16 @@ def job_index():
         cdx_stream = StringIO()
 
         with s3.open(path_in_s3fs, "rb") as source_file:
-            CDXJIndexer(None, None).process_one(input_=source_file, output=cdx_stream, filename=job['source_filename'])
+            CDXJIndexer(None, None).process_one(
+                input_=source_file, output=cdx_stream, filename=job["source_filename"]
+            )
             print(cdx_stream.getvalue())
             response = requests.post(cdx_endpoint, data=cdx_stream.getvalue())
             response.raise_for_status()
 
-            print(f"Successfully uploaded CDX data for {job['source_filename']} ({job['job_iri']})")
+            print(
+                f"Successfully uploaded CDX data for {job['source_filename']} ({job['job_iri']})"
+            )
 
         return job
 

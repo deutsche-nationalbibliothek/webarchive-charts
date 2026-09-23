@@ -20,6 +20,7 @@ secret_env_secret_access_key = Secret(
 )
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
+sparql_update_auth_tuple = ("admin", "admin")
 
 PROV_IRI = f"<{PROV_BASE_IRI}metadata-extract-warc:v1>"
 JOB_TYPE_IRI = "dalajobs:MetadataExtractJob"
@@ -32,8 +33,6 @@ JOB_TYPE_IRI = "dalajobs:MetadataExtractJob"
 )
 def s3_kubernetes_metadata_extract_job():
 
-
-
     @task.kubernetes(
         # image="ghcr.io/white-gecko/warc-metadata2rdf:main-s3",
         image="ghcr.io/white-gecko/warc-metadata2rdf@sha256:61c57230da9f72178b78dd11a0910c2b0ef0d08f093d05b3046467a94838b9df",
@@ -42,7 +41,9 @@ def s3_kubernetes_metadata_extract_job():
             "AWS_ENDPOINT_URL_S3": "http://webarchive-versitygw:7070",
             "AWS_DEFAULT_REGION": "eu-central-1",
             "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint,
-            "GRAPH_BASE_IRI": GRAPH_BASE_IRI
+            "SPARQL_UPDATE_AUTH_TUPLE_USERNAME": sparql_update_auth_tuple[0],
+            "SPARQL_UPDATE_AUTH_TUPLE_PASSWORD": sparql_update_auth_tuple[1],
+            "GRAPH_BASE_IRI": GRAPH_BASE_IRI,
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
@@ -74,6 +75,10 @@ def s3_kubernetes_metadata_extract_job():
         # How could a socket.gaierror be handled propperly
 
         sparql_update_endpoint = os.environ["SPARQL_UPDATE_ENDPOINT"]
+        sparql_update_auth_tuple = (
+            os.environ["SPARQL_UPDATE_AUTH_TUPLE_USERNAME"],
+            os.environ["SPARQL_UPDATE_AUTH_TUPLE_PASSWORD"],
+        )
         graph_base_iri = os.environ["GRAPH_BASE_IRI"]
 
         print(
@@ -89,7 +94,7 @@ def s3_kubernetes_metadata_extract_job():
         # TODO: once we also have crawl jobs, we will know the seed urls from the crawl jobs and somehow have to get the conclusion to the respective records.
 
         with s3.open(path_in_s3fs, "rb") as stream_in:
-            graph = extract_metadata_simple(stream_in, URIRef(job['source_file']))
+            graph = extract_metadata_simple(stream_in, URIRef(job["source_file"]))
             seed_graph = get_seed_record(graph, **guess_seed_request(graph))
 
         print("end metadata extraction")
@@ -97,7 +102,9 @@ def s3_kubernetes_metadata_extract_job():
 
         WAG = Namespace(graph_base_iri)
 
-        store = SPARQLUpdateStore(update_endpoint=sparql_update_endpoint, auth=("admin", "admin"))
+        store = SPARQLUpdateStore(
+            update_endpoint=sparql_update_endpoint, auth=sparql_update_auth_tuple
+        )
         remote_graph = Graph(store=store, identifier=WAG.warc)
         remote_graph += seed_graph
 
@@ -105,23 +112,22 @@ def s3_kubernetes_metadata_extract_job():
 
         return job
 
-
     @task(trigger_rule="all_done")
     def register_files(job: dict):
         import requests
 
         file_update = (
-            PREFIXES + """
+            PREFIXES
+            + """
         INSERT DATA {
             GRAPH wag:data {
         """
-            + f'<{job['source_file']}> wal:fileStatus filestatus:metadata_extracted.'
+            + f"<{job['source_file']}> wal:fileStatus filestatus:metadata_extracted."
             + """
             }
         }
         """
         )
-
 
         # """
         #     GRAPH wag:prov {
@@ -135,7 +141,7 @@ def s3_kubernetes_metadata_extract_job():
 
         r = requests.post(
             sparql_update_endpoint,
-            auth=("admin", "admin"),
+            auth=sparql_update_auth_tuple,
             headers={
                 "Accept": "application/sparql-results+json,*/*;q=0.9",
                 "Content-Type": "application/sparql-update",
@@ -148,7 +154,6 @@ def s3_kubernetes_metadata_extract_job():
 
         r.raise_for_status()
         return job
-
 
     triple_pattern = """
     ?source_file wal:filename ?source_filename ;

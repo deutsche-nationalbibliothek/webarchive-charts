@@ -20,9 +20,11 @@ secret_env_secret_access_key = Secret(
 )
 
 sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
+sparql_update_auth_tuple = ("admin", "admin")
 
 PROV_IRI = f"<{PROV_BASE_IRI}recompress:v1>"
 JOB_TYPE_IRI = "dalajobs:RecompressJob"
+
 
 @dag(
     schedule=None,  # "@once"
@@ -30,7 +32,6 @@ JOB_TYPE_IRI = "dalajobs:RecompressJob"
     tags=["wacli"],
 )
 def s3_kubernetes_recompress_job():
-
 
     @task.kubernetes(
         image="ghcr.io/deutsche-nationalbibliothek/warcio:feature-oci-image-s3",
@@ -74,10 +75,10 @@ def s3_kubernetes_recompress_job():
             pass
 
         print(
-            f"""Executing Job: <{job['job_iri']}>
+            f"""Executing Job: <{job["job_iri"]}>
 
                 I will do the following:
-                1. download the file {job['source_file']} (bucket: {job['source_bucket']}, filename: {job['source_filename']})
+                1. download the file {job["source_file"]} (bucket: {job["source_bucket"]}, filename: {job["source_filename"]})
                 2a. recompress it and
                 2b. in the same run upload it to the s3 bucket {TARGET_BUCKET_NAME}."""
         )
@@ -126,15 +127,13 @@ def s3_kubernetes_recompress_job():
         TARGET_BUCKET_NAME = "webarchive"
 
         file_iris = {
-            FILE_BASE_IRI
-            + TARGET_BUCKET_NAME
-            + "/"
-            + file_name: file_name
+            FILE_BASE_IRI + TARGET_BUCKET_NAME + "/" + file_name: file_name
             for file_name in job["files"]
         }
 
         file_update = (
-            PREFIXES + """
+            PREFIXES
+            + """
         INSERT DATA {
             GRAPH wag:data {
         """
@@ -162,7 +161,7 @@ def s3_kubernetes_recompress_job():
 
         r = requests.post(
             sparql_update_endpoint,
-            auth=("admin", "admin"),
+            auth=sparql_update_auth_tuple,
             headers={
                 "Accept": "application/sparql-results+json,*/*;q=0.9",
                 "Content-Type": "application/sparql-update",

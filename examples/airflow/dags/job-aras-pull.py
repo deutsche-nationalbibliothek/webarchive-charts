@@ -41,7 +41,6 @@ aras_repo = "warc"
 )
 def s3_kubernetes_aras_pull_job():
 
-
     @task.kubernetes(
         image="ghcr.io/deutsche-nationalbibliothek/aras-py:main-s3",
         secrets=[secret_env_access_key, secret_env_secret_access_key],
@@ -50,7 +49,7 @@ def s3_kubernetes_aras_pull_job():
             "AWS_DEFAULT_REGION": aws_default_region,
             "TARGET_BUCKET_NAME": target_bucket_name,
             "ARAS_REST_BASE": aras_rest_base,
-            "ARAS_REPO": aras_repo
+            "ARAS_REPO": aras_repo,
         },
         do_xcom_push=True,
         on_failure_callback=job_failed,
@@ -132,7 +131,8 @@ def s3_kubernetes_aras_pull_job():
         }
 
         file_update = (
-            PREFIXES + """
+            PREFIXES
+            + """
 
         INSERT DATA {
             GRAPH wag:data {

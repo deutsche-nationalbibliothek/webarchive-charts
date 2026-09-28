@@ -11,15 +11,20 @@ airflow:
       enabled: false
   # issue: https://github.com/apache/airflow/issues/58417
   config:
-    # api:
-    #   base_url: "/airflow"
-    # webserver:
-    #   enable_proxy_fix: true
-    #   base_url: "/airflow"
-    #   static_root: "/airflow/static"
-    #   rbac: true
     core:
       hostname_callable: airflow.utils.net.get_host_ip_address
+
+  ##
+  ## Try to get Airflow running under a subpath
+  ##
+  ## The first part is under "config:"
+  #   api:
+  #     base_url: "/airflow"
+  #   webserver:
+  #     enable_proxy_fix: true
+  #     base_url: "/airflow"
+  #     static_root: "/airflow/static"
+  #     rbac: true
   # webserver:
   #   webserverConfig: |
   #     from airflow import configuration as conf

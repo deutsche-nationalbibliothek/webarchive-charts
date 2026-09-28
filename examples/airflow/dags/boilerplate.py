@@ -207,6 +207,11 @@ def job_failed(context):
     remote_pod = json.loads(remote_pod_string)
     print(remote_pod)
 
+    print("remote_pod name: ", remote_pod.get("metadata").get("name"))
+    container_statuses = remote_pod.get("status").get("container_statuses")
+    base_status = [status for status in container_statuses if status["name"] == "base"]
+    print("reson: ", base_status.get("state").get("terminated").get("reason"))
+
     # if ApiException
     # TODO get Reason, HTTP response headers, and HTTP response body
 

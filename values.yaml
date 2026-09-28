@@ -13,6 +13,8 @@ airflow:
   config:
     core:
       hostname_callable: airflow.utils.net.get_host_ip_address
+    secrets:
+      backend: airflow.providers.cncf.kubernetes.secrets.kubernetes_secrets_backend.KubernetesSecretsBackend
 
   ##
   ## Try to get Airflow running under a subpath

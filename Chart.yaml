@@ -25,7 +25,7 @@ appVersion: "1.16.0"
 
 dependencies:
   - name: airflow
-    version: 1.21.0
+    version: 1.22.0
     repository: https://airflow.apache.org
     condition: airflow.enabled
   # - name: versitygw

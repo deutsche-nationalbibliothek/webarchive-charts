@@ -37,20 +37,29 @@ dependencies:
     repository: https://charts.zazuko.com/
     condition: fuseki.enabled
   - name: graph
+    version: 0.1.0
     condition: graph.enabled
   - name: ingest
+    version: 0.1.0
     condition: ingest.enabled
   - name: mockils
+    version: 0.1.0
     condition: mockils.enabled
   - name: outbackcdx
+    version: 0.1.0
     condition: outbackcdx.enabled
   - name: playback
+    version: 0.1.0
     condition: playback.enabled
   - name: pwidresolver
+    version: 0.1.0
     condition: pwidresolver.enabled
   - name: wacalog
+    version: 0.1.0
     condition: wacalog.enabled
   - name: dashboard
+    version: 0.1.0
     condition: dashboard.enabled
   - name: versitygw
+    version: 0.3.3
     condition: versitygw.enabled

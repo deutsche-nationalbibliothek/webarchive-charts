@@ -33,7 +33,7 @@ dependencies:
     repository: oci://ghcr.io/versity/versitygw/charts
     condition: versitygw.enabled
   - name: fuseki
-    version: 0.2.0
+    version: 0.2.3
     repository: https://charts.zazuko.com/
     condition: fuseki.enabled
   - name: graph

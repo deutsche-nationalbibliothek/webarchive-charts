@@ -2,9 +2,12 @@ dependencies:
 - name: airflow
   repository: https://airflow.apache.org
   version: 1.22.0
+- name: versitygw
+  repository: oci://ghcr.io/versity/versitygw/charts
+  version: 0.4.4
 - name: fuseki
   repository: https://charts.zazuko.com/
-  version: 0.2.0
+  version: 0.2.3
 - name: graph
   repository: ""
   version: 0.1.0
@@ -29,8 +32,5 @@ dependencies:
 - name: dashboard
   repository: ""
   version: 0.1.0
-- name: versitygw
-  repository: ""
-  version: 0.3.3
-digest: sha256:0cc74d799b8ceb2c0a80a21946e5291f4ba10c2bd0f72475d5aebd712678d33b
-generated: "2026-09-29T10:38:07.05659971+02:00"
+digest: sha256:890be3be133bce65b11ad7e8643dee1cd1088339b291502a2b677592c10e188a
+generated: "2026-09-29T11:39:58.187179455+02:00"

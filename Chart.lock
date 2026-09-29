@@ -1,12 +1,36 @@
 dependencies:
 - name: airflow
   repository: https://airflow.apache.org
-  version: 1.21.0
-- name: versitygw
-  repository: oci://ghcr.io/versity/versitygw/charts
-  version: 0.3.1
+  version: 1.22.0
 - name: fuseki
   repository: https://charts.zazuko.com/
   version: 0.2.0
-digest: sha256:ea849943d93ecc19bd9a1455bed80aa80292b63f21a5210a3973868db4f93748
-generated: "2026-05-20T11:45:07.745018852+02:00"
+- name: graph
+  repository: ""
+  version: 0.1.0
+- name: ingest
+  repository: ""
+  version: 0.1.0
+- name: mockils
+  repository: ""
+  version: 0.1.0
+- name: outbackcdx
+  repository: ""
+  version: 0.1.0
+- name: playback
+  repository: ""
+  version: 0.1.0
+- name: pwidresolver
+  repository: ""
+  version: 0.1.0
+- name: wacalog
+  repository: ""
+  version: 0.1.0
+- name: dashboard
+  repository: ""
+  version: 0.1.0
+- name: versitygw
+  repository: ""
+  version: 0.3.3
+digest: sha256:0cc74d799b8ceb2c0a80a21946e5291f4ba10c2bd0f72475d5aebd712678d33b
+generated: "2026-09-29T10:38:07.05659971+02:00"

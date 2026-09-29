@@ -75,10 +75,10 @@ versitygw:
     backend:
       type: posix
       # https://github.com/versity/versitygw/discussions/1551#discussioncomment-16508001
-      # --nometa to avoid `xattr check failed: xattrs are not supported on this filesystem`
+      # and https://github.com/versity/versitygw/commit/568d4a25ccc60b4283c52d20be5e416976521393
+      # Add sidecar dir to avoid `xattr check failed: xattrs are not supported on this filesystem`
       # but be aware of https://github.com/versity/versitygw/wiki/POSIX-metadata
-      # args: "--nometa /mnt/data/buckets"
-      args: "--sidecar /mnt/metadata /mnt/data"
+      sidecarDir: "/mnt/metadata"
   sidecar:
     enabled: true
   # ingress:

@@ -3,6 +3,8 @@ global:
 
 airflow:
   enabled: true
+  airflowVersion: "3.3.2"
+  defaultAirflowTag: "3.3.2"
   dags:
     persistence:
       enabled: true

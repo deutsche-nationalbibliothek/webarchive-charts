@@ -111,9 +111,9 @@ The setup uses the [helm chart provided by the apache airflow project](https://a
 
 To nicely integrate secrets and connections we need to [follow the documentation](https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/secrets-backends/kubernetes-secrets-backend.html).
 
-- [Repository](https://github.com/airflow-helm/charts)
-- [README](https://github.com/airflow-helm/charts/blob/main/charts/airflow/README.md)
-- [values.yaml](https://github.com/airflow-helm/charts/blob/main/charts/airflow/values.yaml)
+- [Repository](https://github.com/apache/airflow/tree/main/chart)
+- [README](https://github.com/apache/airflow/blob/main/chart/README.md)
+- [values.yaml](https://github.com/apache/airflow/blob/main/chart/values.yaml)
 - [Parameter Reference](https://airflow.apache.org/docs/helm-chart/stable/parameters-ref.html)
 
 ### VersityGW (S3 Storage)

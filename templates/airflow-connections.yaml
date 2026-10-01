@@ -1,0 +1,18 @@
+# See also
+# https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/secrets-backends/kubernetes-secrets-backend.html
+{{- range .Values.airflowConnections -}}
+{{- $localConfig := deepCopy .config -}}
+{{- if .tplConfig -}}
+  {{- $_ := tpl .tplConfig $ | fromYaml | merge $localConfig -}}
+{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .name | quote }}
+  labels:
+    airflow.apache.org/connection-id: {{ .connectionId }}
+stringData:
+  value: |
+    {{- toRawJson $localConfig | nindent 4 }}
+{{- end }}

@@ -159,3 +159,52 @@ dashboard:
 vpa:
   enabled: true
   updateMode: "Off"
+
+airflowConnections:
+  - name: fuseki-query-secret
+    connectionId: sparql_query_default
+    config:
+      conn_type: http
+      host: webarchive-fuseki
+      port: "3030"
+      schema: ds/query
+
+  - name: fuseki-update-secret
+    connectionId: sparql_update_default
+    config:
+      conn_type: http
+      host: webarchive-fuseki
+      port: "3030"
+      schema: ds/update
+      login: admin
+    tplConfig: |
+      password: {{ .Values.fuseki.config.adminPassword | quote }}
+
+  - name: aras-secret
+    connectionId: aras_default
+    config:
+      conn_type: http
+      host: mockils-service
+      port: "8080"
+
+  - name: outbackcdx-secret
+    connectionId: cdx_default
+    config:
+      conn_type: http
+      host: outbackcdx-service
+      port: "8080"
+      schema: outbackcdx
+
+  - name: s3-secret
+    connectionId: aws_default
+    config:
+      conn_type: aws
+      extra:
+        endpoint_url: http://webarchive-versitygw:7070
+    tplConfig: |
+      login: {{ .Values.versitygw.auth.accessKey | quote }}
+      password: {{ .Values.versitygw.auth.secretKey | quote }}
+      extra:
+        region_name: {{ .Values.versitygw.gateway.region | default "eu-central-1" | quote }}
+    # From somewhere there was the info, the credentials need to go to extra: extra.aws_access_key_id, extra.aws_secret_access_key, but I think login and password are right.
+    # maybe "endpoint_url_s3": "http://webarchive-versitygw:7070"

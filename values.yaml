@@ -161,7 +161,7 @@ vpa:
   updateMode: "Off"
 
 airflowConnections:
-  - name: fuseki-query-secret
+  - name: sparql-query-connection-secret
     connectionId: sparql_query_default
     config:
       conn_type: http
@@ -169,7 +169,7 @@ airflowConnections:
       port: "3030"
       schema: ds/query
 
-  - name: fuseki-update-secret
+  - name: sparql-update-connection-secret
     connectionId: sparql_update_default
     config:
       conn_type: http
@@ -180,14 +180,14 @@ airflowConnections:
     tplConfig: |
       password: {{ .Values.fuseki.config.adminPassword | quote }}
 
-  - name: aras-secret
+  - name: aras-connection-secret
     connectionId: aras_default
     config:
       conn_type: http
       host: mockils-service
       port: "8080"
 
-  - name: outbackcdx-secret
+  - name: cdx-connection-secret
     connectionId: cdx_default
     config:
       conn_type: http
@@ -195,8 +195,8 @@ airflowConnections:
       port: "8080"
       schema: outbackcdx
 
-  - name: s3-secret
-    connectionId: aws_default
+  - name: s3-connection-secret
+    connectionId: s3_default
     config:
       conn_type: aws
       extra:

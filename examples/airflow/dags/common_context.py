@@ -1,6 +1,82 @@
 from inspect import getsource
 from textwrap import dedent
 
+"""
+This common context is a mechanism to share connections among python tasks and kubernetes tasks.
+
+Usage example:
+
+```python
+from airflow.sdk import Connection, dag, task
+from common_context import get_cc
+
+secret_sparql_query_default = Secret(
+    "env", "SECRET_SPARQL_QUERY_DEFAULT", "sparql-query-connection-secret", "value"
+)
+
+secret_aws_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
+
+cc, cc_source = get_cc()
+
+@dag(…)
+def my_dag():
+
+    @task
+    def my_python_task():
+        sparql_query_conn = Connection.get("sparql_query_default")
+        s3_conn = Connection.get("s3_default")
+
+        # Setup and use SPARQL Query
+        response = cc.sparql_query(
+            sparql_query_conn, "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 1"
+        )
+        print(f"SPARQL Query status: {response.status_code}")
+
+        # Setup S3 endpoint
+        cc.set_boto_env(s3_conn, os.environ)
+
+        …
+
+
+    @task.kubernetes(
+        image="…",
+        secrets=[
+            secret_sparql_query_default,
+            secret_aws_default,
+        ],
+    )
+    def my_kubernetes_task(cc_source: str):
+        import os
+
+        exec_locals = {}
+        exec(cc_source, locals=exec_locals)  # noqa: S102
+        cc = exec_locals["common_context"]
+
+        sparql_query_conn = cc.Connection.from_json(
+            value=os.getenv("SECRET_SPARQL_QUERY_DEFAULT"),
+            conn_id="sparql_query_default",
+        )
+        s3_conn = cc.Connection.from_json(
+            value=os.getenv("SECRET_S3_DEFAULT"), conn_id="s3_default"
+        )
+
+        # 1. SPARQL Query endpoint (no auth required in this setup)
+        response = cc.sparql_query(
+            sparql_query_conn, "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 1"
+        )
+        print(f"SPARQL Query status: {response.status_code}")
+
+        # 3. S3 endpoint with credentials from connection
+        cc.set_boto_env(s3_conn, os.environ)
+
+    my_python_task()
+    my_kubernetes_task(cc_source)
+
+
+my_dag()
+
+```
+"""
 
 class common_context:
     """This is a class to wrap a common context of code to transport it into the KubernetesPodOperator"""

@@ -26,7 +26,7 @@ def my_dag():
         sparql_query_conn = Connection.get("sparql_query_default")
         s3_conn = Connection.get("s3_default")
 
-        # Setup and use SPARQL Query
+        # Setup and use SPARQL
         response = cc.sparql_query(
             sparql_query_conn, "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 1"
         )
@@ -60,13 +60,13 @@ def my_dag():
             value=os.getenv("SECRET_S3_DEFAULT"), conn_id="s3_default"
         )
 
-        # 1. SPARQL Query endpoint (no auth required in this setup)
+        # Setup and use SPARQL
         response = cc.sparql_query(
             sparql_query_conn, "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 1"
         )
         print(f"SPARQL Query status: {response.status_code}")
 
-        # 3. S3 endpoint with credentials from connection
+        # Setup S3 endpoint
         cc.set_boto_env(s3_conn, os.environ)
 
     my_python_task()

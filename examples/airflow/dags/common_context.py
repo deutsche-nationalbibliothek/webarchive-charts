@@ -152,10 +152,10 @@ class common_context:
         cls,
         conn,
         query: str,
-        content_type: str = "application/sparql-query",
+        headers: dict = {},
         backend_library=None,
     ):
-        """Query a sparql endpoint defined by a Connection object.
+        """Query a SPARQL endpoint defined by a Connection object.
 
         Requires non sandard python requests or rdflib module to be available.
         """
@@ -181,11 +181,34 @@ class common_context:
                 endpoint_url,
                 auth=auth_tuple,
                 data=query,
-                headers={"Content-Type": content_type},
+                headers={
+                    "Accept": "application/sparql-results+json,*/*;q=0.9",
+                    "Content-Type": "application/sparql-query",
+                    **headers,
+                },
             )
             return response
         elif backend_library == "rdflib":
             raise Exception("The rdflib backend needs to be implemented")
+
+    @classmethod
+    def sparql_update(
+        cls,
+        conn,
+        update: str,
+        headers: dict = {},
+        backend_library=None,
+    ):
+        """Send an update to a SPARQL endpoint defined by a Connection object.
+
+        Requires non sandard python requests or rdflib module to be available.
+        """
+        return cls.sparql_query(
+            conn,
+            update,
+            {"Content-Type": "application/sparql-update", **headers},
+            backend_library,
+        )
 
 
 def get_cc():

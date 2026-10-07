@@ -78,6 +78,7 @@ my_dag()
 ```
 """
 
+
 class common_context:
     """This is a class to wrap a common context of code to transport it into the KubernetesPodOperator"""
 
@@ -146,7 +147,6 @@ class common_context:
         env["AWS_ACCESS_KEY_ID"] = conn.login or ""
         env["AWS_SECRET_ACCESS_KEY"] = conn.password or ""
 
-
     @classmethod
     def sparql_query(
         cls,
@@ -186,6 +186,7 @@ class common_context:
             return response
         elif backend_library == "rdflib":
             raise Exception("The rdflib backend needs to be implemented")
+
 
 def get_cc():
     return common_context, dedent(getsource(common_context))

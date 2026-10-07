@@ -85,7 +85,7 @@ class common_context:
 
     @dataclass
     class Connection:
-        """Mocking a airflow.sdk.Connection object to be compatble with it in kubernetes code.
+        """Mocking an airflow.sdk.Connection object to be compatble with it in kubernetes code.
 
         Caution: secrets are not masked
         """

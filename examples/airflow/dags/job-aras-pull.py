@@ -1,5 +1,5 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
-from airflow.sdk import dag, task
+from airflow.sdk import Connection, dag, task
 from boilerplate import (
     FILE_BASE_IRI,
     PREFIXES,
@@ -8,29 +8,26 @@ from boilerplate import (
     job_failed,
     jobs_done,
 )
+from common_context import get_cc
 
 PROV_IRI = f"<{PROV_BASE_IRI}oGet>"
 JOB_TYPE_IRI = "dalajobs:ArasPullJob"
 
-secret_env_access_key = Secret(
-    "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
-)
-secret_env_secret_access_key = Secret(
-    "env",
-    "AWS_SECRET_ACCESS_KEY",
-    "webarchive-versitygw-credentials",
-    "rootSecretAccessKey",
+## Uses the followin connections
+# sparql_update_default: sparql-update-connection-secret
+# s3_default: s3-connection-secret
+# aras_default: aras-connection-secret
+
+# Define secrets - reference k8s secrets by connection ID label
+secret_aras_default = Secret(
+    "env", "SECRET_ARAS_DEFAULT", "aras-connection-secret", "value"
 )
 
-sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
-sparql_update_auth_tuple = ("admin", "admin")
+secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
 
-aws_endpoint_url_s3 = "http://webarchive-versitygw:7070"
-aws_default_region = "eu-central-1"
+cc, cc_source = get_cc()
 
 target_bucket_name = "waingest"
-
-aras_rest_base = "http://mockils-service:8080/"
 aras_repo = "warc"
 
 
@@ -43,12 +40,9 @@ def s3_kubernetes_aras_pull_job():
 
     @task.kubernetes(
         image="ghcr.io/deutsche-nationalbibliothek/aras-py:main-s3",
-        secrets=[secret_env_access_key, secret_env_secret_access_key],
+        secrets=[secret_aras_default, secret_s3_default],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
-            "AWS_DEFAULT_REGION": aws_default_region,
             "TARGET_BUCKET_NAME": target_bucket_name,
-            "ARAS_REST_BASE": aras_rest_base,
             "ARAS_REPO": aras_repo,
         },
         do_xcom_push=True,
@@ -76,17 +70,29 @@ def s3_kubernetes_aras_pull_job():
             }
         },
     )
-    def aras_download(job: dict):
+    def aras_download(cc_source: str, job: dict):
         import os
         from shutil import copyfileobj
 
         import s3fs
         from aras_py.run import get_stream
 
-        # load with aras-py and write to s3
-        target_bucket_name = os.environ["TARGET_BUCKET_NAME"]
+        exec_locals = {}
+        exec(cc_source, locals=exec_locals)  # noqa: S102
+        cc = exec_locals["common_context"]
 
-        aras_rest_base = os.environ["ARAS_REST_BASE"]
+        aras_conn = cc.Connection.from_json(
+            value=os.getenv("SECRET_ARAS_DEFAULT"),
+            conn_id="aras_default",
+        )
+        s3_conn = cc.Connection.from_json(
+            value=os.getenv("SECRET_S3_DEFAULT"), conn_id="s3_default"
+        )
+
+        aras_rest_base, _ = cc.http_connection(aras_conn)
+        cc.set_boto_env(s3_conn, os.environ)
+
+        target_bucket_name = os.environ["TARGET_BUCKET_NAME"]
         aras_repo = os.environ["ARAS_REPO"]
 
         s3 = s3fs.S3FileSystem()
@@ -122,13 +128,10 @@ def s3_kubernetes_aras_pull_job():
 
     @task(trigger_rule="all_done")
     def register_files(job: dict):
-        import requests
-        TARGET_BUCKET_NAME = "waingest"
 
-        file_iris = {
-            FILE_BASE_IRI + file_name: file_name
-            for file_name in job["files"]
-        }
+        sparql_update_conn = Connection.get("sparql_update_default")
+
+        file_iris = {FILE_BASE_IRI + file_name: file_name for file_name in job["files"]}
 
         file_update = (
             PREFIXES
@@ -139,7 +142,7 @@ def s3_kubernetes_aras_pull_job():
         """
             + "\n".join(
                 [
-                    f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{TARGET_BUCKET_NAME}" .'
+                    f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{target_bucket_name}" .'
                     for file_iri, file_name in file_iris.items()
                 ]
             )
@@ -159,15 +162,7 @@ def s3_kubernetes_aras_pull_job():
         """
         )
 
-        r = requests.post(
-            sparql_update_endpoint,
-            auth=sparql_update_auth_tuple,
-            headers={
-                "Accept": "application/sparql-results+json,*/*;q=0.9",
-                "Content-Type": "application/sparql-update",
-            },
-            data=file_update,
-        )
+        r = cc.sparql_update(sparql_update_conn, file_update)
 
         print(r)
         print(r.text)
@@ -177,7 +172,7 @@ def s3_kubernetes_aras_pull_job():
 
     jobs_done(
         register_files.expand(
-            job=aras_download.expand(
+            job=aras_download.partial(cc_source=cc_source).expand(
                 job=get_jobs(["idn"], JOB_TYPE_IRI, {"wal:idn": "?idn"})
             )
         )

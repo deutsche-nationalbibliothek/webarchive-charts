@@ -125,9 +125,6 @@ fuseki:
         - path: /fuseki(/|$)(.*)
           pathType: ImplementationSpecific
 
-graph:
-  enabled: false
-
 ingest:
   enabled: false
 

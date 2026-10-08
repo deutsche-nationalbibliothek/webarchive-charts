@@ -103,7 +103,7 @@ class common_context:
         def extra_dejson(self) -> dict:
             """returns the extra property which is already deserialized json."""
 
-            return self.extra
+            return self.extra or {}
 
         @classmethod
         def from_json(cls, value: str, conn_id=None):

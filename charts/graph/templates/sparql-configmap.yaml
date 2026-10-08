@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sparql-configmap
+data:
+  GRAPH_FILE: {{ .Values.websiteGraphFile | quote }}

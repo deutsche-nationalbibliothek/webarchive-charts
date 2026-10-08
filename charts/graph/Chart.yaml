@@ -1,6 +1,6 @@
 apiVersion: v2
-name: webarchive
-description: A Helm chart to deploy the "Webarchiv der Zukunft" (future webarchive) to Kubernetes
+name: graph
+description: The helm chart to deploy a knowledge graph system.
 
 # A chart can be either an 'application' or a 'library' chart.
 #
@@ -22,41 +22,3 @@ version: 0.1.0
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "1.16.0"
-
-dependencies:
-  - name: airflow
-    version: 1.22.0
-    repository: https://airflow.apache.org
-    condition: airflow.enabled
-  - name: versitygw
-    version: 0.4.4
-    repository: oci://ghcr.io/versity/versitygw/charts
-    condition: versitygw.enabled
-  - name: fuseki
-    version: 0.2.3
-    repository: https://charts.zazuko.com/
-    condition: fuseki.enabled
-  - name: graph
-    version: 0.1.0
-    condition: graph.enabled
-  - name: ingest
-    version: 0.1.0
-    condition: ingest.enabled
-  - name: mockils
-    version: 0.1.0
-    condition: mockils.enabled
-  - name: outbackcdx
-    version: 0.1.0
-    condition: outbackcdx.enabled
-  - name: playback
-    version: 0.1.0
-    condition: playback.enabled
-  - name: pwidresolver
-    version: 0.1.0
-    condition: pwidresolver.enabled
-  - name: wacalog
-    version: 0.1.0
-    condition: wacalog.enabled
-  - name: dashboard
-    version: 0.1.0
-    condition: dashboard.enabled

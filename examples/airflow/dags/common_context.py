@@ -127,7 +127,10 @@ class common_context:
     def http_connection(cls, conn) -> tuple[str, tuple[str, str] | None]:
         """Get a tuple of http endpoint URL (e.g. sparql endpoint) and auth tuple from a connection object to use it with requests"""
         url_scheme = conn.extra_dejson.get("url_scheme") or "http"
-        endpoint_url = f"{url_scheme}://{conn.host}:{conn.port}/{conn.schema}"
+        host_part = conn.host
+        if conn.port:
+            host_part += f":{conn.port}"
+        endpoint_url = f"{url_scheme}://{host_part}/{conn.schema or ''}"
         auth_tuple = None
         if conn.login:
             auth_tuple = (

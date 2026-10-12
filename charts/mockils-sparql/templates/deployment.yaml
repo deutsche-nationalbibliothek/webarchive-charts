@@ -1,0 +1,60 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: mock-sparql-app
+  labels:
+    app: mock-sparql
+spec:
+  selector:
+    matchLabels:
+      app: mock-sparql
+  template:
+    metadata:
+      labels:
+        app: mock-sparql
+    spec:
+      containers:
+        - name: mock-sparql-app
+          image: 'ghcr.io/aksw/sparql-file:main'
+          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
+          volumeMounts:
+            - name: graph-file
+              mountPath: /data/graph.ttl
+              readOnly: true
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: graph-file
+          hostPath:
+            path: /home/docker/hostdata/test_websites.ttl
+            type: File
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: mock-sparql-service
+spec:
+  selector:
+    app: mock-sparql
+  ports:
+    - port: 8080
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: mocked-ils-sparql-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /mockils-sparql(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: mock-sparql-service
+                port:
+                  number: 8080

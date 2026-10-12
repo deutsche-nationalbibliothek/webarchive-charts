@@ -42,6 +42,9 @@ dependencies:
   - name: mockils
     version: 0.1.0
     condition: mockils.enabled
+  - name: mockils-sparql
+    version: 0.1.0
+    condition: mockils-sparql.enabled
   - name: outbackcdx
     version: 0.1.0
     condition: outbackcdx.enabled

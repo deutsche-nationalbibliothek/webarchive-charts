@@ -131,6 +131,9 @@ ingest:
 mockils:
   enabled: true
 
+mockils-sparql:
+  enabled: true
+
 outbackcdx:
   enabled: true
   pvcName: cdx-pvc

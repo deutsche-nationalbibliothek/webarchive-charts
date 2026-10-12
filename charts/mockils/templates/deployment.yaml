@@ -33,37 +33,6 @@ spec:
             path: /home/docker/hostdata/warc
             type: Directory
 ---
-kind: Deployment
-apiVersion: apps/v1
-metadata:
-  name: mock-sparql-app
-  labels:
-    app: mock-sparql
-spec:
-  selector:
-    matchLabels:
-      app: mock-sparql
-  template:
-    metadata:
-      labels:
-        app: mock-sparql
-    spec:
-      containers:
-        - name: mock-sparql-app
-          image: 'ghcr.io/aksw/sparql-file:main'
-          imagePullPolicy: {{ .Values.global.imagePullPolicy | quote }}
-          volumeMounts:
-            - name: graph-file
-              mountPath: /data/graph.ttl
-              readOnly: true
-          resources:
-            {{- toYaml .Values.graph.resources | nindent 12 }}
-      volumes:
-        - name: graph-file
-          hostPath:
-            path: /home/docker/hostdata/test_websites.ttl
-            type: File
----
 kind: Service
 apiVersion: v1
 metadata:
@@ -71,16 +40,6 @@ metadata:
 spec:
   selector:
     app: mockils
-  ports:
-    - port: 8080
----
-kind: Service
-apiVersion: v1
-metadata:
-  name: mock-sparql-service
-spec:
-  selector:
-    app: mock-sparql
   ports:
     - port: 8080
 ---
@@ -101,12 +60,5 @@ spec:
             backend:
               service:
                 name: mockils-service
-                port:
-                  number: 8080
-          - path: /mockils-sparql(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: mock-sparql-service
                 port:
                   number: 8080

@@ -115,7 +115,7 @@ def s3_kubernetes_aras_pull_job():
 
         for file_name, stream, metadata in stream_iter:
             print(
-                f"download idn: {job['idn']}, metadata: {str(metadata)} to {file_name}"
+                f"download idn: {job['idn']}, metadata: {metadata!s} to {file_name}"
             )
             with (
                 s3.open(f"{target_bucket_name}/{file_name}", "wb") as target_io,

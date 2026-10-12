@@ -132,7 +132,7 @@ mockils:
   enabled: true
 
 mockils-sparql:
-  enabled: true
+  enabled: false
 
 outbackcdx:
   enabled: true

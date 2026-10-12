@@ -105,6 +105,9 @@ def s3_kubernetes_aras_pull_job():
         print(
             f"I will now download the files for {job['idn']} and upload them to the s3 bucket {target_bucket_name}. ({job['job_iri']})."
         )
+        print(
+            f'aras_rest_base: "{aras_rest_base}", aras_repo: "{aras_repo}". ({job["job_iri"]}).'
+        )
 
         stream_iter = get_stream(aras_rest_base, aras_repo, job["idn"])
 

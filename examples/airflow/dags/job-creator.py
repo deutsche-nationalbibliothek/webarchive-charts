@@ -113,7 +113,6 @@ INSERT {
 """
 )
 
-
 job_updates = [
     recompress_update,
     index_update,

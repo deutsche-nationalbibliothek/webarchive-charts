@@ -9,38 +9,3 @@ data:
         archive_paths: {{ .Values.warcDirectory | quote }}
         #archive_paths: http://remote.example.org/warcs/
         index_paths: cdx+http://outbackcdx-service:8080/outbackcdx/{{ .Values.pywbCollection }}
-  uwsgi.ini: |
-    [uwsgi]
-    if-not-env = PORT
-    http-socket = :8080
-    socket = :8081
-    endif =
-
-    master = true
-    buffer-size = 131072
-    die-on-term = true
-
-    if-env = VIRTUAL_ENV
-    venv = $(VIRTUAL_ENV)
-    endif =
-
-    gevent = 100
-
-    #Not available until uwsgi 2.1
-    #monkey-patching manually in pywb.apps.wayback
-    #gevent-early-monkey-patch =
-    # for uwsgi<2.1, set env when using gevent
-    env = GEVENT_MONKEY_PATCH=1
-
-    # specify config file here
-    env = PYWB_CONFIG_FILE=config.yaml
-
-    if-not-env = UWSGI_MOUNT
-    wsgi = pywb.apps.wayback
-    endif =
-
-    # Set the path to which pywb should be mounted
-    if-env = UWSGI_MOUNT
-    mount = %(_)
-    manage-script-name = true
-    endif =

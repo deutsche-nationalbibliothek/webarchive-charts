@@ -44,10 +44,6 @@ spec:
               subPath: "config.yaml"
               name: pywb-config
               readOnly: true
-            - mountPath: "/uwsgi/uwsgi.ini"
-              subPath: "uwsgi.ini"
-              name: uwsgi-config
-              readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -60,9 +56,3 @@ spec:
             items:
               - key: "config.yaml"
                 path: "config.yaml"
-        - name: uwsgi-config
-          configMap:
-            name: pywb-configmap
-            items:
-              - key: "uwsgi.ini"
-                path: "uwsgi.ini"

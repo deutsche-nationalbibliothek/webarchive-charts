@@ -1,10 +1,11 @@
-from airflow.providers.cncf.kubernetes.secret import Secret
-from airflow.sdk import dag, task
+from airflow.sdk import Connection, dag, task
 from boilerplate import PREFIXES
+from common_context import get_cc
 
-sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
-sparql_update_auth_tuple = ("admin", "admin")
+## Uses the following connections
+# sparql_update_default: sparql-update-connection-secret
 
+cc, _ = get_cc()
 
 metadata_warc_to_wash_update = PREFIXES + """
 prefix bibo: <http://purl.org/ontology/bibo/>
@@ -81,18 +82,10 @@ def job_metadata_warc_to_wash():
 
     @task
     def metadata_warc_to_wash():
-        import requests
+        sparql_update_conn = Connection.get("sparql_update_default")
 
         for update in metadata_updates:
-            r = requests.post(
-                sparql_update_endpoint,
-                auth=sparql_update_auth_tuple,
-                headers={
-                    "Accept": "application/sparql-results+json,*/*;q=0.9",
-                    "Content-Type": "application/sparql-update",
-                },
-                data=update,
-            )
+            r = cc.sparql_update(sparql_update_conn, update)
 
             print(r)
             print(r.text)

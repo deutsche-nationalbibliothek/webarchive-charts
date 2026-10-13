@@ -10,22 +10,21 @@ from boilerplate import (
 )
 from common_context import get_cc
 
-PROV_IRI = f"<{PROV_BASE_IRI}oGet>"
-JOB_TYPE_IRI = "dalajobs:ArasPullJob"
+cc, cc_source = get_cc()
 
-## Uses the followin connections
+## Uses the following connections
 # sparql_update_default: sparql-update-connection-secret
 # s3_default: s3-connection-secret
 # aras_default: aras-connection-secret
+
+PROV_IRI = f"<{PROV_BASE_IRI}oGet>"
+JOB_TYPE_IRI = "dalajobs:ArasPullJob"
 
 # Define secrets - reference k8s secrets by connection ID label
 secret_aras_default = Secret(
     "env", "SECRET_ARAS_DEFAULT", "aras-connection-secret", "value"
 )
-
 secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
-
-cc, cc_source = get_cc()
 
 target_bucket_name = "waingest"
 aras_repo = "warc"

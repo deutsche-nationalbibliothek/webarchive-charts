@@ -1,10 +1,11 @@
-from airflow.providers.cncf.kubernetes.secret import Secret
-from airflow.sdk import dag, task
+from airflow.sdk import Connection, dag, task
 from boilerplate import PREFIXES
+from common_context import get_cc
 
-sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
-sparql_update_auth_tuple = ("admin", "admin")
+## Uses the following connections
+# sparql_update_default: sparql-update-connection-secret
 
+cc, _ = get_cc()
 
 recompress_update = PREFIXES + """
 INSERT {
@@ -113,18 +114,10 @@ def job_creator():
 
     @task
     def create_jobs():
-        import requests
+        sparql_update_conn = Connection.get("sparql_update_default")
 
         for update in job_updates:
-            r = requests.post(
-                sparql_update_endpoint,
-                auth=sparql_update_auth_tuple,
-                headers={
-                    "Accept": "application/sparql-results+json,*/*;q=0.9",
-                    "Content-Type": "application/sparql-update",
-                },
-                data=update,
-            )
+            r = cc.sparql_update(sparql_update_conn, update)
 
             print(update)
             print(r)

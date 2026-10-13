@@ -1,12 +1,14 @@
 from textwrap import dedent
 
-import requests
-from airflow.sdk import task
+from airflow.sdk import Connection, task
+from common_context import get_cc
 from requests.exceptions import JSONDecodeError
 
-sparql_query_endpoint = "http://webarchive-fuseki:3030/ds/query"
-sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
-sparql_update_auth_tuple = ("admin", "admin")
+cc, _ = get_cc()
+
+## Uses the following connections
+# sparql_update_default: sparql-update-connection-secret
+# sparql_query_default: sparql-query-connection-secret
 
 BASE_IRI = "https://d-nb.info/"
 
@@ -97,6 +99,7 @@ def get_jobs(
     triple_pattern: str = "",
     limit: int = 5,
 ):
+    sparql_query_conn = Connection.get("sparql_query_default")
 
     job_query = dedent(
         PREFIXES
@@ -121,15 +124,8 @@ def get_jobs(
     )
 
     print(job_query)
+    r = cc.sparql_update(sparql_query_conn, job_query)
 
-    r = requests.post(
-        sparql_query_endpoint,
-        headers={
-            "Accept": "application/sparql-results+json,*/*;q=0.9",
-            "Content-Type": "application/sparql-query",
-        },
-        data=job_query,
-    )
     try:
         return [
             {
@@ -157,6 +153,8 @@ def jobs_done(jobs: list[dict] | None = None):
 
 def _jobs_done(jobs: list[dict]):
 
+    sparql_update_conn = Connection.get("sparql_update_default")
+
     job_update = dedent(
         PREFIXES
         + """
@@ -172,15 +170,7 @@ def _jobs_done(jobs: list[dict]):
         """
     )
 
-    r = requests.post(
-        sparql_update_endpoint,
-        auth=sparql_update_auth_tuple,
-        headers={
-            "Accept": "application/sparql-results+json,*/*;q=0.9",
-            "Content-Type": "application/sparql-update",
-        },
-        data=job_update,
-    )
+    r = cc.sparql_update(sparql_update_conn, job_update)
 
     print(r)
     print(r.text)
@@ -221,6 +211,8 @@ def job_failed(context):
 
 def report_job_status(jobs: list[dict]):
 
+    sparql_update_conn = Connection.get("sparql_update_default")
+
     triples = []
 
     for job in jobs:
@@ -241,15 +233,7 @@ def report_job_status(jobs: list[dict]):
         """
     )
 
-    r = requests.post(
-        sparql_update_endpoint,
-        auth=sparql_update_auth_tuple,
-        headers={
-            "Accept": "application/sparql-results+json,*/*;q=0.9",
-            "Content-Type": "application/sparql-update",
-        },
-        data=job_update,
-    )
+    r = cc.sparql_update(sparql_update_conn, job_update)
 
     print(r)
     print(r.text)

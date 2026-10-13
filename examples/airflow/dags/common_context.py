@@ -169,15 +169,15 @@ class common_context:
             import requests
         elif backend_library == "rdflib":
             import rdflib
+        else:
+            try:
+                import requests
 
-        try:
-            import requests
+                backend_library = "requests"
+            except ImportError:
+                import rdflib
 
-            backend_library = "requests"
-        except ImportError:
-            import rdflib
-
-            backend_library = "rdflib"
+                backend_library = "rdflib"
 
         if backend_library == "requests":
             response = requests.post(
@@ -212,6 +212,26 @@ class common_context:
             {"Content-Type": "application/sparql-update", **headers},
             backend_library,
         )
+
+    @classmethod
+    def sparql_update_graph(
+        cls, conn, add_graph, identifier, headers: dict = {}, backend_library=None
+    ):
+
+        if backend_library == "rdflib":
+            from rdflib import Graph
+            from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
+        else:
+            from rdflib import Graph
+            from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
+
+            backend_library = "rdflib"
+
+        endpoint_url, auth_tuple = cls.http_connection(conn)
+
+        store = SPARQLUpdateStore(update_endpoint=endpoint_url, auth=auth_tuple)
+        remote_graph = Graph(store=store, identifier=identifier)
+        remote_graph += add_graph
 
 
 def get_cc():

@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 from airflow.providers.cncf.kubernetes.secret import Secret
-from airflow.sdk import dag, task
+from airflow.sdk import Connection, dag, task
 from boilerplate import (
     GRAPH_BASE_IRI,
     PREFIXES,
@@ -10,22 +10,19 @@ from boilerplate import (
     job_failed,
     jobs_done,
 )
+from common_context import get_cc
 
-secret_env_access_key = Secret(
-    "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
+cc, cc_source = get_cc()
+
+## Uses the following connections
+# sparql_update_default: sparql-update-connection-secret
+# s3_default: s3-connection-secret
+
+# Define secrets - reference k8s secrets by connection ID label
+secret_sparql_update_default = Secret(
+    "env", "SECRET_SPARQL_UPDATE_DEFAULT", "sparql-update-connection-secret", "value"
 )
-secret_env_secret_access_key = Secret(
-    "env",
-    "AWS_SECRET_ACCESS_KEY",
-    "webarchive-versitygw-credentials",
-    "rootSecretAccessKey",
-)
-
-sparql_update_endpoint = "http://webarchive-fuseki:3030/ds/update"
-sparql_update_auth_tuple = ("admin", "admin")
-
-aws_endpoint_url_s3 = "http://webarchive-versitygw:7070"
-aws_default_region = "eu-central-1"
+secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
 
 PROV_IRI = f"<{PROV_BASE_IRI}title-extract-warc:v1>"
 JOB_TYPE_IRI = "dalajobs:TitledataExtractJob"
@@ -41,13 +38,8 @@ def s3_kubernetes_titledata_extract_job():
     @task.kubernetes(
         # image="ghcr.io/white-gecko/payload2rdf:main-s3",
         image="ghcr.io/white-gecko/payload2rdf@sha256:176de54ccee723d7987191cb2a0aa5e0a5e760c6d2baf41761f0d130598a01d9",
-        secrets=[secret_env_access_key, secret_env_secret_access_key],
+        secrets=[secret_sparql_update_default, secret_s3_default],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
-            "AWS_DEFAULT_REGION": aws_default_region,
-            "SPARQL_UPDATE_ENDPOINT": sparql_update_endpoint,
-            "SPARQL_UPDATE_AUTH_TUPLE_USERNAME": sparql_update_auth_tuple[0],
-            "SPARQL_UPDATE_AUTH_TUPLE_PASSWORD": sparql_update_auth_tuple[1],
             "GRAPH_BASE_IRI": GRAPH_BASE_IRI,
         },
         do_xcom_push=True,
@@ -66,7 +58,7 @@ def s3_kubernetes_titledata_extract_job():
             }
         },
     )
-    def titledata_extract(job: dict):
+    def titledata_extract(cc_source: str, job: dict):
         import os
 
         from payload2rdf.extract import extract_metadata
@@ -74,16 +66,24 @@ def s3_kubernetes_titledata_extract_job():
         from payload2rdf.warc_reader import read_html_payload
         from rdflib import Graph
         from rdflib.namespace import Namespace
-        from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
         from s3fs import S3FileSystem
+
+        exec_locals = {}
+        exec(cc_source, locals=exec_locals)  # noqa: S102
+        cc = exec_locals["common_context"]
+
+        sparql_update_conn = cc.Connection.from_json(
+            value=os.getenv("SECRET_SPARQL_UPDATE_DEFAULT"),
+            conn_id="sparql_update_default",
+        )
+        s3_conn = cc.Connection.from_json(
+            value=os.getenv("SECRET_S3_DEFAULT"), conn_id="s3_default"
+        )
+
+        cc.set_boto_env(s3_conn, os.environ)
 
         s3 = S3FileSystem(config_kwargs={"retries": {"mode": "adaptive"}})
 
-        sparql_update_endpoint = os.environ["SPARQL_UPDATE_ENDPOINT"]
-        sparql_update_auth_tuple = (
-            os.environ["SPARQL_UPDATE_AUTH_TUPLE_USERNAME"],
-            os.environ["SPARQL_UPDATE_AUTH_TUPLE_PASSWORD"],
-        )
         graph_base_iri = os.environ["GRAPH_BASE_IRI"]
 
         print(
@@ -110,12 +110,9 @@ def s3_kubernetes_titledata_extract_job():
         print("start add title data to graph")
 
         WAG = Namespace(graph_base_iri)
-
-        store = SPARQLUpdateStore(
-            update_endpoint=sparql_update_endpoint, auth=sparql_update_auth_tuple
+        cc.sparql_update_graph(
+            conn=sparql_update_conn, add_graph=record_graph, identifier=WAG.warc
         )
-        remote_graph = Graph(store=store, identifier=WAG.warc)
-        remote_graph += record_graph
 
         print("end add title data to graph")
 
@@ -123,7 +120,7 @@ def s3_kubernetes_titledata_extract_job():
 
     @task(trigger_rule="all_done")
     def register_files(job: dict):
-        import requests
+        sparql_update_conn = Connection.get("sparql_update_default")
 
         file_update = (
             PREFIXES
@@ -148,15 +145,7 @@ def s3_kubernetes_titledata_extract_job():
         # }
         # """
 
-        r = requests.post(
-            sparql_update_endpoint,
-            auth=sparql_update_auth_tuple,
-            headers={
-                "Accept": "application/sparql-results+json,*/*;q=0.9",
-                "Content-Type": "application/sparql-update",
-            },
-            data=file_update,
-        )
+        r = cc.sparql_update(sparql_update_conn, file_update)
 
         print(r)
         print(r.text)
@@ -190,7 +179,7 @@ def s3_kubernetes_titledata_extract_job():
 
     jobs_done(
         register_files.expand(
-            job=titledata_extract.expand(
+            job=titledata_extract.partial(cc_source=cc_source).expand(
                 job=get_jobs(
                     [
                         "source_file",

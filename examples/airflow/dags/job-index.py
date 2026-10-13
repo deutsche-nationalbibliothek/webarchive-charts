@@ -1,23 +1,19 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
 from airflow.sdk import dag, task
 from boilerplate import get_jobs, jobs_done
+from common_context import get_cc
 
-secret_env_access_key = Secret(
-    "env", "AWS_ACCESS_KEY_ID", "webarchive-versitygw-credentials", "rootAccessKeyId"
-)
-secret_env_secret_access_key = Secret(
-    "env",
-    "AWS_SECRET_ACCESS_KEY",
-    "webarchive-versitygw-credentials",
-    "rootSecretAccessKey",
-)
+cc, cc_source = get_cc()
+
+## Uses the following connections
+# s3_default: s3-connection-secret
+# cdx_default: cdx-connection-secret
 
 JOB_TYPE_IRI = "dalajobs:IndexJob"
 
-aws_endpoint_url_s3 = "http://webarchive-versitygw:7070"
-aws_default_region = "eu-central-1"
+secret_cdx_default = Secret("env", "SECRET_CDX_DEFAULT", "cdx-connection-secret", "value")
+secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
 
-outback_cdx_url = "http://outbackcdx-service:8080/outbackcdx/"
 warc_collection = "warcs"
 
 
@@ -26,15 +22,12 @@ warc_collection = "warcs"
     description="An indexer dag",
     tags=["wacli"],
 )
-def job_index():
+def job_index(cc_source: str):
 
     @task.kubernetes(
         image="ghcr.io/deutsche-nationalbibliothek/cdxj-indexer:feature-oci-image-s3fs",
-        secrets=[secret_env_access_key, secret_env_secret_access_key],
+        secrets=[secret_s3_default, secret_cdx_default],
         env_vars={
-            "AWS_ENDPOINT_URL_S3": aws_endpoint_url_s3,
-            "AWS_DEFAULT_REGION": aws_default_region,
-            "OUTBACK_CDX_URL": outback_cdx_url,
             "WARC_COLLECTION": warc_collection,
         },
         do_xcom_push=True,
@@ -47,11 +40,22 @@ def job_index():
         from cdxj_indexer import CDXJIndexer
         from s3fs import S3FileSystem
 
-        cdx_url = os.environ.get("OUTBACK_CDX_URL")
+        exec_locals = {}
+        exec(cc_source, locals=exec_locals)  # noqa: S102
+
+        cdx_conn = cc.Connection.from_json(
+            value=os.getenv("SECRET_CDX_DEFAULT"),
+            conn_id="cdx_default",
+        )
+        s3_conn = cc.Connection.from_json(
+            value=os.getenv("SECRET_S3_DEFAULT"), conn_id="s3_default"
+        )
+
+        cdx_url, _ = cc.http_connection(cdx_conn)
         collection = os.environ.get("WARC_COLLECTION")
+        cdx_endpoint = f"{cdx_url}/{collection}"
 
-        cdx_endpoint = f"{cdx_url}{collection}"
-
+        cc.set_boto_env(s3_conn, os.environ)
         s3 = S3FileSystem()
 
         print(
@@ -82,7 +86,7 @@ def job_index():
     """
 
     jobs_done(
-        index.expand(
+        index.partial(cc_source=cc_source).expand(
             job=get_jobs(
                 ["source_file", "source_filename", "source_bucket"],
                 JOB_TYPE_IRI,

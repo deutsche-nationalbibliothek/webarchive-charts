@@ -42,6 +42,7 @@ def job_index():
 
         exec_locals = {}
         exec(cc_source, locals=exec_locals)  # noqa: S102
+        cc = exec_locals["common_context"]
 
         cdx_conn = cc.Connection.from_json(
             value=os.getenv("SECRET_CDX_DEFAULT"),

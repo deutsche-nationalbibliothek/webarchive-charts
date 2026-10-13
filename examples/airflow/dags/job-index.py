@@ -22,7 +22,7 @@ warc_collection = "warcs"
     description="An indexer dag",
     tags=["wacli"],
 )
-def job_index(cc_source: str):
+def job_index():
 
     @task.kubernetes(
         image="ghcr.io/deutsche-nationalbibliothek/cdxj-indexer:feature-oci-image-s3fs",
@@ -32,7 +32,7 @@ def job_index(cc_source: str):
         },
         do_xcom_push=True,
     )
-    def index(job: dict):
+    def index(cc_source: str, job: dict):
         import os
         from io import StringIO
 

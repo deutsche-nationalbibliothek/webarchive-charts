@@ -7,7 +7,9 @@ from common_context import get_cc
 
 cc, _ = get_cc()
 
-metadata_warc_to_wash_update = PREFIXES + """
+metadata_warc_to_wash_update = (
+    PREFIXES
+    + """
 prefix bibo: <http://purl.org/ontology/bibo/>
 prefix dc: <http://purl.org/dc/elements/1.1/>
 prefix dct: <http://purl.org/dc/terms/>
@@ -69,6 +71,7 @@ insert {
     }
 }
 """
+)
 
 metadata_updates = [metadata_warc_to_wash_update]
 

@@ -7,7 +7,9 @@ from common_context import get_cc
 
 cc, _ = get_cc()
 
-recompress_update = PREFIXES + """
+recompress_update = (
+    PREFIXES
+    + """
 INSERT {
     GRAPH wag:jobs {
         ?job a wal:Job, dalajobs:RecompressJob ;
@@ -31,8 +33,11 @@ INSERT {
     BIND (UUID() as ?job)
 }
 """
+)
 
-index_update = PREFIXES + """
+index_update = (
+    PREFIXES
+    + """
 INSERT {
     GRAPH wag:jobs {
         ?job a wal:Job, dalajobs:IndexJob ;
@@ -54,8 +59,11 @@ INSERT {
     BIND (UUID() as ?job)
 }
 """
+)
 
-metadata_extract_update = PREFIXES + """
+metadata_extract_update = (
+    PREFIXES
+    + """
 INSERT {
     GRAPH wag:jobs {
         ?job a wal:Job, dalajobs:MetadataExtractJob ;
@@ -77,8 +85,11 @@ INSERT {
     BIND (UUID() as ?job)
 }
 """
+)
 
-titledata_extract_update = PREFIXES + """
+titledata_extract_update = (
+    PREFIXES
+    + """
 INSERT {
     GRAPH wag:jobs {
         ?job a wal:Job, dalajobs:TitledataExtractJob ;
@@ -100,9 +111,15 @@ INSERT {
     BIND (UUID() as ?job)
 }
 """
+)
 
 
-job_updates = [recompress_update, index_update, metadata_extract_update, titledata_extract_update]
+job_updates = [
+    recompress_update,
+    index_update,
+    metadata_extract_update,
+    titledata_extract_update,
+]
 
 
 @dag(

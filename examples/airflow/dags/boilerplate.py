@@ -124,7 +124,7 @@ def get_jobs(
     )
 
     print(job_query)
-    r = cc.sparql_update(sparql_query_conn, job_query)
+    r = cc.sparql_query(sparql_query_conn, job_query)
 
     try:
         return [

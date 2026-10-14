@@ -73,8 +73,8 @@ def s3_kubernetes_aras_pull_job():
         import os
         from shutil import copyfileobj
 
-        import s3fs
         from aras_py.run import get_stream
+        from s3fs import S3FileSystem
 
         exec_locals = {}
         exec(cc_source, locals=exec_locals)  # noqa: S102
@@ -94,7 +94,11 @@ def s3_kubernetes_aras_pull_job():
         target_bucket_name = os.environ["TARGET_BUCKET_NAME"]
         aras_repo = os.environ["ARAS_REPO"]
 
-        s3 = s3fs.S3FileSystem()
+        print(
+            f"I will now create the bucke for {job['idn']}: {target_bucket_name}. ({job['job_iri']})"
+        )
+
+        s3 = S3FileSystem(client_kwargs={"region_name": os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")})
 
         try:
             s3.mkdir(target_bucket_name, create_parents=True)
@@ -113,9 +117,7 @@ def s3_kubernetes_aras_pull_job():
         job["files"] = []
 
         for file_name, stream, metadata in stream_iter:
-            print(
-                f"download idn: {job['idn']}, metadata: {metadata!s} to {file_name}"
-            )
+            print(f"download idn: {job['idn']}, metadata: {metadata!s} to {file_name}")
             with (
                 s3.open(f"{target_bucket_name}/{file_name}", "wb") as target_io,
                 stream() as source_io,

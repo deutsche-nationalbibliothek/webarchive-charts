@@ -143,10 +143,11 @@ class common_context:
     def set_boto_env(cls, conn, env):
         """Set the environment variables for a boto aws connection."""
         aws_endpoint_url_s3 = conn.extra_dejson.get("endpoint_url")
-        aws_default_region = conn.extra_dejson.get("region_name")
+        region_name = conn.extra_dejson.get("region_name")
 
         env["AWS_ENDPOINT_URL_S3"] = aws_endpoint_url_s3 or ""
-        env["AWS_DEFAULT_REGION"] = aws_default_region or ""
+        env["AWS_DEFAULT_REGION"] = region_name or ""
+        env["AWS_REGION"] = region_name or ""
         env["AWS_ACCESS_KEY_ID"] = conn.login or ""
         env["AWS_SECRET_ACCESS_KEY"] = conn.password or ""
 

@@ -23,6 +23,7 @@ secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "
 
 target_bucket_name = "webarchive"
 
+
 @dag(
     schedule=None,  # "@once"
     description="A recompress dag",
@@ -73,7 +74,13 @@ def s3_kubernetes_recompress_job():
 
         target_bucket_name = os.environ["TARGET_BUCKET_NAME"]
 
-        s3 = S3FileSystem(config_kwargs={"retries": {"mode": "adaptive"}})
+        s3 = S3FileSystem(
+            config_kwargs={"retries": {"mode": "adaptive"}},
+            client_kwargs={
+                "region_name": os.environ.get("AWS_REGION")
+                or os.environ.get("AWS_DEFAULT_REGION")
+            },
+        )
         # How could a socket.gaierror be handled propperly
 
         try:

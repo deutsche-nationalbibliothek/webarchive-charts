@@ -17,42 +17,32 @@ airflow:
       hostname_callable: airflow.utils.net.get_host_ip_address
     secrets:
       backend: airflow.providers.cncf.kubernetes.secrets.kubernetes_secrets_backend.KubernetesSecretsBackend
-
-  ##
-  ## Try to get Airflow running under a subpath
-  ##
-  ## The first part is under "config:"
-  #   api:
-  #     base_url: "/airflow"
-  #   webserver:
-  #     enable_proxy_fix: true
-  #     base_url: "/airflow"
-  #     static_root: "/airflow/static"
-  #     rbac: true
-  # webserver:
-  #   webserverConfig: |
-  #     from airflow import configuration as conf
-  #     from flask import Flask
-  #     from werkzeug.middleware.proxy_fix import ProxyFix
-
-  #     app = Flask(__name__)
-  #     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
-  # apiServer:
-  #   args:
-  #     - bash
-  #     - -c
-  #     - exec airflow api-server --proxy-headers
-  # ingress:
-  #   enabled: true
-  #   apiServer:
-  #     ingressClassName: nginx
-  #     annotations:
-  #       nginx.ingress.kubernetes.io/rewrite-target: /$2
-  #       nginx.ingress.kubernetes.io/use-regex: "true"
-  #     path: /airflow(/|$)(.*)
-  # env:
-  #   - name: FORWARDED_ALLOW_IPS
-  #     value: "*"
+    # run under subpath, see: https://airflow.apache.org/docs/apache-airflow/stable/howto/run-behind-proxy.html
+    api:
+      base_url: "/airflow"
+  apiServer:
+    args: ["bash", "-c", "exec airflow api-server --proxy-headers"]
+    # env:
+    #   - name: FORWARDED_ALLOW_IPS
+    #     value: "*"  # Use "*" for trusted environments, or specify proxy IP ranges for production
+  ingress:
+    apiServer:
+      enabled: true
+      ingressClassName: nginx
+      annotations:
+        nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+        nginx.ingress.kubernetes.io/proxy-redirect-off: "true"
+        # since we can't use the nginx.ingress.kubernetes.io/configuration-snippet:
+        nginx.ingress.kubernetes.io/use-forwarded-headers: "true"
+        nginx.ingress.kubernetes.io/proxy-protocol: "true"
+        nginx.ingress.kubernetes.io/websocket-service: "true"
+        # nginx.ingress.kubernetes.io/configuration-snippet: |
+        #   proxy_set_header Host $http_host;
+        #   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        #   proxy_set_header X-Forwarded-Proto $scheme;
+        #   proxy_set_header Upgrade $http_upgrade;
+        #   proxy_set_header Connection $connection_upgrade;
+      path: /airflow(/|$)(.*)
 
 versitygw:
   enabled: false

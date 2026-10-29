@@ -135,7 +135,20 @@ def s3_kubernetes_aras_pull_job():
     @task(trigger_rule="all_done")
     def register_files(job: dict):
 
+        from airflow.sdk import get_current_context
+
         sparql_update_conn = Connection.get("sparql_update_default")
+
+        # context = get_current_context()
+        # print(context)
+        # task_instance = context["ti"]
+        # print(context.upstream_task_ids)
+
+        # jobs = task_instance.xcom_pull(task_ids="aras_download")
+        # print(jobs)
+        # # task_instance.xcom_pull(key="return_value", task_ids="aras_download")
+
+        # for job in jobs:
 
         file_iris = {FILE_BASE_IRI + file_name: file_name for file_name in job["files"]}
 
@@ -183,6 +196,11 @@ def s3_kubernetes_aras_pull_job():
             )
         )
     )
+
+    # download_job = aras_download.expand(
+    #     job=get_jobs(["idn"], "wal:ArasPullJob", {"wal:idn": "?idn"})
+    # )
+    # download_job >> register_files() >> jobs_done()
     # job_done.expand(job=job_execution.expand(job=get_jobs("?idn", "wal:ArasPullJob", {"wal:idn": "?idn"})))
 
 

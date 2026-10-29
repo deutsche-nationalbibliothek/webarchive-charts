@@ -190,6 +190,9 @@ def _jobs_done(jobs: list[dict]):
 
 
 def job_failed(context):
+    """This method is used to analyze and categorize failed tasks.
+    A task is usually
+    """
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     print("job_failed was called")
     print(context)
@@ -218,6 +221,11 @@ def job_failed(context):
 
     print(f"job_iri: {job_iri}")
     report_job_status([{"job_iri": job_iri}])
+
+    # finally we have to decide if the task should be rerun:
+    # https://airflow.apache.org/docs/apache-airflow/stable/howto/dag-level-retry-via-callback.html
+    # but we have to limit the retries:
+    # https://airflow.apache.org/docs/apache-airflow/stable/howto/dag-level-retry-via-callback.html#clear-retry-limiting
 
 
 def report_job_status(jobs: list[dict]):

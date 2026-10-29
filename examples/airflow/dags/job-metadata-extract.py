@@ -8,6 +8,7 @@ from boilerplate import (
     job_failed,
     jobs_done,
 )
+from boilerplate import metadataextract_job_asset as job_asset
 from common_context import get_cc
 
 cc, cc_source = get_cc()
@@ -22,12 +23,14 @@ secret_sparql_update_default = Secret(
 )
 secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
 
+JOB_IRI_LOCAL_PART = "MetadataExtractJob"
+
 PROV_IRI = f"<{PROV_BASE_IRI}metadata-extract-warc:v1>"
-JOB_TYPE_IRI = "dalajobs:MetadataExtractJob"
+JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
 
 
 @dag(
-    schedule=None,  # "@once"
+    schedule=job_asset,  # "@once"
     description="Extract Structured WARC Metadata",
     tags=["wacli"],
 )
@@ -157,7 +160,7 @@ def s3_kubernetes_metadata_extract_job():
             job=metadata_extract.partial(cc_source=cc_source).expand(
                 job=get_jobs(
                     ["source_file", "source_filename", "source_bucket"],
-                    JOB_TYPE_IRI,
+                    JOB_TYPE_QNAME,
                     {"wal:file": "?source_file"},
                     triple_pattern=triple_pattern,
                 )

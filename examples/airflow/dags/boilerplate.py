@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from airflow.sdk import Connection, task
+from airflow.sdk import Asset, Connection, task
 from common_context import get_cc
 from requests.exceptions import JSONDecodeError
 
@@ -22,6 +22,9 @@ WAL_NAMESPACE = BASE_IRI + "standards/elementset/wal#"
 FILESTATUS_NAMESPACE = BASE_IRI + "standards/vocab/filestatus#"
 JOBSTATUS_NAMESPACE = BASE_IRI + "standards/vocab/jobstatus#"
 DALAJOBS_NAMESPACE = BASE_IRI + "standards/vocab/datalakejobs#"
+DALAJOBS_ASSET_NAMESPACE = BASE_IRI + "standards/vocab/datalakejobs/"
+
+LIFECYCLE = "http://purl.org/vocab/lifecycle/schema#"
 
 PREFIXES = dedent(f"""
     PREFIX wapplan: <{PROV_BASE_IRI}>
@@ -89,6 +92,14 @@ dalajobs:MetadataExtractJob rdfs:label "Metadata Extract Job" .
 dalajobs:ArasPullJob rdfs:label "Aras Pull Job" .
 """
 )
+
+
+arras_pull_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "ArasPullJob")
+recompress_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "RecompressJob")
+metadataextract_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "MetadataExtractJob")
+titlebasic_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "TitledataBasicJob")
+titleextract_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "TitledataExtractJob")
+index_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "IndexJob")
 
 
 @task

@@ -10,6 +10,7 @@ from boilerplate import (
     job_failed,
     jobs_done,
 )
+from boilerplate import titlebasic_job_asset as job_asset
 from common_context import get_cc
 
 cc, cc_source = get_cc()
@@ -25,11 +26,13 @@ secret_sparql_update_default = Secret(
 secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
 
 PROV_IRI = f"<{PROV_BASE_IRI}title-extract-warc:v1>"
-JOB_TYPE_IRI = "dalajobs:TitledataExtractJob"
+
+JOB_IRI_LOCAL_PART = "TitledataExtractJob"
+JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
 
 
 @dag(
-    schedule=None,  # "@once"
+    schedule=job_asset,  # "@once"
     description="Extract Titel Data for Websites from WARC Payload",
     tags=["wacli"],
 )
@@ -188,7 +191,7 @@ def s3_kubernetes_titledata_extract_job():
                         "record_id",
                         "bibo_website",
                     ],
-                    JOB_TYPE_IRI,
+                    JOB_TYPE_QNAME,
                     {"wal:file": "?source_file"},
                     triple_pattern=triple_pattern,
                 )

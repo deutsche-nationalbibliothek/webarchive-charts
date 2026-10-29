@@ -1,5 +1,11 @@
-from airflow.sdk import Connection, dag, task
-from boilerplate import PREFIXES
+from airflow.sdk import AssetAlias, Connection, dag, task
+from boilerplate import (
+    PREFIXES,
+    index_job_asset,
+    metadataextract_job_asset,
+    recompress_job_asset,
+    titleextract_job_asset,
+)
 from common_context import get_cc
 
 ## Uses the following connections
@@ -113,13 +119,15 @@ INSERT {
 """
 )
 
-job_updates = [
-    recompress_update,
-    index_update,
-    metadata_extract_update,
-    titledata_extract_update,
-]
+job_updates = {
+    recompress_job_asset: recompress_update,
+    titleextract_job_asset: index_update,
+    metadataextract_job_asset: metadata_extract_update,
+    index_job_asset: titledata_extract_update,
+}
 
+
+job_assetalias = AssetAlias("job-alias")
 
 @dag(
     schedule=None,  # "@once"
@@ -128,11 +136,13 @@ job_updates = [
 )
 def job_creator():
 
-    @task
-    def create_jobs():
+    @task(
+        outlets=[job_assetalias]
+    )
+    def create_jobs(*, outlet_events):
         sparql_update_conn = Connection.get("sparql_update_default")
 
-        for update in job_updates:
+        for job_asset, update in job_updates.values():
             r = cc.sparql_update(sparql_update_conn, update)
 
             print(update)
@@ -140,6 +150,7 @@ def job_creator():
             print(r.text)
 
             r.raise_for_status()
+            outlet_events[job_assetalias].add(job_asset)
 
     create_jobs()
 

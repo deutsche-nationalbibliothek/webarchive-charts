@@ -1,6 +1,7 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
 from airflow.sdk import dag, task
 from boilerplate import get_jobs, jobs_done
+from boilerplate import index_job_asset as job_asset
 from common_context import get_cc
 
 cc, cc_source = get_cc()
@@ -9,16 +10,19 @@ cc, cc_source = get_cc()
 # s3_default: s3-connection-secret
 # cdx_default: cdx-connection-secret
 
-JOB_TYPE_IRI = "dalajobs:IndexJob"
-
-secret_cdx_default = Secret("env", "SECRET_CDX_DEFAULT", "cdx-connection-secret", "value")
+secret_cdx_default = Secret(
+    "env", "SECRET_CDX_DEFAULT", "cdx-connection-secret", "value"
+)
 secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
 
 warc_collection = "warcs"
 
+JOB_IRI_LOCAL_PART = "IndexJob"
+JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
+
 
 @dag(
-    schedule=None,  # "@once"
+    schedule=job_asset,  # "@once"
     description="An indexer dag",
     tags=["wacli"],
 )
@@ -90,7 +94,7 @@ def job_index():
         index.partial(cc_source=cc_source).expand(
             job=get_jobs(
                 ["source_file", "source_filename", "source_bucket"],
-                JOB_TYPE_IRI,
+                JOB_TYPE_QNAME,
                 {"wal:file": "?source_file"},
                 triple_pattern=triple_pattern,
             )

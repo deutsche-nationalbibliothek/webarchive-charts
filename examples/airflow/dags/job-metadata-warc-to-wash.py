@@ -1,5 +1,6 @@
 from airflow.sdk import Connection, dag, task
 from boilerplate import PREFIXES
+from boilerplate import titlebasic_job_asset as job_asset
 from common_context import get_cc
 
 ## Uses the following connections
@@ -75,9 +76,11 @@ insert {
 
 metadata_updates = [metadata_warc_to_wash_update]
 
+JOB_IRI_LOCAL_PART = "TitledataBasicJob"
+JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
 
 @dag(
-    schedule=None,  # "@once"
+    schedule=job_asset,  # "@once"
     description="Update WARC Metadata",
     tags=["wacli"],
 )

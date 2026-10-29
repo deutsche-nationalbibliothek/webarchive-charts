@@ -8,6 +8,7 @@ from boilerplate import (
     job_failed,
     jobs_done,
 )
+from boilerplate import arras_pull_job_asset as job_asset
 from common_context import get_cc
 
 cc, cc_source = get_cc()
@@ -17,8 +18,10 @@ cc, cc_source = get_cc()
 # s3_default: s3-connection-secret
 # aras_default: aras-connection-secret
 
+JOB_IRI_LOCAL_PART = "ArasPullJob"
+
 PROV_IRI = f"<{PROV_BASE_IRI}oGet>"
-JOB_TYPE_IRI = "dalajobs:ArasPullJob"
+JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
 
 # Define secrets - reference k8s secrets by connection ID label
 secret_aras_default = Secret(
@@ -29,9 +32,8 @@ secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "
 target_bucket_name = "waingest"
 aras_repo = "warc"
 
-
 @dag(
-    schedule=None,  # "@once"
+    schedule=job_asset,  # "@once"
     description="A k8n dag",
     tags=["wacli"],
 )
@@ -177,7 +179,7 @@ def s3_kubernetes_aras_pull_job():
     jobs_done(
         register_files.expand(
             job=aras_download.partial(cc_source=cc_source).expand(
-                job=get_jobs(["idn"], JOB_TYPE_IRI, {"wal:idn": "?idn"})
+                job=get_jobs(["idn"], JOB_TYPE_QNAME, {"wal:idn": "?idn"})
             )
         )
     )

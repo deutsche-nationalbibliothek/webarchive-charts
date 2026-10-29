@@ -8,6 +8,7 @@ from boilerplate import (
     job_failed,
     jobs_done,
 )
+from boilerplate import recompress_job_asset as job_asset
 from common_context import get_cc
 
 cc, cc_source = get_cc()
@@ -16,16 +17,17 @@ cc, cc_source = get_cc()
 # sparql_update_default: sparql-update-connection-secret
 # s3_default: s3-connection-secret
 
+JOB_IRI_LOCAL_PART = "RecompressJob"
+
 PROV_IRI = f"<{PROV_BASE_IRI}recompress:v1>"
-JOB_TYPE_IRI = "dalajobs:RecompressJob"
+JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
 
 secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "value")
 
 target_bucket_name = "webarchive"
 
-
 @dag(
-    schedule=None,  # "@once"
+    schedule=job_asset,  # "@once"
     description="A recompress dag",
     tags=["wacli"],
 )
@@ -187,7 +189,7 @@ def s3_kubernetes_recompress_job():
             job=recompress.partial(cc_source=cc_source).expand(
                 job=get_jobs(
                     ["source_file", "source_filename", "source_bucket"],
-                    JOB_TYPE_IRI,
+                    JOB_TYPE_QNAME,
                     {"wal:file": "?source_file"},
                     triple_pattern=triple_pattern,
                 )

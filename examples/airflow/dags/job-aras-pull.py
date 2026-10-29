@@ -181,9 +181,9 @@ def s3_kubernetes_aras_pull_job():
             return job
 
         # Define the workflow within the task group
-        downloaded_job = Label("downloaded")(aras_download(cc_source=cc_source, job=job))
-        registered_job = Label("registered")(register_files(downloaded_job))
-        done_job = Label("done")(job_done(registered_job))
+        downloaded_job = aras_download(cc_source=cc_source, job=job)
+        registered_job = register_files(downloaded_job)
+        done_job = job_done(registered_job)
 
         return done_job
 

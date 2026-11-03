@@ -2,8 +2,10 @@ from airflow.sdk import AssetAlias, Connection, dag, task
 from boilerplate import (
     PREFIXES,
     index_job_asset,
+    job_creator_asset,
     metadataextract_job_asset,
     recompress_job_asset,
+    titlebasicwash_job_asset,
     titleextract_job_asset,
 )
 from common_context import get_cc
@@ -93,6 +95,32 @@ INSERT {
 """
 )
 
+metadata_wash_convert_update = (
+    PREFIXES
+    + """
+INSERT {
+    GRAPH wag:jobs {
+        ?job a wal:Job, dalajobs:TitledataBasicWashJob ;
+            wal:file ?file .
+    }
+} WHERE {
+    ?file a wal:File ;
+        wal:fileStatus filestatus:metadata_extracted .
+
+    FILTER NOT EXISTS {
+        ?snapshot a lv:ArchivedWebPage ; dc:relation ?file .
+    }
+
+    FILTER NOT EXISTS {
+        ?recompressJob a dalajobs:TitledataBasicWashJob ;
+            wal:file ?file .
+    }
+
+    BIND (UUID() as ?job)
+}
+"""
+)
+
 titledata_extract_update = (
     PREFIXES
     + """
@@ -104,6 +132,7 @@ INSERT {
 } WHERE {
     ?file a wal:File ;
         wal:fileStatus filestatus:metadata_extracted .
+    ?snapshot a lv:ArchivedWebPage ; dc:relation ?file .
 
     FILTER NOT EXISTS {
         ?file wal:fileStatus filestatus:titledata_extracted .
@@ -123,6 +152,7 @@ job_updates = {
     recompress_job_asset: recompress_update,
     titleextract_job_asset: index_update,
     metadataextract_job_asset: metadata_extract_update,
+    titlebasicwash_job_asset: metadata_wash_convert_update,
     index_job_asset: titledata_extract_update,
 }
 
@@ -130,7 +160,7 @@ job_updates = {
 job_assetalias = AssetAlias("job-alias")
 
 @dag(
-    schedule=None,  # "@once"
+    schedule=job_creator_asset,  # "@once"
     description="Creates jobs",
     tags=["wacli"],
 )
@@ -142,7 +172,7 @@ def job_creator():
     def create_jobs(*, outlet_events):
         sparql_update_conn = Connection.get("sparql_update_default")
 
-        for job_asset, update in job_updates.values():
+        for job_asset, update in job_updates.items():
             r = cc.sparql_update(sparql_update_conn, update)
 
             print(update)

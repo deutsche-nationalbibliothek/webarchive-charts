@@ -1,6 +1,6 @@
-from airflow.sdk import Connection, dag, task
-from boilerplate import PREFIXES
-from boilerplate import titlebasic_job_asset as job_asset
+from airflow.sdk import Connection, dag, task, task_group
+from boilerplate import PREFIXES, get_jobs, job_done
+from boilerplate import titlebasicwash_job_asset as job_asset
 from common_context import get_cc
 
 ## Uses the following connections
@@ -76,8 +76,9 @@ insert {
 
 metadata_updates = [metadata_warc_to_wash_update]
 
-JOB_IRI_LOCAL_PART = "TitledataBasicJob"
+JOB_IRI_LOCAL_PART = "TitledataBasicWashJob"
 JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
+
 
 @dag(
     schedule=job_asset,  # "@once"
@@ -86,19 +87,35 @@ JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
 )
 def job_metadata_warc_to_wash():
 
-    @task
-    def metadata_warc_to_wash():
-        sparql_update_conn = Connection.get("sparql_update_default")
+    @task_group(group_id="warc_to_wash_workflow")
+    def warc_to_wash_workflow(job: dict):
+        """Task group for a single TitledataBasicWashJob"""
 
-        for update in metadata_updates:
-            r = cc.sparql_update(sparql_update_conn, update)
+        @task
+        def metadata_warc_to_wash(job: dict):
+            sparql_update_conn = Connection.get("sparql_update_default")
 
-            print(r)
-            print(r.text)
+            for update in metadata_updates:
+                r = cc.sparql_update(sparql_update_conn, update)
 
-            r.raise_for_status()
+                print(r)
+                print(r.text)
 
-    metadata_warc_to_wash()
+                r.raise_for_status()
+
+
+        metadata_job = metadata_warc_to_wash(job=job)
+        done_job = job_done(metadata_job)
+
+        return done_job
+
+    jobs = get_jobs(
+        ["source_file"],
+        JOB_TYPE_QNAME,
+        {"wal:file": "?source_file"},
+    )
+
+    warc_to_wash_workflow.expand(job=jobs)
 
 
 job_metadata_warc_to_wash()

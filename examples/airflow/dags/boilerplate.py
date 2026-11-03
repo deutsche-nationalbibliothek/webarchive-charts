@@ -94,10 +94,11 @@ dalajobs:ArasPullJob rdfs:label "Aras Pull Job" .
 )
 
 
+job_creator_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "UpdateJobs")
 arras_pull_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "ArasPullJob")
 recompress_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "RecompressJob")
 metadataextract_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "MetadataExtractJob")
-titlebasic_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "TitledataBasicJob")
+titlebasicwash_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "TitledataBasicWashJob")
 titleextract_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "TitledataExtractJob")
 index_job_asset = Asset(uri=DALAJOBS_ASSET_NAMESPACE + "IndexJob")
 
@@ -152,12 +153,12 @@ def get_jobs(
         pass
 
 
-@task
+@task(outlets=[job_creator_asset])
 def job_done(job: dict | None = None):
     return _jobs_done([job])
 
 
-@task(trigger_rule="all_done")
+@task(trigger_rule="all_done", outlets=[job_creator_asset])
 def jobs_done(jobs: list[dict] | None = None):
     return _jobs_done(jobs)
 

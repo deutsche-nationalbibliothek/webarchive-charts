@@ -10,7 +10,7 @@ from boilerplate import (
     job_failed,
     jobs_done,
 )
-from boilerplate import titlebasic_job_asset as job_asset
+from boilerplate import titleextract_job_asset as job_asset
 from common_context import get_cc
 
 cc, cc_source = get_cc()

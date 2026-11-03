@@ -93,6 +93,9 @@ def job_metadata_warc_to_wash():
 
         @task
         def metadata_warc_to_wash(job: dict):
+            """
+            TODO: get warc source_file from job and inject variable into sparql update
+            """
             sparql_update_conn = Connection.get("sparql_update_default")
 
             for update in metadata_updates:

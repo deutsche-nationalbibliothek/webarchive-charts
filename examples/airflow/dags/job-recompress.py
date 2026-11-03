@@ -26,6 +26,7 @@ secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "
 
 target_bucket_name = "webarchive"
 
+
 @dag(
     schedule=job_asset,  # "@once"
     description="A recompress dag",

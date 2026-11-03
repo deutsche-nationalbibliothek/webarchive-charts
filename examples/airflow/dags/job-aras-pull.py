@@ -33,6 +33,7 @@ secret_s3_default = Secret("env", "SECRET_S3_DEFAULT", "s3-connection-secret", "
 target_bucket_name = "waingest"
 aras_repo = "warc"
 
+
 @dag(
     schedule=job_asset,  # "@once"
     description="A k8n dag",
@@ -43,6 +44,7 @@ def s3_kubernetes_aras_pull_job():
     @task_group(group_id="aras_pull_job_workflow")
     def aras_pull_job_workflow(job: dict):
         """Task group for a single ArasPullJob"""
+
         @task.kubernetes(
             image="ghcr.io/deutsche-nationalbibliothek/aras-py:main-s3",
             secrets=[secret_aras_default, secret_s3_default],
@@ -104,7 +106,12 @@ def s3_kubernetes_aras_pull_job():
                 f"I will now create the bucke for {job['idn']}: {target_bucket_name}. ({job['job_iri']})"
             )
 
-            s3 = S3FileSystem(client_kwargs={"region_name": os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")})
+            s3 = S3FileSystem(
+                client_kwargs={
+                    "region_name": os.environ.get("AWS_REGION")
+                    or os.environ.get("AWS_DEFAULT_REGION")
+                }
+            )
 
             try:
                 s3.mkdir(target_bucket_name, create_parents=True)
@@ -123,7 +130,9 @@ def s3_kubernetes_aras_pull_job():
             job["files"] = []
 
             for file_name, stream, metadata in stream_iter:
-                print(f"download idn: {job['idn']}, metadata: {metadata!s} to {file_name}")
+                print(
+                    f"download idn: {job['idn']}, metadata: {metadata!s} to {file_name}"
+                )
                 with (
                     s3.open(f"{target_bucket_name}/{file_name}", "wb") as target_io,
                     stream() as source_io,
@@ -141,7 +150,9 @@ def s3_kubernetes_aras_pull_job():
 
             sparql_update_conn = Connection.get("sparql_update_default")
 
-            file_iris = {FILE_BASE_IRI + file_name: file_name for file_name in job["files"]}
+            file_iris = {
+                FILE_BASE_IRI + file_name: file_name for file_name in job["files"]
+            }
 
             file_update = (
                 PREFIXES
@@ -191,5 +202,6 @@ def s3_kubernetes_aras_pull_job():
 
     aras_pull_job_workflow.expand(job=jobs)
     # job_done.expand(job=job_execution.expand(job=get_jobs("?idn", "wal:ArasPullJob", {"wal:idn": "?idn"})))
+
 
 s3_kubernetes_aras_pull_job()

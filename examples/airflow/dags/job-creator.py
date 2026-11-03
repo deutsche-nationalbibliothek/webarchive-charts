@@ -159,6 +159,7 @@ job_updates = {
 
 job_assetalias = AssetAlias("job-alias")
 
+
 @dag(
     schedule=job_creator_asset,  # "@once"
     description="Creates jobs",
@@ -166,9 +167,7 @@ job_assetalias = AssetAlias("job-alias")
 )
 def job_creator():
 
-    @task(
-        outlets=[job_assetalias]
-    )
+    @task(outlets=[job_assetalias])
     def create_jobs(*, outlet_events):
         sparql_update_conn = Connection.get("sparql_update_default")
 

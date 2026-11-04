@@ -1,6 +1,5 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
 from airflow.sdk import Connection, dag, task, task_group
-from airflow.utils.edgemodifier import Label
 from boilerplate import (
     FILE_BASE_IRI,
     PREFIXES,
@@ -192,15 +191,11 @@ def s3_kubernetes_aras_pull_job():
             return job
 
         # Define the workflow within the task group
-        downloaded_job = aras_download(cc_source=cc_source, job=job)
-        registered_job = register_files(downloaded_job)
-        done_job = job_done(registered_job)
+        return job_done(register_files(aras_download(cc_source=cc_source, job=job)))
 
-        return done_job
-
-    jobs = get_jobs(["idn"], JOB_TYPE_QNAME, {"wal:idn": "?idn"})
-
-    aras_pull_job_workflow.expand(job=jobs)
+    aras_pull_job_workflow.expand(
+        job=get_jobs(["idn"], JOB_TYPE_QNAME, {"wal:idn": "?idn"})
+    )
     # job_done.expand(job=job_execution.expand(job=get_jobs("?idn", "wal:ArasPullJob", {"wal:idn": "?idn"})))
 
 

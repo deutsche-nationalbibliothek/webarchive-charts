@@ -106,18 +106,15 @@ def job_metadata_warc_to_wash():
 
                 r.raise_for_status()
 
-        metadata_job = metadata_warc_to_wash(job=job)
-        done_job = job_done(metadata_job)
+        return job_done(metadata_warc_to_wash(job=job))
 
-        return done_job
-
-    jobs = get_jobs(
-        ["source_file"],
-        JOB_TYPE_QNAME,
-        {"wal:file": "?source_file"},
+    warc_to_wash_workflow.expand(
+        job=get_jobs(
+            ["source_file"],
+            JOB_TYPE_QNAME,
+            {"wal:file": "?source_file"},
+        )
     )
-
-    warc_to_wash_workflow.expand(job=jobs)
 
 
 job_metadata_warc_to_wash()

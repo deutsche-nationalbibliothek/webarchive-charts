@@ -106,7 +106,9 @@ def job_metadata_warc_to_wash():
 
                 r.raise_for_status()
 
-        return job_done(metadata_warc_to_wash(job=job))
+            return job
+
+        job_done(metadata_warc_to_wash(job=job))
 
     warc_to_wash_workflow.expand(
         job=get_jobs(

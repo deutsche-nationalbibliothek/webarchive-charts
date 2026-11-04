@@ -1,5 +1,6 @@
 from textwrap import dedent
 
+from airflow.exceptions import AirflowSkipException
 from airflow.sdk import Asset, Connection, task
 from common_context import get_cc
 from requests.exceptions import JSONDecodeError
@@ -137,6 +138,9 @@ def get_jobs(
 
     print(job_query)
     r = cc.sparql_query(sparql_query_conn, job_query)
+
+    if not r.json()["results"]["bindings"]:
+        raise AirflowSkipException
 
     try:
         return [

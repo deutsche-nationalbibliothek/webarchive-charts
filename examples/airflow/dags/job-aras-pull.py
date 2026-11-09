@@ -1,12 +1,11 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
-from airflow.sdk import Connection, dag, task, task_group
+from airflow.sdk import dag, task, task_group
 from boilerplate import (
-    FILE_BASE_IRI,
-    PREFIXES,
     PROV_BASE_IRI,
     get_jobs,
     job_done,
     job_failed,
+    record_file_outputs,
 )
 from boilerplate import arras_pull_job_asset as job_asset
 from common_context import get_cc
@@ -144,54 +143,12 @@ def s3_kubernetes_aras_pull_job():
 
             return job
 
-        @task(trigger_rule="all_done")
-        def register_files(job: dict):
-
-            sparql_update_conn = Connection.get("sparql_update_default")
-
-            file_iris = {
-                FILE_BASE_IRI + file_name: file_name for file_name in job["files"]
-            }
-
-            file_update = (
-                PREFIXES
-                + """
-
-            INSERT DATA {
-                GRAPH wag:data {
-            """
-                + "\n".join(
-                    [
-                        f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{target_bucket_name}" .'
-                        for file_iri, file_name in file_iris.items()
-                    ]
-                )
-                + """
-                }
-                GRAPH wag:prov {
-            """
-                + "\n".join(
-                    [
-                        f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo {PROV_IRI} ."
-                        for file_iri, file_name in file_iris.items()
-                    ]
-                )
-                + """
-                }
-            }
-            """
-            )
-
-            r = cc.sparql_update(sparql_update_conn, file_update)
-
-            print(r)
-            print(r.text)
-
-            r.raise_for_status()
-            return job
-
         # Define the workflow within the task group
-        return job_done(register_files(aras_download(cc_source=cc_source, job=job)))
+        return job_done(
+            record_file_outputs(
+                aras_download(cc_source=cc_source, job=job), PROV_IRI, cc
+            )
+        )
 
     aras_pull_job_workflow.expand(
         job=get_jobs(["idn"], JOB_TYPE_QNAME, {"wal:idn": "?idn"})

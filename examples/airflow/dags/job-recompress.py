@@ -1,12 +1,11 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
-from airflow.sdk import Connection, dag, task, task_group
+from airflow.sdk import dag, task, task_group
 from boilerplate import (
-    FILE_BASE_IRI,
-    PREFIXES,
     PROV_BASE_IRI,
     get_jobs,
     job_done,
     job_failed,
+    record_file_outputs,
 )
 from boilerplate import recompress_job_asset as job_asset
 from common_context import get_cc
@@ -141,52 +140,14 @@ def s3_kubernetes_recompress_job():
 
             return job
 
-        @task(trigger_rule="all_done")
-        def register_files(job: dict):
-            sparql_update_conn = Connection.get("sparql_update_default")
-
-            file_iris = {
-                FILE_BASE_IRI + target_bucket_name + "/" + file_name: file_name
-                for file_name in job["files"]
-            }
-
-            file_update = (
-                PREFIXES
-                + """
-            INSERT DATA {
-                GRAPH wag:data {
-            """
-                + "\n".join(
-                    [
-                        f'<{file_iri}> a wal:File ; wal:filename "{file_name}"; wal:bucket "{target_bucket_name}" ; wal:fileStatus filestatus:clean.'
-                        for file_iri, file_name in file_iris.items()
-                    ]
-                )
-                + """
-                }
-                GRAPH wag:prov {
-            """
-                + "\n".join(
-                    [
-                        f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo {PROV_IRI}; prov:wasDerivedFrom <{file_iri}> ."
-                        for file_iri, file_name in file_iris.items()
-                    ]
-                )
-                + """
-                }
-            }
-            """
+        return job_done(
+            record_file_outputs(
+                recompress(cc_source=cc_source, job=job),
+                PROV_IRI,
+                cc,
+                initial_status="filestatus:clean",
             )
-
-            r = cc.sparql_update(sparql_update_conn, file_update)
-
-            print(r)
-            print(r.text)
-
-            r.raise_for_status()
-            return job
-
-        return job_done(register_files(recompress(cc_source=cc_source, job=job)))
+        )
 
     triple_pattern = """
     ?source_file wal:filename ?source_filename ;

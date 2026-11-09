@@ -1,12 +1,12 @@
 from airflow.providers.cncf.kubernetes.secret import Secret
-from airflow.sdk import Connection, dag, task, task_group
+from airflow.sdk import dag, task, task_group
 from boilerplate import (
     GRAPH_BASE_IRI,
-    PREFIXES,
     PROV_BASE_IRI,
     get_jobs,
     job_done,
     job_failed,
+    update_file_status,
 )
 from boilerplate import metadataextract_job_asset as job_asset
 from common_context import get_cc
@@ -119,42 +119,13 @@ def s3_kubernetes_metadata_extract_job():
 
             return job
 
-        @task(trigger_rule="all_done")
-        def register_files(job: dict):
-            sparql_update_conn = Connection.get("sparql_update_default")
-
-            file_update = (
-                PREFIXES
-                + """
-            INSERT DATA {
-                GRAPH wag:data {
-            """
-                + f"<{job['source_file']}> wal:fileStatus filestatus:metadata_extracted."
-                + """
-                }
-            }
-            """
+        return job_done(
+            update_file_status(
+                metadata_extract(cc_source=cc_source, job=job),
+                "filestatus:metadata_extracted",
+                cc,
             )
-
-            # """
-            #     GRAPH wag:prov {
-            # """ + "\n".join(
-            #     [
-            #         f"<{file_iri}> prov:wasGeneratedBy <{job['job_iri']}> ; prov:wasAttributedTo {PROV_IRI}; prov:wasDerivedFrom <{job['source_file']}> ."
-            #     ]
-            # ) + """
-            # }
-            # """
-
-            r = cc.sparql_update(sparql_update_conn, file_update)
-
-            print(r)
-            print(r.text)
-
-            r.raise_for_status()
-            return job
-
-        return job_done(register_files(metadata_extract(cc_source=cc_source, job=job)))
+        )
 
     triple_pattern = """
     ?source_file wal:filename ?source_filename ;

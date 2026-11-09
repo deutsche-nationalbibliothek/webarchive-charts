@@ -263,3 +263,126 @@ def report_job_status(jobs: list[dict]):
     print(r.text)
 
     r.raise_for_status()
+
+
+@task
+def update_file_status(job: dict, status: str, cc) -> None:
+    """Update file status in wag:data graph.
+
+    Args:
+        job: Job dict with 'source_file' (string or list)
+        status: Status IRI (e.g., "filestatus:metadata_extracted")
+        cc: common_context instance (uses default if None)
+    """
+    sparql_update_conn = Connection.get("sparql_update_default")
+
+    source_files = job["source_file"]
+    if isinstance(source_files, str):
+        source_files = [source_files]
+
+    updates = "\n".join([f"<{f}> wal:fileStatus {status} ." for f in source_files])
+
+    file_update = dedent(f"""
+        {PREFIXES}
+        INSERT DATA {{
+            GRAPH wag:data {{
+                {updates}
+            }}
+        }}
+    """)
+
+    r = cc.sparql_update(sparql_update_conn, file_update)
+    r.raise_for_status()
+
+    return job
+
+
+@task
+def record_file_outputs(
+    job: dict,
+    prov_iri: str,
+    cc,
+    initial_status: str | None = None,
+) -> None:
+    """Register file outputs generated/converted by a job with full provenance.
+
+    Creates file entities in wag:data and provenance relations in wag:prov.
+    Optionally sets initial file status.
+
+    Args:
+        job: Job dict with keys:
+            - 'files': list of {filename, bucket?}
+            - 'job_iri': IRI of the job
+            - 'source_file': optional source file IRI(s) for wasDerivedFrom
+        prov_iri: IRI of the provenance plan/actor
+        cc: common_context instance (uses default if None)
+        initial_status: Optional status to set (e.g., "filestatus:clean")
+    """
+    sparql_update_conn = Connection.get("sparql_update_default")
+
+    files = job["files"]
+    job_iri = job["job_iri"]
+
+    # Build file data
+    file_data = []
+    for f in files:
+        filename = f["filename"]
+        bucket = f.get("bucket", "")
+        file_iri = (
+            FILE_BASE_IRI + bucket + "/" + filename
+            if bucket
+            else FILE_BASE_IRI + filename
+        )
+        file_data.append({"iri": file_iri, "filename": filename, "bucket": bucket})
+
+    # Build data graph triples
+    data_triples = "\n".join(
+        [
+            f'<{f["iri"]}> a wal:File ; wal:filename "{f["filename"]}"; wal:bucket "{f["bucket"]}" .'
+            for f in file_data
+        ]
+    )
+
+    if initial_status:
+        data_triples += "\n" + "\n".join(
+            [f"<{f['iri']}> wal:fileStatus {initial_status} ." for f in file_data]
+        )
+
+    # Build provenance triples
+    prov_triples = "\n".join(
+        [
+            f"<{f['iri']}> prov:wasGeneratedBy <{job_iri}> ; prov:wasAttributedTo {prov_iri} ."
+            for f in file_data
+        ]
+    )
+
+    # Add wasDerivedFrom if source file provided
+    if "source_file" in job:
+        source_files = job["source_file"]
+        if isinstance(source_files, str):
+            source_files = [source_files]
+        if len(source_files) == len(file_data):
+            prov_triples += "\n" + "\n".join(
+                [
+                    f"<{file_data[i]['iri']}> prov:wasDerivedFrom <{source}> ."
+                    for i, source in enumerate(source_files)
+                ]
+            )
+
+    # Combine into single SPARQL update
+    update = dedent(f"""
+        {PREFIXES}
+        INSERT DATA {{
+            GRAPH wag:data {{
+                {data_triples}
+            }}
+            GRAPH wag:prov {{
+                {prov_triples}
+            }}
+        }}
+    """)
+
+    r = cc.sparql_update(sparql_update_conn, update)
+    r.raise_for_status()
+
+    return job

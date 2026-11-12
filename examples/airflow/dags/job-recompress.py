@@ -136,7 +136,7 @@ def s3_kubernetes_recompress_job():
             print(s3.ls(target_bucket_name))
             print(f"wrote recompressed file directly to {path_out_s3fs}")
 
-            job["files"] = [job["source_filename"]]
+            job["files"] = [{"filename": job["source_filename"], "bucket": target_bucket_name}]
 
             return job
 

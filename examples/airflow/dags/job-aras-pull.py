@@ -136,7 +136,7 @@ def s3_kubernetes_aras_pull_job():
                     stream() as source_io,
                 ):
                     copyfileobj(source_io, target_io)
-                job["files"] += [file_name]
+                job["files"] += [{"filename": file_name, "bucket": target_bucket_name}]
 
             print(s3.info(target_bucket_name))
             print(s3.ls(target_bucket_name))

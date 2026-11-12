@@ -311,7 +311,7 @@ def record_file_outputs(
 
     Args:
         job: Job dict with keys:
-            - 'files': list of {filename, bucket?}
+            - 'files': list of {filename, bucket}
             - 'job_iri': IRI of the job
             - 'source_file': optional source file IRI(s) for wasDerivedFrom
         prov_iri: IRI of the provenance plan/actor

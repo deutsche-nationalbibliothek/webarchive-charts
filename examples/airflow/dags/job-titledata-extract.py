@@ -35,6 +35,7 @@ JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
     schedule=job_asset,  # "@once"
     description="Extract Titel Data for Websites from WARC Payload",
     tags=["wacli"],
+    max_active_runs=1,
 )
 def s3_kubernetes_titledata_extract_job():
 

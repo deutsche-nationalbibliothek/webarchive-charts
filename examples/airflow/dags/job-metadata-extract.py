@@ -33,6 +33,7 @@ JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
     schedule=job_asset,  # "@once"
     description="Extract Structured WARC Metadata",
     tags=["wacli"],
+    max_active_runs=1,
 )
 def s3_kubernetes_metadata_extract_job():
 

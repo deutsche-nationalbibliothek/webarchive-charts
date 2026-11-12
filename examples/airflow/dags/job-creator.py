@@ -181,6 +181,7 @@ job_assetalias = AssetAlias("job-alias")
     schedule=job_creator_asset,  # "@once"
     description="Creates jobs",
     tags=["wacli"],
+    max_active_runs=1,
 )
 def job_creator():
 

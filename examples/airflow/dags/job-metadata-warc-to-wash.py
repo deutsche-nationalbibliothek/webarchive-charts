@@ -84,6 +84,7 @@ JOB_TYPE_QNAME = "dalajobs:" + JOB_IRI_LOCAL_PART
     schedule=job_asset,  # "@once"
     description="Update WARC Metadata",
     tags=["wacli"],
+    max_active_runs=1,
 )
 def job_metadata_warc_to_wash():
 

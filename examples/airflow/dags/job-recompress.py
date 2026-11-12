@@ -30,6 +30,7 @@ target_bucket_name = "webarchive"
     schedule=job_asset,  # "@once"
     description="A recompress dag",
     tags=["wacli"],
+    max_active_runs=1,
 )
 def s3_kubernetes_recompress_job():
 

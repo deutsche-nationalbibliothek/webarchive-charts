@@ -36,6 +36,7 @@ aras_repo = "warc"
     schedule=job_asset,  # "@once"
     description="A k8n dag",
     tags=["wacli"],
+    max_active_runs=1,
 )
 def s3_kubernetes_aras_pull_job():
 

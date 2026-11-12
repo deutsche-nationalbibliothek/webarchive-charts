@@ -361,11 +361,11 @@ def record_file_outputs(
         source_files = job["source_file"]
         if isinstance(source_files, str):
             source_files = [source_files]
-        if len(source_files) == len(file_data):
+        for f in file_data:
             prov_triples += "\n" + "\n".join(
                 [
-                    f"<{file_data[i]['iri']}> prov:wasDerivedFrom <{source}> ."
-                    for i, source in enumerate(source_files)
+                    f"<{f['iri']}> prov:wasDerivedFrom <{source}> ."
+                    for source in source_files
                 ]
             )
 

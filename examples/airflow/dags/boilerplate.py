@@ -1,7 +1,4 @@
-import ast
-import re
 from textwrap import dedent
-from typing import cast
 
 from airflow.exceptions import AirflowException, AirflowSkipException
 from airflow.sdk import Asset, Connection, Context, task
@@ -197,29 +194,6 @@ def _jobs_done(jobs: list[dict]):
     r.raise_for_status()
 
 
-def get_pod_from_exception(exception: AirflowException) -> dict:
-    """Get the pod object from an AirflowException"""
-
-    exception_string_split = exception.args[0].splitlines()
-
-    remote_pod_string = ""
-    # get start of remote_pod string
-    for i, line in enumerate(exception_string_split):
-        if line.startswith("remote_pod: "):
-            s = "".join(exception.args[0].splitlines()[i:])
-
-            # remove prefix
-            t = s.removeprefix("remote_pod: ")
-
-            # replace function calls
-            remote_pod_string = re.sub(
-                r"datetime\.datetime\([^\(\)]*\([^\(\)]*\)\)", "None", t
-            )
-            break
-
-    return ast.literal_eval(remote_pod_string)
-
-
 def job_failed(context: Context):
     """This method is used to analyze and categorize failed tasks.
     A task is usually
@@ -237,7 +211,7 @@ def job_failed(context: Context):
     # We want to get from AirflowException > remote_pod.status.container_statuses[name=base].state.terminated.reason
 
     if isinstance(exception, AirflowException):
-        remote_pod = get_pod_from_exception(exception)
+        remote_pod = task_instance.task.remote_pod
 
         print("remote_pod name: ", remote_pod.get("metadata").get("name"))
         container_statuses = remote_pod.get("status").get("container_statuses")

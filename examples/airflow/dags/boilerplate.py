@@ -1,7 +1,10 @@
+import ast
+import re
 from textwrap import dedent
+from typing import cast
 
-from airflow.exceptions import AirflowSkipException
-from airflow.sdk import Asset, Connection, task
+from airflow.exceptions import AirflowException, AirflowSkipException
+from airflow.sdk import Asset, Connection, Context, task
 from common_context import get_cc
 from requests.exceptions import JSONDecodeError
 
@@ -194,43 +197,70 @@ def _jobs_done(jobs: list[dict]):
     r.raise_for_status()
 
 
-def job_failed(context):
+def get_pod_from_exception(exception: AirflowException) -> dict:
+    """Get the pod object from an AirflowException"""
+
+    exception_string_split = exception.args[0].splitlines()
+
+    remote_pod_string = ""
+    # get start of remote_pod string
+    for i, line in enumerate(exception_string_split):
+        if line.startswith("remote_pod: "):
+            s = "".join(exception.args[0].splitlines()[i:])
+
+            # remove prefix
+            t = s.removeprefix("remote_pod: ")
+
+            # replace function calls
+            remote_pod_string = re.sub(
+                r"datetime\.datetime\([^\(\)]*\([^\(\)]*\)\)", "None", t
+            )
+            break
+
+    return ast.literal_eval(remote_pod_string)
+
+
+def job_failed(context: Context):
     """This method is used to analyze and categorize failed tasks.
     A task is usually
     """
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print("job_failed was called")
-    print(context)
+    print(
+        "!!! job_failed was called !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    )
     task_instance = context["task_instance"]
-    # Can we get remote_pod from the exception or from the task_instance?
-    print(task_instance)
-    job_iri = task_instance.xcom_pull(key="job")
+    job_iri = task_instance.xcom_pull(key="job", task_ids="get_jobs")
+
     print(f"job {job_iri} failed")
+    # TODO get `job_iri` from job object
+
     exception = context.get("exception")
     # We want to get from AirflowException > remote_pod.status.container_statuses[name=base].state.terminated.reason
-    # if AirflowException
-    import json
 
-    remote_pod_string = "".join(exception.args.splitlines()[1:])
-    print(remote_pod_string)
-    remote_pod = json.loads(remote_pod_string)
-    print(remote_pod)
+    if isinstance(exception, AirflowException):
+        remote_pod = get_pod_from_exception(exception)
 
-    print("remote_pod name: ", remote_pod.get("metadata").get("name"))
-    container_statuses = remote_pod.get("status").get("container_statuses")
-    base_status = [status for status in container_statuses if status["name"] == "base"]
-    print("reson: ", base_status.get("state").get("terminated").get("reason"))
+        print("remote_pod name: ", remote_pod.get("metadata").get("name"))
+        container_statuses = remote_pod.get("status").get("container_statuses")
+        base_status = [
+            status for status in container_statuses if status["name"] == "base"
+        ]
+        print("reason: ", base_status[0].get("state").get("terminated").get("reason"))
 
-    # if ApiException
-    # TODO get Reason, HTTP response headers, and HTTP response body
+        # TODO
+        #
+        # reasons:
+        # "Error" -> the process in the pod failed -> we need to get the log
+        #
+        # "ApiException" (is this the actual string?) -> we need to see if it is a resource problem
+        #   -> get Reason, HTTP response headers, and HTTP response body
 
-    print(f"job_iri: {job_iri}")
-    report_job_status([{"job_iri": job_iri}])
+        print(f"job_iri: {job_iri}")
+        report_job_status([{"job_iri": job_iri}])
 
-    # finally we have to decide if the task should be rerun:
-    # https://airflow.apache.org/docs/apache-airflow/stable/howto/dag-level-retry-via-callback.html
-    # but we have to limit the retries:
-    # https://airflow.apache.org/docs/apache-airflow/stable/howto/dag-level-retry-via-callback.html#clear-retry-limiting
+        # finally we have to decide if the task should be rerun:
+        # https://airflow.apache.org/docs/apache-airflow/stable/howto/dag-level-retry-via-callback.html
+        # but we have to limit the retries:
+        # https://airflow.apache.org/docs/apache-airflow/stable/howto/dag-level-retry-via-callback.html#clear-retry-limiting
 
 
 def report_job_status(jobs: list[dict]):

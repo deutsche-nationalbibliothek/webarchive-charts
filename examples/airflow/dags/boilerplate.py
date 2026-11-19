@@ -1,6 +1,7 @@
 from textwrap import dedent
 
-from airflow.exceptions import AirflowException, AirflowSkipException
+from airflow.exceptions import AirflowSkipException
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.sdk import Asset, Connection, Context, task
 from common_context import get_cc
 from requests.exceptions import JSONDecodeError
@@ -207,18 +208,13 @@ def job_failed(context: Context):
     print(f"job {job_iri} failed")
     # TODO get `job_iri` from job object
 
-    exception = context.get("exception")
-    # We want to get from AirflowException > remote_pod.status.container_statuses[name=base].state.terminated.reason
-
-    if isinstance(exception, AirflowException):
+    if isinstance(task_instance.task, KubernetesPodOperator):
         remote_pod = task_instance.task.remote_pod
 
-        print("remote_pod name: ", remote_pod.get("metadata").get("name"))
-        container_statuses = remote_pod.get("status").get("container_statuses")
-        base_status = [
-            status for status in container_statuses if status["name"] == "base"
-        ]
-        print("reason: ", base_status[0].get("state").get("terminated").get("reason"))
+        print("remote_pod name: ", remote_pod.metadata.name)
+        container_statuses = remote_pod.status.container_statuses
+        base_status = [status for status in container_statuses if status.name == "base"]
+        print("reason:", base_status[0].state.terminated.reason)
 
         # TODO
         #

@@ -1,9 +1,11 @@
 from textwrap import dedent
+from typing import cast
 
 from airflow.exceptions import AirflowSkipException
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.sdk import Asset, Connection, Context, task
 from common_context import get_cc
+from kubernetes.client.models import V1Pod
 from requests.exceptions import JSONDecodeError
 
 cc, _ = get_cc()
@@ -195,7 +197,7 @@ def _jobs_done(jobs: list[dict]):
     r.raise_for_status()
 
 
-def job_failed(context: Context):
+def job_failed_callback(context: Context):
     """This method is used to analyze and categorize failed tasks.
     A task is usually
     """
@@ -203,17 +205,27 @@ def job_failed(context: Context):
         "!!! job_failed was called !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     )
     task_instance = context["task_instance"]
-    job_iri = task_instance.xcom_pull(key="job", task_ids="get_jobs")
+    job = task_instance.xcom_pull(task_ids="get_jobs")
+
+    print("job")
+    print(job)
+
+    job_iri = job.get("job_iri")
 
     print(f"job {job_iri} failed")
     # TODO get `job_iri` from job object
 
     if isinstance(task_instance.task, KubernetesPodOperator):
-        remote_pod = task_instance.task.remote_pod
+        pod_operator = cast(KubernetesPodOperator, task_instance.task)
+        remote_pod = cast(V1Pod, pod_operator.remote_pod)
 
         print("remote_pod name: ", remote_pod.metadata.name)
         container_statuses = remote_pod.status.container_statuses
-        base_status = [status for status in container_statuses if status.name == "base"]
+        base_status = [
+            status
+            for status in container_statuses
+            if status.name == pod_operator.base_container_name
+        ]
         print("reason:", base_status[0].state.terminated.reason)
 
         # TODO
@@ -224,8 +236,16 @@ def job_failed(context: Context):
         # "ApiException" (is this the actual string?) -> we need to see if it is a resource problem
         #   -> get Reason, HTTP response headers, and HTTP response body
 
+        report = f"""
+        Task terminated with {base_status[0].state.terminated.reason}.
+
+        remote_pod:
+
+        {remote_pod}
+        """
+
         print(f"job_iri: {job_iri}")
-        report_job_status([{"job_iri": job_iri}])
+        report_job_status([{"job_iri": job_iri, "report": report}])
 
         # finally we have to decide if the task should be rerun:
         # https://airflow.apache.org/docs/apache-airflow/stable/howto/dag-level-retry-via-callback.html
@@ -233,16 +253,51 @@ def job_failed(context: Context):
         # https://airflow.apache.org/docs/apache-airflow/stable/howto/dag-level-retry-via-callback.html#clear-retry-limiting
 
 
+def job_finish_callback(context: Context):
+
+    # if sucessfull look in xcom
+
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print("job_finish was called")
+    task_instance = context["task_instance"]
+
+    task_result = task_instance.xcom_pull()
+
+    print(task_result)
+
+    if isinstance(task_result, dict) and task_result.get("type") == "Exception":
+        jobs = task_instance.xcom_pull(task_ids="get_jobs")
+        job = jobs[0]
+        print(job)
+        job_iri = job.get("job_iri")
+
+        e = task_result.get("exception")
+        print(e)
+
+        report = f"""
+        Task terminated with Exception.
+
+        exception:
+
+        {e}
+        """
+
+        print(f"job_iri: {job_iri}")
+        report_job_status([{"job_iri": job_iri, "report": report}])
+
 def report_job_status(jobs: list[dict]):
 
     sparql_update_conn = Connection.get("sparql_update_default")
 
     triples = []
 
+
     for job in jobs:
-        triples += f"<{job['job_iri']}> wal:jobStatus jobstatus:failed ."
-        if "error_report" in job:
-            triples += f'<{job["job_iri"]}> wal:report """{job["error_report"]}""" .'
+        job_status = job.get("job_status")
+        if "report" in job:
+            triples.append(f'<{job["job_iri"]}> wal:report """{job["report"]}""" .')
+
+    triples.append(f"<{job['job_iri']}> wal:jobStatus jobstatus:{job_status or "failed"} .")
 
     job_update = dedent(
         PREFIXES
@@ -256,6 +311,8 @@ def report_job_status(jobs: list[dict]):
         }
         """
     )
+
+    print(job_update)
 
     r = cc.sparql_update(sparql_update_conn, job_update)
 

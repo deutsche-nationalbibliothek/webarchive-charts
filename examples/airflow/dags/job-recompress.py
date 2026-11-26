@@ -4,7 +4,8 @@ from boilerplate import (
     PROV_BASE_IRI,
     get_jobs,
     job_done,
-    job_failed,
+    job_failed_callback,
+    job_finish_callback,
     record_file_outputs,
 )
 from boilerplate import recompress_job_asset as job_asset
@@ -45,7 +46,8 @@ def s3_kubernetes_recompress_job():
                 "TARGET_BUCKET_NAME": target_bucket_name,
             },
             do_xcom_push=True,
-            on_failure_callback=job_failed,
+            on_failure_callback=job_failed_callback,
+            on_success_callback=job_finish_callback,
             pod_template_dict={
                 "spec": {
                     "containers": [
@@ -137,7 +139,9 @@ def s3_kubernetes_recompress_job():
             print(s3.ls(target_bucket_name))
             print(f"wrote recompressed file directly to {path_out_s3fs}")
 
-            job["files"] = [{"filename": job["source_filename"], "bucket": target_bucket_name}]
+            job["files"] = [
+                {"filename": job["source_filename"], "bucket": target_bucket_name}
+            ]
 
             return job
 

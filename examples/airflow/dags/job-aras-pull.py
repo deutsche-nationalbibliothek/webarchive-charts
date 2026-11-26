@@ -4,7 +4,8 @@ from boilerplate import (
     PROV_BASE_IRI,
     get_jobs,
     job_done,
-    job_failed,
+    job_failed_callback,
+    job_finish_callback,
     record_file_outputs,
 )
 from boilerplate import arras_pull_job_asset as job_asset
@@ -52,7 +53,8 @@ def s3_kubernetes_aras_pull_job():
                 "ARAS_REPO": aras_repo,
             },
             do_xcom_push=True,
-            on_failure_callback=job_failed,
+            on_failure_callback=job_failed_callback,
+            on_success_callback=job_finish_callback,
             pod_template_dict={
                 "spec": {
                     "containers": [
@@ -124,23 +126,28 @@ def s3_kubernetes_aras_pull_job():
                 f'aras_rest_base: "{aras_rest_base}", aras_repo: "{aras_repo}". ({job["job_iri"]}).'
             )
 
-            stream_iter = get_stream(aras_rest_base, aras_repo, job["idn"])
+            try:
+                stream_iter = get_stream(aras_rest_base, aras_repo, job["idn"])
 
-            job["files"] = []
+                job["files"] = []
 
-            for file_name, stream, metadata in stream_iter:
-                print(
-                    f"download idn: {job['idn']}, metadata: {metadata!s} to {file_name}"
-                )
-                with (
-                    s3.open(f"{target_bucket_name}/{file_name}", "wb") as target_io,
-                    stream() as source_io,
-                ):
-                    copyfileobj(source_io, target_io)
-                job["files"] += [{"filename": file_name, "bucket": target_bucket_name}]
+                for file_name, stream, metadata in stream_iter:
+                    print(
+                        f"download idn: {job['idn']}, metadata: {metadata!s} to {file_name}"
+                    )
+                    with (
+                        s3.open(f"{target_bucket_name}/{file_name}", "wb") as target_io,
+                        stream() as source_io,
+                    ):
+                        copyfileobj(source_io, target_io)
+                    job["files"] += [
+                        {"filename": file_name, "bucket": target_bucket_name}
+                    ]
 
-            print(s3.info(target_bucket_name))
-            print(s3.ls(target_bucket_name))
+                print(s3.info(target_bucket_name))
+                print(s3.ls(target_bucket_name))
+            except Exception as e:
+                return cc.report_exception(e)
 
             return job
 

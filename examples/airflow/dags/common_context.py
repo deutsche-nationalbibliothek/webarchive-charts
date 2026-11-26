@@ -234,6 +234,10 @@ class common_context:
         remote_graph = Graph(store=store, identifier=identifier)
         remote_graph += add_graph
 
+    @classmethod
+    def report_exception(cls, exception):
+        return {"type": "Exception", "exception": str(exception)}
+
 
 def get_cc():
     return common_context, dedent(getsource(common_context))

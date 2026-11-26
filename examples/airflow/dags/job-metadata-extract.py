@@ -5,7 +5,6 @@ from boilerplate import (
     PROV_BASE_IRI,
     get_jobs,
     job_done,
-    job_failed,
     update_file_status,
 )
 from boilerplate import metadataextract_job_asset as job_asset
@@ -49,7 +48,6 @@ def s3_kubernetes_metadata_extract_job():
                 "GRAPH_BASE_IRI": GRAPH_BASE_IRI,
             },
             do_xcom_push=True,
-            on_failure_callback=job_failed,
             pod_template_dict={
                 "spec": {
                     "containers": [
